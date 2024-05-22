@@ -53,39 +53,35 @@ public class Lexer
 
             else 
             {
-                if(Atual() == ';')
-                {
-                    tokens.Add(new Token(TokenTipo.PontoEVirgula));
-                    Passar();
-                }
 
-                else if (Atual() == '(')
+                switch(Atual())
                 {
-                    tokens.Add(new Token(TokenTipo.AbrirParen));
-                    Passar();
-                }
-                else if (Atual() == ')')
-                {
-                    tokens.Add(new Token(TokenTipo.FecharParen));
-                    Passar();
-                }
-                else if (Atual() == ' ')
-                {
-                    Passar();
-                }
-                else if (Atual() == '#')
-                {
-
-                    while(Atual() != '\n')
-                    {
+                    case ' ':
                         Passar();
-                    }
-                    
-                }
-                else if (Atual() == '(')
-                {
-                    tokens.Add(new Token(TokenTipo.AbrirParen));
-                    Passar();
+                        break;
+                    case ';':
+                        tokens.Add(new Token(TokenTipo.PontoEVirgula));
+                        Passar();
+                        break;
+                    case '(':
+                        tokens.Add(new Token(TokenTipo.AbrirParen));
+                        Passar();
+                        break;
+                    case ')':
+                        tokens.Add(new Token(TokenTipo.FecharParen));
+                        Passar();
+                        break;
+                    case '#':
+                        while(Atual() != '\n')
+                        {
+                            Passar();
+                        }
+
+                        Passar();
+                        break;
+                    default:
+                        Libra.Erro($"Simbolo inválido {Atual()}");
+                        break;
                 }
                 
             }

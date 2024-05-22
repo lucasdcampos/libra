@@ -1,3 +1,6 @@
+// Árvore Semântica
+// Esse arquivo necessita revisão
+
 public abstract class Nodo
 {
     // cada nó retornará um tipo de valor diferente
@@ -18,15 +21,35 @@ public class NodoExpressao
 
 }
 
-public class NodoPrograma
+public class NodoInstrucaoSair
 {
-    public NodoPrograma(NodoExpressao expressao)
+    public NodoInstrucaoSair(NodoExpressao expressao)
     {
-        ExpressaoSaida = expressao;
+        Expressao = expressao;
     }
 
-    public NodoExpressao ExpressaoSaida { get; private set; }
+    public NodoExpressao Expressao { get; private set; }
+}
 
+public class NodoInstrucao
+{
+    public NodoInstrucao(NodoInstrucaoSair saida)
+    {
+        Saida = saida;
+    }
+
+    public NodoInstrucaoSair Saida { get; private set; }
+
+}
+
+public class NodoPrograma
+{
+    public NodoPrograma(List<NodoInstrucao> instrucoes)
+    {
+        Instrucoes = instrucoes;
+    }
+
+    public List<NodoInstrucao> Instrucoes { get; private set; }
 
 }
 
@@ -45,30 +68,82 @@ public class Parser
     {
         NodoPrograma programa = null;
 
-        var expressao = ParseExpressao();
+        var instrucoes = new List<NodoInstrucao>();
 
-        if(expressao != null)
+        while(Atual().Tipo != TokenTipo.FimDoArquivo)
         {
-            programa = new NodoPrograma(expressao);
+            instrucoes.Add(ParseInstrucao());
         }
+
+        programa = new NodoPrograma(instrucoes);
 
         return programa;
     }
 
+    private NodoInstrucao ParseInstrucao()
+    {
+        NodoInstrucao instrucao = null;
 
+        if(Atual().Tipo == TokenTipo.Sair)
+        {
+            Passar();
+
+            var sair = ParseInstrucaoSair();
+
+            if(Atual().Tipo != TokenTipo.PontoEVirgula)
+            {
+                Libra.Erro("Esperado ';'");
+            }
+
+            Passar();
+            
+            instrucao = new NodoInstrucao(sair);
+        }
+
+        if(instrucao == null)
+            Libra.Erro("Instrução inválida!");
+
+        return instrucao;
+    }
+
+    private NodoInstrucaoSair ParseInstrucaoSair()
+    {
+        NodoInstrucaoSair sair = null;
+
+        if(Atual().Tipo == TokenTipo.AbrirParen)
+        {
+            Passar();
+        }
+        else
+        {
+            Libra.Erro("Esperado '('");
+        }
+
+        sair = new NodoInstrucaoSair(ParseExpressao());
+
+        if(Atual().Tipo == TokenTipo.FecharParen)
+        {
+            Passar();
+        }
+        else
+        {
+            Libra.Erro("Esperado ')'");
+        }
+
+        return sair;
+    }
+    
     private NodoExpressao ParseExpressao()
     {
         NodoExpressao expressao = null;
 
-        while(Atual().Tipo != TokenTipo.FimDoArquivo)
+        if(Atual().Tipo == TokenTipo.Numero)
         {
-            Passar();
-
-            if(Atual().Tipo == TokenTipo.Numero)
-            {
-                expressao = new NodoExpressao(ConsumirToken());
-            }
+            expressao = new NodoExpressao(ConsumirToken());
         }
+
+        if(expressao == null)
+            Libra.Erro("Expressão inválida!");
 
         return expressao;
     }

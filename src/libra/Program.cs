@@ -12,6 +12,11 @@
                 break;
             }
 
+            else if(line == "limpar")
+            {
+                Console.Clear();
+            }
+
             else
             {
                 Lexer lexer = new Lexer(line);
@@ -20,7 +25,11 @@
 
                 NodoPrograma programa = parser.Parse();
 
-                Console.WriteLine(programa.ExpressaoSaida.Numero.Valor);
+                foreach (NodoInstrucao i in programa.Instrucoes)
+                {
+                    Console.WriteLine(i.Saida.Expressao.Numero.Valor);
+                }
+               
             }
         }
     }
