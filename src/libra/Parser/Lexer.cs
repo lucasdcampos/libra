@@ -38,21 +38,23 @@ public class Lexer
                     texto += ConsumirChar();
                 }
 
-                if(texto == "sair")
+                switch(texto)
                 {
-                    tokens.Add(new Token(TokenTipo.Sair));
-                    texto = "";
+                    case "sair":
+                        tokens.Add(new Token(TokenTipo.Sair));
+                        break;
+                    case "var":
+                        tokens.Add(new Token(TokenTipo.Var));
+                        break;
+                    case "imprimir":
+                        tokens.Add(new Token(TokenTipo.Imprimir));
+                        break;
+                    default:
+                        tokens.Add(new Token(TokenTipo.Identificador, texto));
+                        break;
                 }
-                else if (texto == "var")
-                {
-                    tokens.Add(new Token(TokenTipo.Var));
-                    texto = "";
-                }
-                else
-                {
-                    tokens.Add(new Token(TokenTipo.Identificador, texto));
-                    texto = "";
-                }
+
+                texto = "";
                     
             }
 

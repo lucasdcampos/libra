@@ -236,7 +236,7 @@ public class Parser
             instrucao = new NodoInstrucao(sair);
         }
 
-        if(TentarConsumirToken(TokenTipo.Var) != null)
+        else if(TentarConsumirToken(TokenTipo.Var) != null)
         {
             var ident = ParseInstrucaoVar();
 

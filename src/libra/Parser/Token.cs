@@ -1,7 +1,30 @@
 public enum TokenTipo
 {
-    TokenInvalido, Numero, PontoEVirgula, OperadorSoma, OperadorSub, OperadorDiv, OperadorMult, AbrirParen, FecharParen,
-    Sair, Identificador, FimDoArquivo, Var, OperadorDefinir, OperadorComparacao
+    
+    // Tipos
+    Numero,
+    Identificador,
+    TokenInvalido,
+
+    // Operadores
+    OperadorSoma,
+    OperadorSub,
+    OperadorMult, 
+    OperadorDiv,
+    OperadorComparacao,
+    OperadorDefinir,
+
+    // Simbolos
+    AbrirParen, 
+    FecharParen,
+    PontoEVirgula,
+    FimDoArquivo,
+
+    // Palavras Reservadas
+    Sair, 
+    Var,
+    Imprimir
+    
 }
 
 public class Token 

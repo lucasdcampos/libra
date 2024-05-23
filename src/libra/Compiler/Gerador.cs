@@ -20,7 +20,7 @@ public class GeradorC : Gerador
 
     public override string Gerar()
     {
-        _final += "int main() {\n";
+        Escrever("int main() {");
 
         foreach(var instrucao in _programa.Instrucoes)
         {
