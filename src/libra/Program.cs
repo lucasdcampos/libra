@@ -23,13 +23,11 @@
                 
                 Parser parser = new Parser(lexer.Tokenize());
 
-                NodoPrograma programa = parser.Parse();
+                GeradorC gerador = new GeradorC(parser.Parse());
 
-                foreach (NodoInstrucao i in programa.Instrucoes)
-                {
-                    Console.WriteLine(i.Avaliar());
-                }
-               
+                Console.WriteLine("Código correspondente em C:");
+                Console.WriteLine(gerador.Gerar());
+
             }
         }
     }

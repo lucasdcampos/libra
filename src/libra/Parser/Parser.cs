@@ -1,11 +1,6 @@
 // Árvore Semântica
 // Esse arquivo necessita revisão
 
-// eu poderia usar typeof() ao invés de enums, mas prefiro dessa forma
-public enum ExpressaoTipo
-{
-    Numero, ExpressaoBinaria, Identificador
-}
 
 public abstract class Nodo
 {
@@ -19,21 +14,19 @@ public class NodoExpressao : Nodo
     {
         if(token.Tipo == TokenTipo.Numero)
         {
-            Tipo = ExpressaoTipo.Numero;
             _token = token;
         }
     }
 
-    public ExpressaoTipo Tipo { get; private set; }
     private Token _token;
     
     public override object Avaliar()
     {
-        switch (Tipo)
+        switch (_token.Tipo)
         {
-            case ExpressaoTipo.Numero:
+            case TokenTipo.Numero:
                 return _token.Valor;
-            case ExpressaoTipo.Identificador:
+            case TokenTipo.Identificador:
                 return 0; // depois eu desenvolvo isso
         }
 
@@ -60,16 +53,16 @@ public class NodoInstrucao : Nodo
 {
     public NodoInstrucao(NodoInstrucaoSair saida)
     {
-        _instrucao = saida;
+        Instrucao = saida;
     }
 
-    private object _instrucao;
+    public object Instrucao { get; private set; }
 
     public override object Avaliar()
     {
-        if(_instrucao.GetType() == typeof(NodoInstrucaoSair))
+        if(Instrucao.GetType() == typeof(NodoInstrucaoSair))
         {
-            var sair = (NodoInstrucaoSair)_instrucao;
+            var sair = (NodoInstrucaoSair)Instrucao;
 
             return sair.Avaliar();
         }
