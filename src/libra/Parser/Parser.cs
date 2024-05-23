@@ -15,14 +15,36 @@ public struct Var
     public object Valor;
 }
 
+// termo matemático
+public class NodoTermo : Nodo
+{
+    public NodoTermo(Token token)
+    {
+        _token = token;
+    }
+
+    private Token _token;
+
+    public override object Avaliar()
+    {
+        switch (_token.Tipo)
+            {
+                case TokenTipo.Numero:
+                    return _token.Valor;
+                case TokenTipo.Identificador:
+                    return double.Parse(Libra.Variaveis[_token.Valor.ToString()].ToString());
+            }
+        
+        return 0;
+    }
+
+}
+
 public class NodoExpressao : Nodo
 {
-    public NodoExpressao(Token token)
+    public NodoExpressao(NodoTermo termo)
     {
-        if(token.Tipo == TokenTipo.Numero || token.Tipo == TokenTipo.Identificador)
-        {
-            Expressao = token;
-        }
+        Expressao = termo;
     }
 
     public NodoExpressao(NodoExpressaoBinaria exprBinaria)
@@ -34,17 +56,10 @@ public class NodoExpressao : Nodo
 
     public override object Avaliar()
     {
-        if(Expressao.GetType() == typeof(Token))
+        if(Expressao.GetType() == typeof(NodoTermo))
         {
-            var token = (Token)Expressao;
-
-            switch (token.Tipo)
-            {
-                case TokenTipo.Numero:
-                    return token.Valor;
-                case TokenTipo.Identificador:
-                    return double.Parse(token.Valor.ToString()); // *
-            }
+            var termo = (NodoTermo)Expressao;
+            return termo.Avaliar();
         }
 
         else if (Expressao.GetType() == typeof(NodoExpressaoBinaria))
@@ -59,11 +74,11 @@ public class NodoExpressao : Nodo
 
 public class NodoExpressaoBinaria : Nodo 
 {
-    private Token _esquerda;
+    private NodoExpressao _esquerda;
     private Token _operador;
-    private Token _direita;
+    private NodoExpressao _direita;
 
-    public NodoExpressaoBinaria(Token esquerda, Token operador, Token direita)
+    public NodoExpressaoBinaria(NodoExpressao esquerda, Token operador, NodoExpressao direita)
     {
         _esquerda = esquerda;
         _operador = operador;
@@ -74,25 +89,8 @@ public class NodoExpressaoBinaria : Nodo
     {
         if(_operador.Tipo == TokenTipo.OperadorSoma)
         {
-            return double.Parse(_esquerda.Valor.ToString()) + double.Parse(_direita.Valor.ToString());
-        }
-
-        else if(_operador.Tipo == TokenTipo.OperadorSub)
-        {
-            return double.Parse(_esquerda.Valor.ToString()) - double.Parse(_direita.Valor.ToString());
-        }
-
-        else if(_operador.Tipo == TokenTipo.OperadorMult)
-        {
-            return double.Parse(_esquerda.Valor.ToString()) * double.Parse(_direita.Valor.ToString());
-        }
-
-        else if(_operador.Tipo == TokenTipo.OperadorDiv)
-        {
-            if(double.Parse(_direita.Valor.ToString()) == 0)
-                Libra.Erro("Divisão por zero");
-    
-            return double.Parse(_esquerda.Valor.ToString()) + double.Parse(_direita.Valor.ToString());
+            double resultado = double.Parse(_esquerda.Avaliar().ToString()) + double.Parse(_direita.Avaliar().ToString());
+            return resultado;
         }
 
         return 0;
@@ -328,7 +326,7 @@ public class Parser
             }
             else
             {
-                expressao = new NodoExpressao(ConsumirToken());
+                expressao = new NodoExpressao(new NodoTermo(ConsumirToken()));
             }
 
         }
@@ -343,13 +341,29 @@ public class Parser
     {
         NodoExpressaoBinaria binaria = null;
 
-        if(Peek(1).Tipo == TokenTipo.OperadorSoma)
+        NodoExpressao esquerda = null;
+        Token operador = null;
+        NodoExpressao direita = null;
+
+        if(Atual().Tipo == TokenTipo.Numero || Atual().Tipo == TokenTipo.Identificador)
         {
-            if(Atual().Tipo == TokenTipo.Numero && Peek(2).Tipo == TokenTipo.Numero)
-            {
-                binaria = new NodoExpressaoBinaria(ConsumirToken(), ConsumirToken(), ConsumirToken());
-            }
+            esquerda = new NodoExpressao(new NodoTermo(ConsumirToken()));
         }
+
+        if(Atual().Tipo == TokenTipo.OperadorSoma)
+        {
+            operador = ConsumirToken();
+
+            direita = ParseExpressao();
+        }
+
+        if(esquerda != null && direita != null)
+        {
+            binaria = new NodoExpressaoBinaria(esquerda, operador, direita);
+        }
+
+        if(binaria == null)
+            Libra.Erro("Expressão binária inválida");
 
         return binaria;
     }
