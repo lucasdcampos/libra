@@ -210,34 +210,19 @@ public class Parser
     {
         NodoInstrucao instrucao = null;
 
-        if(Atual().Tipo == TokenTipo.Sair)
+        if(TentarConsumirToken(TokenTipo.Sair) != null)
         {
-            Passar();
-
             var sair = ParseInstrucaoSair();
+            TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
 
-            if(Atual().Tipo != TokenTipo.PontoEVirgula)
-            {
-                Libra.Erro("Esperado ';'");
-            }
-
-            Passar();
-            
             instrucao = new NodoInstrucao(sair);
         }
 
-        if(Atual().Tipo == TokenTipo.Var)
+        if(TentarConsumirToken(TokenTipo.Var) != null)
         {
-            Passar();
-
             var ident = ParseInstrucaoVar();
 
-            if(Atual().Tipo != TokenTipo.PontoEVirgula)
-            {
-                Libra.Erro("Esperado ';'");
-            }
-
-            Passar();
+            TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
             
             instrucao = new NodoInstrucao(ident);
         }
@@ -252,25 +237,11 @@ public class Parser
     {
         NodoInstrucaoSair sair = null;
 
-        if(Atual().Tipo == TokenTipo.AbrirParen)
-        {
-            Passar();
-        }
-        else
-        {
-            Libra.Erro("Esperado '('");
-        }
+        TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
 
         sair = new NodoInstrucaoSair(ParseExpressao());
 
-        if(Atual().Tipo == TokenTipo.FecharParen)
-        {
-            Passar();
-        }
-        else
-        {
-            Libra.Erro("Esperado ')'");
-        }
+        TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
 
         return sair;
     }
@@ -288,10 +259,7 @@ public class Parser
             Passar();
         }
 
-        if(Atual().Tipo == TokenTipo.OperadorDefinir)
-        {
-            Passar();
-        }
+        TentarConsumirToken(TokenTipo.FecharParen, "Esperado `=`");
 
         NodoExpressao expressao = null;
 
@@ -393,5 +361,27 @@ public class Parser
         Passar();
 
         return token;
+    }
+
+    private Token TentarConsumirToken(TokenTipo tipo, string erro)
+    {
+        if(Atual().Tipo == tipo)
+        {
+            return ConsumirToken();
+        }
+
+        Libra.Erro(erro);
+
+        return null;
+    }
+
+    private Token TentarConsumirToken(TokenTipo tipo)
+    {
+        if(Atual().Tipo == tipo)
+        {
+            return ConsumirToken();
+        }
+
+        return null;
     }
 }
