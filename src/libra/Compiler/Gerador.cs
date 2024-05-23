@@ -28,12 +28,19 @@ public class GeradorC : Gerador
 
             if(tipo == typeof(NodoInstrucaoSair))
             {
-                Escrever($"    exit({instrucao.Avaliar()});\n");
+                Escrever($"    exit({instrucao.Avaliar()});");
+            }
+
+            else if(tipo == typeof(NodoInstrucaoVar))
+            {
+                var variavel = (Var)instrucao.Avaliar();
+
+                Escrever($"    double {variavel.Identificador} = {variavel.Valor};");
             }
         }
 
         Escrever("    return 0;");
-        Escrever("}\n");
+        Escrever("}");
 
         return _final;
     }

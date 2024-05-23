@@ -2,6 +2,19 @@
 {
     internal static void Main(string[] args)
     {
+
+        if(args.Length == 1)
+        {
+            
+            Lexer lexer = new Lexer(File.ReadAllText(args[0]));
+            Parser parser = new Parser(lexer.Tokenize());
+            GeradorC gerador = new GeradorC(parser.Parse());
+
+            Console.WriteLine(gerador.Gerar());
+
+            return;
+        }
+
         while (true) 
         {
             Console.Write("> ");

@@ -43,6 +43,11 @@ public class Lexer
                     tokens.Add(new Token(TokenTipo.Sair));
                     texto = "";
                 }
+                else if (texto == "var")
+                {
+                    tokens.Add(new Token(TokenTipo.Var));
+                    texto = "";
+                }
                 else
                 {
                     tokens.Add(new Token(TokenTipo.Identificador, texto));
@@ -59,6 +64,9 @@ public class Lexer
                     case ' ':
                         Passar();
                         break;
+                    case '\n':
+                        Passar();
+                        break;
                     case ';':
                         tokens.Add(new Token(TokenTipo.PontoEVirgula));
                         Passar();
@@ -67,9 +75,40 @@ public class Lexer
                         tokens.Add(new Token(TokenTipo.AbrirParen));
                         Passar();
                         break;
+                    case '+':
+                        tokens.Add(new Token(TokenTipo.OperadorSoma));
+                        Passar();
+                        break;
+                    case '-':
+                        tokens.Add(new Token(TokenTipo.OperadorSub));
+                        Passar();
+                        break;
+                    case '*':
+                        tokens.Add(new Token(TokenTipo.OperadorMult));
+                        Passar();
+                        break;
+                    case '/':
+                        tokens.Add(new Token(TokenTipo.OperadorDiv));
+                        Passar();
+                        break;
                     case ')':
                         tokens.Add(new Token(TokenTipo.FecharParen));
                         Passar();
+                        break;
+                    case '=':
+                        Passar();
+
+                        if(Atual() == '=')
+                        {
+                            tokens.Add(new Token(TokenTipo.OperadorComparacao));
+                            Passar();
+                        }
+                        else
+                        {
+                            tokens.Add(new Token(TokenTipo.OperadorDefinir));
+                            Passar();
+                        }
+
                         break;
                     case '#':
                         while(Atual() != '\n')
@@ -80,7 +119,7 @@ public class Lexer
                         Passar();
                         break;
                     default:
-                        Libra.Erro($"Simbolo inválido {Atual()}");
+                        //Libra.Erro($"Simbolo inválido {Atual()}");
                         break;
                 }
                 

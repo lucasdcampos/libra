@@ -18,7 +18,6 @@ Aqui está um exemplo simples de um programa em Libra:
 
 ```js
 # exemplo de loop
-var i = 0;
 enquanto (i < 10) 
     imprimir(i);
     i = i + 1;
