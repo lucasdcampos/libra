@@ -93,6 +93,24 @@ public class NodoExpressaoBinaria : Nodo
             return resultado;
         }
 
+        if(_operador.Tipo == TokenTipo.OperadorSub)
+        {
+            double resultado = double.Parse(_esquerda.Avaliar().ToString()) - double.Parse(_direita.Avaliar().ToString());
+            return resultado;
+        }
+
+        if(_operador.Tipo == TokenTipo.OperadorMult)
+        {
+            double resultado = double.Parse(_esquerda.Avaliar().ToString()) * double.Parse(_direita.Avaliar().ToString());
+            return resultado;
+        }
+
+        if(_operador.Tipo == TokenTipo.OperadorDiv)
+        {
+            double resultado = double.Parse(_esquerda.Avaliar().ToString()) / double.Parse(_direita.Avaliar().ToString());
+            return resultado;
+        }
+
         return 0;
     }
 }
@@ -288,7 +306,8 @@ public class Parser
 
         if(Atual().Tipo == TokenTipo.Numero || Atual().Tipo == TokenTipo.Identificador)
         {
-            if(Peek(1).Tipo == TokenTipo.OperadorSoma)
+            if(Peek(1).Tipo == TokenTipo.OperadorSoma || Peek(1).Tipo == TokenTipo.OperadorSub
+            || Peek(1).Tipo == TokenTipo.OperadorMult || Peek(1).Tipo == TokenTipo.OperadorDiv)
             {
                 expressao = new NodoExpressao(ParseExpressaoBinaria());
             }
@@ -318,7 +337,8 @@ public class Parser
             esquerda = new NodoExpressao(new NodoTermo(ConsumirToken()));
         }
 
-        if(Atual().Tipo == TokenTipo.OperadorSoma)
+        if(Atual().Tipo == TokenTipo.OperadorSoma || Atual().Tipo == TokenTipo.OperadorSub
+        || Atual().Tipo == TokenTipo.OperadorMult || Atual().Tipo == TokenTipo.OperadorDiv)
         {
             operador = ConsumirToken();
 
