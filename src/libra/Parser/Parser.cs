@@ -1,27 +1,47 @@
 // Árvore Semântica
 // Esse arquivo necessita revisão
 
+// eu poderia usar typeof() ao invés de enums, mas prefiro dessa forma
+public enum ExpressaoTipo
+{
+    Numero, ExpressaoBinaria, Identificador
+}
+
 public abstract class Nodo
 {
     // cada nó retornará um tipo de valor diferente
     public abstract object Avaliar();
 }
 
-public class NodoExpressao
+public class NodoExpressao : Nodo
 {
     public NodoExpressao(Token token)
     {
         if(token.Tipo == TokenTipo.Numero)
         {
-            Numero = token;
+            Tipo = ExpressaoTipo.Numero;
+            _token = token;
         }
     }
 
-    public Token Numero { get; private set; }
+    public ExpressaoTipo Tipo { get; private set; }
+    private Token _token;
+    
+    public override object Avaliar()
+    {
+        switch (Tipo)
+        {
+            case ExpressaoTipo.Numero:
+                return _token.Valor;
+            case ExpressaoTipo.Identificador:
+                return 0; // depois eu desenvolvo isso
+        }
 
+        return 0;
+    }
 }
 
-public class NodoInstrucaoSair
+public class NodoInstrucaoSair : Nodo
 {
     public NodoInstrucaoSair(NodoExpressao expressao)
     {
@@ -29,20 +49,36 @@ public class NodoInstrucaoSair
     }
 
     public NodoExpressao Expressao { get; private set; }
+
+    public override object Avaliar()
+    {
+        return Expressao.Avaliar();
+    }
 }
 
-public class NodoInstrucao
+public class NodoInstrucao : Nodo
 {
     public NodoInstrucao(NodoInstrucaoSair saida)
     {
-        Saida = saida;
+        _instrucao = saida;
     }
 
-    public NodoInstrucaoSair Saida { get; private set; }
+    private object _instrucao;
 
+    public override object Avaliar()
+    {
+        if(_instrucao.GetType() == typeof(NodoInstrucaoSair))
+        {
+            var sair = (NodoInstrucaoSair)_instrucao;
+
+            return sair.Avaliar();
+        }
+
+        return 0;
+    }
 }
 
-public class NodoPrograma
+public class NodoPrograma : Nodo
 {
     public NodoPrograma(List<NodoInstrucao> instrucoes)
     {
@@ -50,6 +86,13 @@ public class NodoPrograma
     }
 
     public List<NodoInstrucao> Instrucoes { get; private set; }
+
+    public int CodigoSaida { get; private set; }
+
+    public override object Avaliar()
+    {
+        return CodigoSaida;
+    }
 
 }
 

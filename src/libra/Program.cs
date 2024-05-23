@@ -27,7 +27,7 @@
 
                 foreach (NodoInstrucao i in programa.Instrucoes)
                 {
-                    Console.WriteLine(i.Saida.Expressao.Numero.Valor);
+                    Console.WriteLine(i.Avaliar());
                 }
                
             }
