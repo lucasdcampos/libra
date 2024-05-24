@@ -1,0 +1,6 @@
+# declaração de variáveis
+var a = 10;
+var b = 5;
+var c = a + b * 2;
+
+sair(c); # encerra o programa com códido de saída c 
