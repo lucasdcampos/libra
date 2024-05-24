@@ -1,22 +1,23 @@
 ﻿internal static class Program 
 {
+        static Tokenizador s_tokenizador;
+        static Parser s_parser;
+        static GeradorC s_gerador;
     internal static void Main(string[] args)
     {
-        Tokenizador tokenizador;
-        Parser parser;
-        GeradorC gerador;
+        s_tokenizador = new Tokenizador();
+        s_parser = new Parser();
+        s_gerador = new GeradorC();
 
         if(args.Length == 1)
         {
-            tokenizador = new Tokenizador();
-            parser = new Parser();
-            gerador = new GeradorC();
+
 
             var caminhoArquivo = args[0];
             var codigoFonte = File.ReadAllText(args[0]);
-            var tokens = tokenizador.Tokenizar(codigoFonte);
-            var programa = parser.Parse(tokens);
-            var codigoFinal = gerador.Gerar(programa);
+            var tokens = s_tokenizador.Tokenizar(codigoFonte);
+            var programa = s_parser.Parse(tokens);
+            var codigoFinal = s_gerador.Gerar(programa);
 
             EscreverNoArquivo(codigoFinal, caminhoArquivo);
 
@@ -26,25 +27,34 @@
         while (true) 
         {
             Console.Write("> ");
-            var line = Console.ReadLine();
+            var linha = Console.ReadLine();
 
-            if(line == "sair")
+            if(linha == "sair")
             {
                 break;
             }
 
-            else if(line == "limpar")
+            else if(linha == "limpar")
             {
                 Console.Clear();
             }
 
             else
             {
-
+                ExecutarModoImperativo(linha);
             }
         }
     }
 
+    private static void ExecutarModoImperativo(string codigoFonte)
+    {
+        var tokens = s_tokenizador.Tokenizar(codigoFonte);
+        var programa = s_parser.Parse(tokens);
+        var codigoFinal = s_gerador.Gerar(programa);
+
+        Console.WriteLine("Código correspondente em C:\n");
+        Console.WriteLine(codigoFinal);
+    }
     private static void EscreverNoArquivo(string texto, string arquivo)
     {
         try

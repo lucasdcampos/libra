@@ -1,45 +1,8 @@
 namespace Libra.Arvore
 {
-    public class NodoInstrucao : Nodo
-    {
-        public NodoInstrucao(NodoInstrucaoSair saida)
-        {
-            Instrucao = saida;
-        }
+    public abstract class NodoInstrucao : Nodo {} // Por que não interface? Não me pergunte
 
-        public NodoInstrucao(NodoInstrucaoVar var)
-        {
-            Instrucao = var;
-        }
-
-        public NodoInstrucao(NodoInstrucaoImprimir imprimir)
-        {
-            Instrucao = imprimir;
-        }
-
-        public object Instrucao { get; private set; }
-
-        public override object Avaliar()
-        {
-            if(Instrucao.GetType() == typeof(NodoInstrucaoSair))
-            {
-                var sair = (NodoInstrucaoSair)Instrucao;
-
-                return sair.Avaliar();
-            }
-
-            if(Instrucao.GetType() == typeof(NodoInstrucaoVar))
-            {
-                var var = (NodoInstrucaoVar)Instrucao;
-
-                return var.Avaliar();
-            }
-
-            return 0;
-        }
-    }
-
-    public class NodoInstrucaoSair : Nodo
+    public class NodoInstrucaoSair : NodoInstrucao
     {
         public NodoInstrucaoSair(NodoExpressao expressao)
         {
@@ -54,7 +17,7 @@ namespace Libra.Arvore
         }
     }
 
-    public class NodoInstrucaoVar : Nodo
+    public class NodoInstrucaoVar : NodoInstrucao
     {
         public NodoInstrucaoVar(Var var)
         {
@@ -69,7 +32,7 @@ namespace Libra.Arvore
         }
     }
 
-    public class NodoInstrucaoImprimir: Nodo
+    public class NodoInstrucaoImprimir: NodoInstrucao
     {
         public NodoInstrucaoImprimir(NodoExpressao expressao)
         {

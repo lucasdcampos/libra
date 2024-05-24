@@ -23,8 +23,8 @@ public class GeradorC : Gerador
         // ou compilar a própria expressão? Ex: compilar 10 + 2, ou compilar 12 direto?
         foreach(var instrucao in m_programa.Instrucoes)
         {
-            var tipo = instrucao.Instrucao.GetType();
-
+            var tipo = instrucao.GetType();
+            Console.WriteLine(instrucao.GetType());
             if(tipo == typeof(NodoInstrucaoSair))
             {
                 Escrever($"    exit({instrucao.Avaliar()});");

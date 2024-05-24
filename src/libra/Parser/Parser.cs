@@ -39,7 +39,7 @@ public class Parser
             var sair = ParseInstrucaoSair();
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
 
-            instrucao = new NodoInstrucao(sair);
+            instrucao = sair;
         }
 
         else if(TentarConsumirToken(TokenTipo.Var) != null)
@@ -48,7 +48,7 @@ public class Parser
 
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
             
-            instrucao = new NodoInstrucao(ident);
+            instrucao = ident;
         }
 
         else if(TentarConsumirToken(TokenTipo.Imprimir) != null)
@@ -57,7 +57,7 @@ public class Parser
 
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
             
-            instrucao = new NodoInstrucao(imprimir);
+            instrucao = imprimir;
         }
 
         if(instrucao == null)
