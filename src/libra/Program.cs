@@ -2,15 +2,23 @@
 {
     internal static void Main(string[] args)
     {
+        Tokenizador tokenizador;
+        Parser parser;
+        GeradorC gerador;
 
         if(args.Length == 1)
         {
-            
-            Lexer lexer = new Lexer(File.ReadAllText(args[0]));
-            Parser parser = new Parser(lexer.Tokenize());
-            GeradorC gerador = new GeradorC(parser.Parse());
+            tokenizador = new Tokenizador();
+            parser = new Parser();
+            gerador = new GeradorC();
 
-            Console.WriteLine(gerador.Gerar());
+            var caminhoArquivo = args[0];
+            var codigoFonte = File.ReadAllText(args[0]);
+            var tokens = tokenizador.Tokenizar(codigoFonte);
+            var programa = parser.Parse(tokens);
+            var codigoFinal = gerador.Gerar(programa);
+
+            EscreverNoArquivo(codigoFinal, caminhoArquivo);
 
             return;
         }
@@ -32,16 +40,31 @@
 
             else
             {
-                Lexer lexer = new Lexer(line);
-                
-                Parser parser = new Parser(lexer.Tokenize());
-
-                GeradorC gerador = new GeradorC(parser.Parse());
-
-                Console.WriteLine("Código correspondente em C:");
-                Console.WriteLine(gerador.Gerar());
 
             }
+        }
+    }
+
+    private static void EscreverNoArquivo(string texto, string arquivo)
+    {
+        try
+        {
+            if (File.Exists(arquivo))
+            {
+                File.WriteAllText(arquivo, texto);
+            }
+            else
+            {
+                using (FileStream fs = File.Create(arquivo))
+                {
+                    File.WriteAllText(arquivo, texto);
+                }
+
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
         }
     }
 }

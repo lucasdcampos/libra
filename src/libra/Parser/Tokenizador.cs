@@ -1,15 +1,12 @@
-public class Lexer 
+public class Tokenizador 
 {
-    public Lexer(string source)
-    {
-        _source = source;
-    }
+    private int m_posicao;
+    private string m_fonte;
 
-    private int _posicao;
-    private string _source;
-
-    public List<Token> Tokenize() 
+    public List<Token> Tokenizar(string source) 
     {
+        m_fonte = source;
+
         var texto = "";
         var tokens = new List<Token>();
 
@@ -141,9 +138,9 @@ public class Lexer
     
     private char Peek(int offset)
     {
-        if(_posicao + offset < _source.Length)
+        if(m_posicao + offset < m_fonte.Length)
         {
-            return _source[_posicao + offset];
+            return m_fonte[m_posicao + offset];
         }
 
         return '\0';
@@ -151,7 +148,7 @@ public class Lexer
 
     private void Passar(int quantidade = 1) 
     {
-        _posicao += quantidade;
+        m_posicao += quantidade;
     }
 
     private char ConsumirChar()

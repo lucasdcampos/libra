@@ -2,27 +2,26 @@ using System;
 
 public abstract class Gerador 
 {
-    protected string _final = string.Empty;
-    protected NodoPrograma _programa;
+    protected string m_final = string.Empty;
+    protected NodoPrograma m_programa;
 
-    public Gerador(NodoPrograma programa)
-    {
-        _programa = programa;
-    }
-
-    public abstract string Gerar();
+    public abstract string Gerar(NodoPrograma programa);
     protected virtual void Escrever(string str) {}
 }
 
 public class GeradorC : Gerador
 {
-    public GeradorC(NodoPrograma programa) : base(programa){}
-
-    public override string Gerar()
+    public override string Gerar(NodoPrograma programa)
     {
+        m_programa = programa;
+
+        Escrever("#include <stdio.h>");
+        Escrever("");
         Escrever("int main() {");
 
-        foreach(var instrucao in _programa.Instrucoes)
+        // Eu deveria compilar em C o resultado final de uma expressão
+        // ou compilar a própria expressão? Ex: compilar 10 + 2, ou compilar 12 direto?
+        foreach(var instrucao in m_programa.Instrucoes)
         {
             var tipo = instrucao.Instrucao.GetType();
 
@@ -37,16 +36,21 @@ public class GeradorC : Gerador
 
                 Escrever($"    double {variavel.Identificador} = {variavel.Valor};");
             }
+
+            else if(tipo == typeof(NodoInstrucaoImprimir))
+            {
+                Escrever($"    printf({instrucao.Avaliar().ToString()});");
+            }
         }
 
         Escrever("    return 0;");
         Escrever("}");
 
-        return _final;
+        return m_final;
     }
 
     protected override void Escrever(string str)
     {
-        _final += str + "\n";
+        m_final += str + "\n";
     }
 }

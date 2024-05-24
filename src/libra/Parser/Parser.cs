@@ -1,7 +1,4 @@
-// Árvore Semântica
-// Esse arquivo necessita revisão
-
-// * --> revisar
+// preciso refatorar isso depois
 
 public abstract class Nodo
 {
@@ -20,19 +17,19 @@ public class NodoTermo : Nodo
 {
     public NodoTermo(Token token)
     {
-        _token = token;
+        m_token = token;
     }
 
-    private Token _token;
+    private Token m_token;
 
     public override object Avaliar()
     {
-        switch (_token.Tipo)
+        switch (m_token.Tipo)
             {
                 case TokenTipo.Numero:
-                    return _token.Valor;
+                    return m_token.Valor;
                 case TokenTipo.Identificador:
-                    return double.Parse(Libra.Variaveis[_token.Valor.ToString()].ToString());
+                    return double.Parse(Libra.Variaveis[m_token.Valor.ToString()].ToString());
             }
         
         return 0;
@@ -74,40 +71,40 @@ public class NodoExpressao : Nodo
 
 public class NodoExpressaoBinaria : Nodo 
 {
-    private NodoExpressao _esquerda;
-    private Token _operador;
-    private NodoExpressao _direita;
+    private NodoExpressao m_esquerda;
+    private Token m_operador;
+    private NodoExpressao m_direita;
 
     public NodoExpressaoBinaria(NodoExpressao esquerda, Token operador, NodoExpressao direita)
     {
-        _esquerda = esquerda;
-        _operador = operador;
-        _direita = direita;
+        m_esquerda = esquerda;
+        m_operador = operador;
+        m_direita = direita;
     }
 
     public override object Avaliar()
     {
-        if(_operador.Tipo == TokenTipo.OperadorSoma)
+        if(m_operador.Tipo == TokenTipo.OperadorSoma)
         {
-            double resultado = double.Parse(_esquerda.Avaliar().ToString()) + double.Parse(_direita.Avaliar().ToString());
+            double resultado = double.Parse(m_esquerda.Avaliar().ToString()) + double.Parse(m_direita.Avaliar().ToString());
             return resultado;
         }
 
-        if(_operador.Tipo == TokenTipo.OperadorSub)
+        if(m_operador.Tipo == TokenTipo.OperadorSub)
         {
-            double resultado = double.Parse(_esquerda.Avaliar().ToString()) - double.Parse(_direita.Avaliar().ToString());
+            double resultado = double.Parse(m_esquerda.Avaliar().ToString()) - double.Parse(m_direita.Avaliar().ToString());
             return resultado;
         }
 
-        if(_operador.Tipo == TokenTipo.OperadorMult)
+        if(m_operador.Tipo == TokenTipo.OperadorMult)
         {
-            double resultado = double.Parse(_esquerda.Avaliar().ToString()) * double.Parse(_direita.Avaliar().ToString());
+            double resultado = double.Parse(m_esquerda.Avaliar().ToString()) * double.Parse(m_direita.Avaliar().ToString());
             return resultado;
         }
 
-        if(_operador.Tipo == TokenTipo.OperadorDiv)
+        if(m_operador.Tipo == TokenTipo.OperadorDiv)
         {
-            double resultado = double.Parse(_esquerda.Avaliar().ToString()) / double.Parse(_direita.Avaliar().ToString());
+            double resultado = double.Parse(m_esquerda.Avaliar().ToString()) / double.Parse(m_direita.Avaliar().ToString());
             return resultado;
         }
 
@@ -134,14 +131,29 @@ public class NodoInstrucaoVar : Nodo
 {
     public NodoInstrucaoVar(Var var)
     {
-        _var = var;
+        m_var = var;
     }
 
-    private Var _var;
+    private Var m_var;
 
     public override object Avaliar()
     {
-        return _var;
+        return m_var;
+    }
+}
+
+public class NodoInstrucaoImprimir: Nodo
+{
+    public NodoInstrucaoImprimir(NodoExpressao expressao)
+    {
+        m_expressao = expressao;
+    }
+
+    private NodoExpressao m_expressao;
+
+    public override object Avaliar()
+    {
+        return m_expressao;
     }
 }
 
@@ -155,6 +167,11 @@ public class NodoInstrucao : Nodo
     public NodoInstrucao(NodoInstrucaoVar var)
     {
         Instrucao = var;
+    }
+
+    public NodoInstrucao(NodoInstrucaoImprimir imprimir)
+    {
+        Instrucao = imprimir;
     }
 
     public object Instrucao { get; private set; }
@@ -199,17 +216,14 @@ public class NodoPrograma : Nodo
 
 public class Parser
 {
-    public Parser(List<Token> tokens)
+    private List<Token> m_tokens;
+    private int m_posicao;
+
+
+    public NodoPrograma Parse(List<Token> tokens)
     {
-        _tokens = tokens;
-    }
+        m_tokens = tokens;
 
-    private List<Token> _tokens;
-    private int _posicao;
-
-
-    public NodoPrograma Parse()
-    {
         NodoPrograma programa = null;
 
         var instrucoes = new List<NodoInstrucao>();
@@ -245,6 +259,15 @@ public class Parser
             instrucao = new NodoInstrucao(ident);
         }
 
+        else if(TentarConsumirToken(TokenTipo.Imprimir) != null)
+        {
+            var imprimir = ParseInstrucaoImprimir();
+
+            TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
+            
+            instrucao = new NodoInstrucao(imprimir);
+        }
+
         if(instrucao == null)
             Libra.Erro("Instrução inválida!");
 
@@ -266,13 +289,13 @@ public class Parser
 
     private NodoInstrucaoVar ParseInstrucaoVar()
     {
-        string nome_identificador = "";
+        string nomeIdentificador = "";
 
         Token identificador = null;
 
         if(Atual().Tipo == TokenTipo.Identificador)
         {
-            nome_identificador = Atual().Valor.ToString();
+            nomeIdentificador = Atual().Valor.ToString();
             identificador = Atual();
             Passar();
         }
@@ -290,16 +313,33 @@ public class Parser
 
         if(expressao != null)
         {
-            var.Identificador = nome_identificador;
+            var.Identificador = nomeIdentificador;
             var.Valor = expressao.Avaliar();
 
-            Libra.Variaveis[nome_identificador] = var.Valor;
+            Libra.Variaveis[nomeIdentificador] = var.Valor;
         }
 
         return new NodoInstrucaoVar(var);
     }
 
-    
+    private NodoInstrucaoImprimir ParseInstrucaoImprimir()
+    {
+        NodoInstrucaoImprimir imprimir = null;
+
+        TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
+
+        var expressao = ParseExpressao();
+
+        if(expressao != null)
+        {
+            imprimir = new NodoInstrucaoImprimir(expressao);
+        }
+
+        TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
+
+        return imprimir;
+    }
+
     private NodoExpressao ParseExpressao()
     {
         NodoExpressao expressao = null;
@@ -362,9 +402,9 @@ public class Parser
     }
     private Token Peek(int offset)
     {
-        if(_posicao + offset < _tokens.Count)
+        if(m_posicao + offset < m_tokens.Count)
         {
-            return _tokens[_posicao + offset];
+            return m_tokens[m_posicao + offset];
         }
 
         return new Token(TokenTipo.FimDoArquivo);
@@ -372,7 +412,7 @@ public class Parser
 
     private void Passar(int quantidade = 1) 
     {
-        _posicao += quantidade;
+        m_posicao += quantidade;
     }
 
     private Token ConsumirToken()
