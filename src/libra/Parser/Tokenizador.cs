@@ -87,6 +87,29 @@ public class Tokenizador
                         Passar();
                         break;
                     case '/':
+                        
+                        if(Peek(1) == '/')
+                        {
+                            Passar();
+
+                            while(Atual() != '\n' || Atual() != '\0')
+                            {
+                                // solução imbecil pra conseguir parar o comentário sem quebrar linha
+                                if(Atual() == '*')
+                                {
+                                    if(Peek(1) == '\\')
+                                    {
+                                        Passar();
+                                        Passar();
+                                        break;
+                                    }
+                                }
+                                Passar();
+                            }
+                                
+                            break;
+                        }
+
                         tokens.Add(new Token(TokenTipo.OperadorDiv));
                         Passar();
                         break;
