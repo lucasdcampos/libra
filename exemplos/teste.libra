@@ -1,6 +1,10 @@
-# declaração de variáveis
+// Exemplo de comentário
+
 var a = 10;
 var b = 5;
 var c = a + b * 2;
 
-sair(c); # encerra o programa com códido de saída c 
+exibir("Olá, Mundo!"); // exibe 'Olá, Mundo' no terminal
+exibir(2+2+); // exibe 4 no terminal
+
+sair(c); // encerra o programa com códido de saída c 

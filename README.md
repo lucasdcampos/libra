@@ -20,12 +20,16 @@ Libra foi projetada para ser fácil de entender e utilizar, especialmente para i
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
-# exemplo de loop
-var i = 0;
-enquanto (i < 10) 
-    imprimir(i);
-    i = i + 1;
-fim
+// declarando variáveis
+var a = 10;
+var b = 5;
+var c = a + b * 2;
+
+exibir("Olá, Mundo!"); // exibe 'Olá, Mundo!' no terminal
+exibir(2+2); // exibe 4 no terminal
+exibir(c); // exibe 20 no terminal (c = a + (b*2))
+
+sair(0); // encerra o programa com código 0
 ```
 
 ## Como contribuir?
