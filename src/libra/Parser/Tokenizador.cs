@@ -130,7 +130,17 @@ public class Tokenizador
                             tokens.Add(new Token(TokenTipo.OperadorDefinir));
                             Passar();
                         }
+                        break;
+                    case '"':
+                        Passar();
 
+                        while(Atual() != '"')
+                        {
+                            texto += ConsumirChar();
+                        }
+
+                        tokens.Add(new Token(TokenTipo.StringLiteral, texto));
+                        Passar();
                         break;
                     case '#':
                         while(Atual() != '\n')

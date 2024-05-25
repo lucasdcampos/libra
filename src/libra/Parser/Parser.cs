@@ -126,16 +126,37 @@ public class Parser
 
         TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
 
-        var expressao = ParseExpressao();
+        var str = ParseString();
 
-        if(expressao != null)
+        if(str != null)
         {
-            exibir = new NodoInstrucaoExibir(expressao);
+            exibir = new NodoInstrucaoExibir(str);
         }
 
         TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
 
         return exibir;
+    }
+
+    private NodoString ParseString()
+    {
+        NodoString nodoString;
+
+        if(Atual().Tipo == TokenTipo.StringLiteral)
+        {
+            nodoString = new NodoString(ConsumirToken());
+        }
+        else
+        {
+            var expr = ParseExpressao();
+
+            if(expr == null)
+                LibraHelper.Erro("Expressão inválida");
+
+            nodoString = new NodoString(expr);
+        }
+
+        return nodoString;
     }
 
     private NodoExpressao ParseExpressao()

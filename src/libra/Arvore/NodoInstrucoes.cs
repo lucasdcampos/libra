@@ -34,16 +34,16 @@ namespace Libra.Arvore
 
     public class NodoInstrucaoExibir: NodoInstrucao
     {
-        public NodoInstrucaoExibir(NodoExpressao expressao)
+        public NodoInstrucaoExibir(NodoString str)
         {
-            m_expressao = expressao;
+            m_string = str;
         }
 
-        private NodoExpressao m_expressao;
+        private NodoString m_string;
 
         public override object Avaliar()
         {
-            return m_expressao.Avaliar();
+            return m_string.Avaliar();
         }
     }
 }

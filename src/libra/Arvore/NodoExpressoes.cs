@@ -61,4 +61,27 @@ namespace Libra.Arvore
             return 0;
         }
     }
+
+    public class NodoString : Nodo
+    {
+        private string m_texto;
+
+        public NodoString(NodoExpressao expressao)
+        {
+            m_texto = expressao.Avaliar().ToString();
+        }
+
+        public NodoString(Token str)
+        {
+            if(str.Tipo != TokenTipo.StringLiteral)
+                LibraHelper.Erro($"Não é possível converter {str.Tipo} para String!");
+
+            m_texto = str.Valor.ToString();
+        }
+
+        public override object Avaliar()
+        {
+            return m_texto;
+        }
+    }
 }
