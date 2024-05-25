@@ -15,7 +15,7 @@ namespace Libra.Arvore
         {
             switch (m_token.Tipo)
                 {
-                    case TokenTipo.Numero:
+                    case TokenTipo.NumeroLiteral:
                         return m_token.Valor;
                     case TokenTipo.Identificador:
                         return double.Parse(LibraHelper.Variaveis[m_token.Valor.ToString()].ToString());

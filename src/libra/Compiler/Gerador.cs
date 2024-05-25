@@ -37,9 +37,9 @@ public class GeradorC : Gerador
                 Escrever($"    double {variavel.Identificador} = {variavel.Valor};");
             }
 
-            else if(tipo == typeof(NodoInstrucaoImprimir))
+            else if(tipo == typeof(NodoInstrucaoExibir))
             {
-                Escrever($"    printf({instrucao.Avaliar().ToString()});");
+                Escrever($"    printf(\"{instrucao.Avaliar()}\");");
             }
         }
 

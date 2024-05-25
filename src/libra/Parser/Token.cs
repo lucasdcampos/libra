@@ -2,7 +2,7 @@ public enum TokenTipo
 {
     
     // Tipos
-    Numero,
+    NumeroLiteral,
     Identificador,
     TokenInvalido,
 
@@ -23,7 +23,7 @@ public enum TokenTipo
     // Palavras Reservadas
     Sair, 
     Var,
-    Imprimir
+    Exibir
     
 }
 

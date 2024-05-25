@@ -21,7 +21,7 @@ public class Tokenizador
                     texto += ConsumirChar();
                 }
 
-                tokens.Add(new Token(TokenTipo.Numero, texto));
+                tokens.Add(new Token(TokenTipo.NumeroLiteral, texto));
                 texto = "";
                 continue;
             }
@@ -43,8 +43,8 @@ public class Tokenizador
                     case "var":
                         tokens.Add(new Token(TokenTipo.Var));
                         break;
-                    case "imprimir":
-                        tokens.Add(new Token(TokenTipo.Imprimir));
+                    case "exibir":
+                        tokens.Add(new Token(TokenTipo.Exibir));
                         break;
                     default:
                         tokens.Add(new Token(TokenTipo.Identificador, texto));

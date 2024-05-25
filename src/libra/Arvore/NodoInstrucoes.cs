@@ -32,9 +32,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class NodoInstrucaoImprimir: NodoInstrucao
+    public class NodoInstrucaoExibir: NodoInstrucao
     {
-        public NodoInstrucaoImprimir(NodoExpressao expressao)
+        public NodoInstrucaoExibir(NodoExpressao expressao)
         {
             m_expressao = expressao;
         }
@@ -43,7 +43,7 @@ namespace Libra.Arvore
 
         public override object Avaliar()
         {
-            return m_expressao;
+            return m_expressao.Avaliar();
         }
     }
 }

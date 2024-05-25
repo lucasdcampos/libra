@@ -50,13 +50,13 @@ public class Parser
             instrucao = ident;
         }
 
-        else if(TentarConsumirToken(TokenTipo.Imprimir) != null)
+        else if(TentarConsumirToken(TokenTipo.Exibir) != null)
         {
-            var imprimir = ParseInstrucaoImprimir();
+            var exibir = ParseInstrucaoExibir();
 
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
             
-            instrucao = imprimir;
+            instrucao = exibir;
         }
 
         if(instrucao == null)
@@ -82,16 +82,10 @@ public class Parser
     {
         string nomeIdentificador = "";
 
-        Token identificador = null;
+        // novo recorde: maior linha de código que já escrevi na vida
+        nomeIdentificador = TentarConsumirToken(TokenTipo.Identificador, $"{Atual().Tipo} não pode ser usado como um identificador!").Valor.ToString();
 
-        if(Atual().Tipo == TokenTipo.Identificador)
-        {
-            nomeIdentificador = Atual().Valor.ToString();
-            identificador = Atual();
-            Passar();
-        }
-
-        TentarConsumirToken(TokenTipo.FecharParen, "Esperado `=`");
+        TentarConsumirToken(TokenTipo.OperadorDefinir, "Esperado `=`");
 
         NodoExpressao expressao = null;
 
@@ -113,9 +107,9 @@ public class Parser
         return new NodoInstrucaoVar(var);
     }
 
-    private NodoInstrucaoImprimir ParseInstrucaoImprimir()
+    private NodoInstrucaoExibir ParseInstrucaoExibir()
     {
-        NodoInstrucaoImprimir imprimir = null;
+        NodoInstrucaoExibir exibir = null;
 
         TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
 
@@ -123,19 +117,19 @@ public class Parser
 
         if(expressao != null)
         {
-            imprimir = new NodoInstrucaoImprimir(expressao);
+            exibir = new NodoInstrucaoExibir(expressao);
         }
 
         TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
 
-        return imprimir;
+        return exibir;
     }
 
     private NodoExpressao ParseExpressao()
     {
         NodoExpressao expressao = null;
 
-        if(Atual().Tipo == TokenTipo.Numero || Atual().Tipo == TokenTipo.Identificador)
+        if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
             if(Peek(1).Tipo == TokenTipo.OperadorSoma || Peek(1).Tipo == TokenTipo.OperadorSub
             || Peek(1).Tipo == TokenTipo.OperadorMult || Peek(1).Tipo == TokenTipo.OperadorDiv)
@@ -163,7 +157,7 @@ public class Parser
         Token operador = null;
         NodoExpressao direita = null;
 
-        if(Atual().Tipo == TokenTipo.Numero || Atual().Tipo == TokenTipo.Identificador)
+        if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
             esquerda = new NodoExpressaoTermo(ConsumirToken());
         }
