@@ -28,7 +28,7 @@ public enum TokenTipo
     
 }
 
-public class Token 
+public class Token
 {
     public Token(TokenTipo tipo, object valor = null) 
     {

@@ -64,6 +64,7 @@ public class Tokenizador
                         Passar();
                         break;
                     case '\n':
+                        LibraHelper.Linha++;
                         Passar();
                         break;
                     case ';':
