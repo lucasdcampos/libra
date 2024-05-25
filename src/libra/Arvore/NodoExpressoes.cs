@@ -54,7 +54,7 @@ namespace Libra.Arvore
                     return esquerda * direita;
                 case TokenTipo.OperadorDiv:
                     if(direita == 0)
-                        LibraHelper.Erro("Divisão por zero"); // TODO: Isso deveria ser checado aqui?
+                        Erro.ErroGenerico("Divisão por zero"); // TODO: Isso deveria ser checado aqui?
                     return esquerda / direita;
             }
             
@@ -74,7 +74,7 @@ namespace Libra.Arvore
         public NodoString(Token str)
         {
             if(str.Tipo != TokenTipo.StringLiteral)
-                LibraHelper.Erro($"Não é possível converter {str.Tipo} para String!");
+                Erro.ErroGenerico($"Não é possível converter {str.Tipo} para String!");
 
             m_texto = str.Valor.ToString();
         }

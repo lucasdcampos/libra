@@ -23,12 +23,13 @@ public class Parser
 {
     private List<Token> m_tokens;
     private int m_posicao;
+    private int m_linha;
 
     public NodoPrograma Parse(List<Token> tokens)
     {
         m_tokens = tokens;
 
-        NodoPrograma programa = null;
+        NodoPrograma? programa = null;
 
         var instrucoes = new List<NodoInstrucao>();
 
@@ -39,12 +40,14 @@ public class Parser
 
         programa = new NodoPrograma(instrucoes);
 
+        if(programa == null)
+            Erro.ErroGenerico("Programa inválido. Não foi possível determinar as instruções");
         return programa;
     }
 
-    private NodoInstrucao ParseInstrucao()
+    private NodoInstrucao? ParseInstrucao()
     {
-        NodoInstrucao instrucao = null;
+        NodoInstrucao? instrucao = null;
 
         if(TentarConsumirToken(TokenTipo.Sair) != null)
         {
@@ -73,14 +76,15 @@ public class Parser
         }
 
         if(instrucao == null)
-            LibraHelper.Erro("Instrução inválida!");
+            Erro.ErroGenerico("Instrução inválida!", m_linha);
+            
 
         return instrucao;
     }
 
-    private NodoInstrucaoSair ParseInstrucaoSair()
+    private NodoInstrucaoSair? ParseInstrucaoSair()
     {
-        NodoInstrucaoSair sair = null;
+        NodoInstrucaoSair? sair = null;
 
         TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
 
@@ -91,7 +95,7 @@ public class Parser
         return sair;
     }
 
-    private NodoInstrucaoVar ParseInstrucaoVar()
+    private NodoInstrucaoVar? ParseInstrucaoVar()
     {
         string nomeIdentificador = "";
 
@@ -120,9 +124,9 @@ public class Parser
         return new NodoInstrucaoVar(var);
     }
 
-    private NodoInstrucaoExibir ParseInstrucaoExibir()
+    private NodoInstrucaoExibir? ParseInstrucaoExibir()
     {
-        NodoInstrucaoExibir exibir = null;
+        NodoInstrucaoExibir? exibir = null;
 
         TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
 
@@ -138,9 +142,9 @@ public class Parser
         return exibir;
     }
 
-    private NodoString ParseString()
+    private NodoString? ParseString()
     {
-        NodoString nodoString;
+        NodoString? nodoString;
 
         if(Atual().Tipo == TokenTipo.StringLiteral)
         {
@@ -151,7 +155,7 @@ public class Parser
             var expr = ParseExpressao();
 
             if(expr == null)
-                LibraHelper.Erro("Expressão inválida");
+                Erro.ErroGenerico("Expressão inválida", m_linha);
 
             nodoString = new NodoString(expr);
         }
@@ -159,9 +163,9 @@ public class Parser
         return nodoString;
     }
 
-    private NodoExpressao ParseExpressao()
+    private NodoExpressao? ParseExpressao()
     {
-        NodoExpressao expressao = null;
+        NodoExpressao? expressao = null;
 
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
@@ -178,18 +182,18 @@ public class Parser
         }
 
         if(expressao == null)
-            LibraHelper.Erro("Expressão inválida!");
+            Erro.ErroGenerico("Expressão inválida!", m_linha);
 
         return expressao;
     }
 
-    private NodoExpressaoBinaria ParseExpressaoBinaria()
+    private NodoExpressaoBinaria? ParseExpressaoBinaria()
     {
-        NodoExpressaoBinaria binaria = null;
+        NodoExpressaoBinaria? binaria = null;
 
-        NodoExpressaoTermo esquerda = null; // TEM que ser um TERMO
-        Token operador = null;
-        NodoExpressao direita = null;
+        NodoExpressaoTermo? esquerda = null; // TEM que ser um TERMO
+        Token? operador = null;
+        NodoExpressao? direita = null;
 
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
@@ -210,7 +214,7 @@ public class Parser
         }
 
         if(binaria == null)
-            LibraHelper.Erro("Expressão binária inválida");
+            Erro.ErroGenerico("Expressão binária inválida", m_linha);
 
         return binaria;
     }
@@ -226,7 +230,7 @@ public class Parser
             return m_tokens[m_posicao + offset];
         }
 
-        return new Token(TokenTipo.FimDoArquivo);
+        return new Token(TokenTipo.FimDoArquivo, m_linha);
     }
 
     private void Passar(int quantidade = 1) 
@@ -234,27 +238,29 @@ public class Parser
         m_posicao += quantidade;
     }
 
-    private Token ConsumirToken()
+    private Token? ConsumirToken()
     {
         var token = Atual();
         Passar();
 
+        m_linha = token.Linha;
+
         return token;
     }
 
-    private Token TentarConsumirToken(TokenTipo tipo, string erro)
+    private Token? TentarConsumirToken(TokenTipo tipo, string erro)
     {
         if(Atual().Tipo == tipo)
         {
             return ConsumirToken();
         }
 
-        LibraHelper.Erro(erro);
+        Erro.ErroEsperado(tipo, m_linha);
 
         return null;
     }
 
-    private Token TentarConsumirToken(TokenTipo tipo)
+    private Token? TentarConsumirToken(TokenTipo tipo)
     {
         if(Atual().Tipo == tipo)
         {

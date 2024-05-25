@@ -1,15 +1,18 @@
 public class Tokenizador 
 {
     private int m_posicao;
-    private string m_fonte;
+    private string? m_fonte;
+    private List<Token>? m_tokens;
+    private int m_linha;
 
     public List<Token> Tokenizar(string source) 
     {
         m_fonte = source;
+        m_tokens = new();
+        m_linha = 1;
 
         var texto = "";
-        var tokens = new List<Token>();
-
+        
         while (Atual() != '\0')
         {
             if(char.IsDigit(Atual()))
@@ -21,7 +24,7 @@ public class Tokenizador
                     texto += ConsumirChar();
                 }
 
-                tokens.Add(new Token(TokenTipo.NumeroLiteral, texto));
+                AdicionarTokenALista(TokenTipo.NumeroLiteral, texto);
                 texto = "";
                 continue;
             }
@@ -38,16 +41,16 @@ public class Tokenizador
                 switch(texto)
                 {
                     case "sair":
-                        tokens.Add(new Token(TokenTipo.Sair));
+                        AdicionarTokenALista(TokenTipo.Sair);
                         break;
                     case "var":
-                        tokens.Add(new Token(TokenTipo.Var));
+                        AdicionarTokenALista(TokenTipo.Var);
                         break;
                     case "exibir":
-                        tokens.Add(new Token(TokenTipo.Exibir));
+                        AdicionarTokenALista(TokenTipo.Exibir);
                         break;
                     default:
-                        tokens.Add(new Token(TokenTipo.Identificador, texto));
+                        AdicionarTokenALista(TokenTipo.Identificador, texto);
                         break;
                 }
 
@@ -64,27 +67,27 @@ public class Tokenizador
                         Passar();
                         break;
                     case '\n':
-                        LibraHelper.Linha++;
+                        m_linha++;
                         Passar();
                         break;
                     case ';':
-                        tokens.Add(new Token(TokenTipo.PontoEVirgula));
+                        AdicionarTokenALista(TokenTipo.PontoEVirgula);
                         Passar();
                         break;
                     case '(':
-                        tokens.Add(new Token(TokenTipo.AbrirParen));
+                        AdicionarTokenALista(TokenTipo.AbrirParen);
                         Passar();
                         break;
                     case '+':
-                        tokens.Add(new Token(TokenTipo.OperadorSoma));
+                        AdicionarTokenALista(TokenTipo.OperadorSoma);
                         Passar();
                         break;
                     case '-':
-                        tokens.Add(new Token(TokenTipo.OperadorSub));
+                        AdicionarTokenALista(TokenTipo.OperadorSub);
                         Passar();
                         break;
                     case '*':
-                        tokens.Add(new Token(TokenTipo.OperadorMult));
+                        AdicionarTokenALista(TokenTipo.OperadorMult);
                         Passar();
                         break;
                     case '/':
@@ -111,11 +114,11 @@ public class Tokenizador
                             break;
                         }
 
-                        tokens.Add(new Token(TokenTipo.OperadorDiv));
+                        AdicionarTokenALista(TokenTipo.OperadorDiv);
                         Passar();
                         break;
                     case ')':
-                        tokens.Add(new Token(TokenTipo.FecharParen));
+                        AdicionarTokenALista(TokenTipo.FecharParen);
                         Passar();
                         break;
                     case '=':
@@ -123,12 +126,12 @@ public class Tokenizador
 
                         if(Atual() == '=')
                         {
-                            tokens.Add(new Token(TokenTipo.OperadorComparacao));
+                            AdicionarTokenALista(TokenTipo.OperadorComparacao);
                             Passar();
                         }
                         else
                         {
-                            tokens.Add(new Token(TokenTipo.OperadorDefinir));
+                            AdicionarTokenALista(TokenTipo.OperadorDefinir);
                             Passar();
                         }
                         break;
@@ -140,7 +143,7 @@ public class Tokenizador
                             texto += ConsumirChar();
                         }
 
-                        tokens.Add(new Token(TokenTipo.StringLiteral, texto));
+                        AdicionarTokenALista(TokenTipo.StringLiteral, texto);
                         Passar();
                         break;
                     case '#':
@@ -160,9 +163,9 @@ public class Tokenizador
 
         }
         
-        tokens.Add(new Token(TokenTipo.FimDoArquivo));
+        AdicionarTokenALista(TokenTipo.FimDoArquivo);
 
-        return tokens;
+        return m_tokens;
     }
 
     private char Atual() 
@@ -192,4 +195,15 @@ public class Tokenizador
 
         return c;
     }
+
+    private void AdicionarTokenALista(TokenTipo tipo)
+    {
+        m_tokens.Add(new Token(tipo, m_linha));
+    }
+
+    private void AdicionarTokenALista(TokenTipo tipo, object valor)
+    {
+        m_tokens.Add(new Token(tipo, m_linha, valor));
+    }
+
 }
