@@ -1,9 +1,22 @@
 using Libra.Arvore;
 
-public struct Var
+// TODO: Onde eu deixo isso?
+public class Variavel
 {
     public string Identificador;
-    public object Valor;
+    public string Valor;
+
+    public Token Tipo { get; private set; }
+
+    public Variavel()
+    {
+
+    }
+
+    public Variavel(string identificador, string valor)
+    {
+
+    }
 }
 
 public class Parser
@@ -94,12 +107,12 @@ public class Parser
             expressao = ParseExpressao();
         }
 
-        Var var = new Var();
+        Variavel var = new Variavel();
 
         if(expressao != null)
         {
             var.Identificador = nomeIdentificador;
-            var.Valor = expressao.Avaliar();
+            var.Valor = expressao.Avaliar().ToString();
 
             LibraHelper.Variaveis[nomeIdentificador] = var.Valor;
         }

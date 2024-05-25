@@ -19,12 +19,12 @@ namespace Libra.Arvore
 
     public class NodoInstrucaoVar : NodoInstrucao
     {
-        public NodoInstrucaoVar(Var var)
+        public NodoInstrucaoVar(Variavel var)
         {
             m_var = var;
         }
 
-        private Var m_var;
+        private Variavel m_var;
 
         public override object Avaliar()
         {

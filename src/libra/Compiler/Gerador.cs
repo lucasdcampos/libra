@@ -32,7 +32,7 @@ public class GeradorC : Gerador
 
             else if(tipo == typeof(NodoInstrucaoVar))
             {
-                var variavel = (Var)instrucao.Avaliar();
+                var variavel = (Variavel)instrucao.Avaliar();
 
                 Escrever($"    double {variavel.Identificador} = {variavel.Valor};");
             }
