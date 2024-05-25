@@ -1,23 +1,21 @@
 ﻿internal static class Program 
 {
-        static Tokenizador s_tokenizador;
-        static Parser s_parser;
-        static GeradorC s_gerador;
+    private static Tokenizador ms_tokenizador;
+    private static Parser ms_parser;
+    private static GeradorC ms_gerador;
     internal static void Main(string[] args)
     {
-        s_tokenizador = new Tokenizador();
-        s_parser = new Parser();
-        s_gerador = new GeradorC();
+        ms_tokenizador = new Tokenizador();
+        ms_parser = new Parser();
+        ms_gerador = new GeradorC();
 
         if(args.Length == 1)
         {
-
-
             var caminhoArquivo = args[0];
             var codigoFonte = File.ReadAllText(args[0]);
-            var tokens = s_tokenizador.Tokenizar(codigoFonte);
-            var programa = s_parser.Parse(tokens);
-            var codigoFinal = s_gerador.Gerar(programa);
+            var tokens = ms_tokenizador.Tokenizar(codigoFonte);
+            var programa = ms_parser.Parse(tokens);
+            var codigoFinal = ms_gerador.Gerar(programa);
 
             EscreverNoArquivo(codigoFinal, caminhoArquivo);
 
@@ -48,9 +46,9 @@
 
     private static void ExecutarModoImperativo(string codigoFonte)
     {
-        var tokens = s_tokenizador.Tokenizar(codigoFonte);
-        var programa = s_parser.Parse(tokens);
-        var codigoFinal = s_gerador.Gerar(programa);
+        var tokens = ms_tokenizador.Tokenizar(codigoFonte);
+        var programa = ms_parser.Parse(tokens);
+        var codigoFinal = ms_gerador.Gerar(programa);
 
         Console.WriteLine("Código correspondente em C:\n");
         Console.WriteLine(codigoFinal);

@@ -1,9 +1,10 @@
 namespace Libra.Arvore
 {
-    // termo matemático
-    public class NodoTermo : Nodo
+    public abstract class NodoExpressao : Nodo { } // TODO: Por que não é uma interface? Não faço ideia..
+
+    public class NodoExpressaoTermo : NodoExpressao
     {
-        public NodoTermo(Token token)
+        public NodoExpressaoTermo(Token token)
         {
             m_token = token;
         }
@@ -25,39 +26,7 @@ namespace Libra.Arvore
 
     }
 
-    public class NodoExpressao : Nodo
-    {
-        public NodoExpressao(NodoTermo termo)
-        {
-            Expressao = termo;
-        }
-
-        public NodoExpressao(NodoExpressaoBinaria exprBinaria)
-        {
-            Expressao = exprBinaria;
-        }
-
-        public object Expressao { get; private set; }
-
-        public override object Avaliar()
-        {
-            if(Expressao.GetType() == typeof(NodoTermo))
-            {
-                var termo = (NodoTermo)Expressao;
-                return termo.Avaliar();
-            }
-
-            else if (Expressao.GetType() == typeof(NodoExpressaoBinaria))
-            {
-                var expressao = (NodoExpressaoBinaria)Expressao;
-                return expressao.Avaliar();
-            }
-        
-            return 0;
-        }
-    }
-
-    public class NodoExpressaoBinaria : Nodo 
+    public class NodoExpressaoBinaria : NodoExpressao
     {
         private NodoExpressao m_esquerda;
         private Token m_operador;
@@ -72,30 +41,23 @@ namespace Libra.Arvore
 
         public override object Avaliar()
         {
-            if(m_operador.Tipo == TokenTipo.OperadorSoma)
-            {
-                double resultado = double.Parse(m_esquerda.Avaliar().ToString()) + double.Parse(m_direita.Avaliar().ToString());
-                return resultado;
-            }
+            var esquerda = double.Parse(m_esquerda.Avaliar().ToString());
+            var direita = double.Parse(m_direita.Avaliar().ToString());
 
-            if(m_operador.Tipo == TokenTipo.OperadorSub)
+            switch(m_operador.Tipo)
             {
-                double resultado = double.Parse(m_esquerda.Avaliar().ToString()) - double.Parse(m_direita.Avaliar().ToString());
-                return resultado;
+                case TokenTipo.OperadorSoma:
+                    return esquerda + direita;
+                case TokenTipo.OperadorSub:
+                    return esquerda - direita;
+                case TokenTipo.OperadorMult:
+                    return esquerda * direita;
+                case TokenTipo.OperadorDiv:
+                    if(direita == 0)
+                        LibraHelper.Erro("Divisão por zero"); // TODO: Isso deveria ser checado aqui?
+                    return esquerda / direita;
             }
-
-            if(m_operador.Tipo == TokenTipo.OperadorMult)
-            {
-                double resultado = double.Parse(m_esquerda.Avaliar().ToString()) * double.Parse(m_direita.Avaliar().ToString());
-                return resultado;
-            }
-
-            if(m_operador.Tipo == TokenTipo.OperadorDiv)
-            {
-                double resultado = double.Parse(m_esquerda.Avaliar().ToString()) / double.Parse(m_direita.Avaliar().ToString());
-                return resultado;
-            }
-
+            
             return 0;
         }
     }

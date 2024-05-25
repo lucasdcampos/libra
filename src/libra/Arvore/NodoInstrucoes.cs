@@ -1,6 +1,6 @@
 namespace Libra.Arvore
 {
-    public abstract class NodoInstrucao : Nodo {} // Por que não interface? Não me pergunte
+    public abstract class NodoInstrucao : Nodo {} // TODO: Por que não interface? Não me pergunte
 
     public class NodoInstrucaoSair : NodoInstrucao
     {

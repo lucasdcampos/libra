@@ -11,7 +11,6 @@ public class Parser
     private List<Token> m_tokens;
     private int m_posicao;
 
-
     public NodoPrograma Parse(List<Token> tokens)
     {
         m_tokens = tokens;
@@ -141,11 +140,11 @@ public class Parser
             if(Peek(1).Tipo == TokenTipo.OperadorSoma || Peek(1).Tipo == TokenTipo.OperadorSub
             || Peek(1).Tipo == TokenTipo.OperadorMult || Peek(1).Tipo == TokenTipo.OperadorDiv)
             {
-                expressao = new NodoExpressao(ParseExpressaoBinaria());
+                expressao = ParseExpressaoBinaria();
             }
             else
             {
-                expressao = new NodoExpressao(new NodoTermo(ConsumirToken()));
+                expressao = new NodoExpressaoTermo(ConsumirToken());
             }
 
         }
@@ -160,13 +159,13 @@ public class Parser
     {
         NodoExpressaoBinaria binaria = null;
 
-        NodoExpressao esquerda = null;
+        NodoExpressaoTermo esquerda = null; // TEM que ser um TERMO
         Token operador = null;
         NodoExpressao direita = null;
 
         if(Atual().Tipo == TokenTipo.Numero || Atual().Tipo == TokenTipo.Identificador)
         {
-            esquerda = new NodoExpressao(new NodoTermo(ConsumirToken()));
+            esquerda = new NodoExpressaoTermo(ConsumirToken());
         }
 
         if(Atual().Tipo == TokenTipo.OperadorSoma || Atual().Tipo == TokenTipo.OperadorSub
