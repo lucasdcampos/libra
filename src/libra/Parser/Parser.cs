@@ -47,7 +47,7 @@ public class Parser
 
         if(programa == null)
             Erro.ErroGenerico("Programa inválido. Não foi possível determinar as instruções");
-            
+
         return programa;
     }
 
@@ -116,7 +116,6 @@ public class Parser
     {
         string nomeIdentificador = "";
 
-        // novo recorde: maior linha de código que já escrevi na vida
         nomeIdentificador = TentarConsumirToken(TokenTipo.Identificador, "").Valor.ToString();
 
         TentarConsumirToken(TokenTipo.OperadorDefinir, "Esperado `=`");
