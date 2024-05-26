@@ -25,9 +25,14 @@ public class Parser
     private int m_posicao;
     private int m_linha;
 
-    public NodoPrograma Parse(List<Token> tokens)
+    public NodoPrograma Parse(List<Token> tokens, bool debugTokens = false)
     {
         m_tokens = tokens;
+
+        if(debugTokens)
+            foreach(var t in tokens)
+                Console.WriteLine(t.ToString());
+        
 
         NodoPrograma? programa = null;
 
@@ -42,6 +47,7 @@ public class Parser
 
         if(programa == null)
             Erro.ErroGenerico("Programa inválido. Não foi possível determinar as instruções");
+            
         return programa;
     }
 
@@ -55,6 +61,9 @@ public class Parser
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
 
             instrucao = sair;
+
+            if(instrucao == null)
+                Erro.ErroGenerico("Instrução sair() inválida!", m_linha);
         }
 
         else if(TentarConsumirToken(TokenTipo.Var) != null)
@@ -64,6 +73,9 @@ public class Parser
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
             
             instrucao = ident;
+
+            if(instrucao == null)
+                Erro.ErroGenerico("Declaração de variáveis inválida!", m_linha);
         }
 
         else if(TentarConsumirToken(TokenTipo.Exibir) != null)
@@ -73,11 +85,16 @@ public class Parser
             TentarConsumirToken(TokenTipo.PontoEVirgula, "Esperado `;`");
             
             instrucao = exibir;
+
+            if(instrucao == null)
+                Erro.ErroGenerico("Instrução exibir() inválida!", m_linha);
         }
 
-        if(instrucao == null)
-            Erro.ErroGenerico("Instrução inválida!", m_linha);
-            
+        else
+        { 
+            Erro.ErroGenerico($"Instrução inválida: {Peek(0).Tipo} --> {ConsumirToken().Valor}");
+        }
+
 
         return instrucao;
     }
@@ -100,7 +117,7 @@ public class Parser
         string nomeIdentificador = "";
 
         // novo recorde: maior linha de código que já escrevi na vida
-        nomeIdentificador = TentarConsumirToken(TokenTipo.Identificador, $"{Atual().Tipo} não pode ser usado como um identificador!").Valor.ToString();
+        nomeIdentificador = TentarConsumirToken(TokenTipo.Identificador, "").Valor.ToString();
 
         TentarConsumirToken(TokenTipo.OperadorDefinir, "Esperado `=`");
 

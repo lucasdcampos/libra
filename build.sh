@@ -1,1 +1,1 @@
-dotnet run --project src/libra
+dotnet run --project src/libra --property WarningLevel=0 

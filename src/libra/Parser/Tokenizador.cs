@@ -144,6 +144,7 @@ public class Tokenizador
                         }
 
                         AdicionarTokenALista(TokenTipo.StringLiteral, texto);
+                        texto = "";
                         Passar();
                         break;
                     case '#':
@@ -155,7 +156,7 @@ public class Tokenizador
                         Passar();
                         break;
                     default:
-                        //Libra.Erro($"Simbolo inválido {Atual()}");
+                        Erro.ErroGenerico($"Simbolo inválido '{Atual()}'");
                         break;
                 }
                 

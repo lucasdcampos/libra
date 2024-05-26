@@ -24,7 +24,7 @@ public class GeradorC : Gerador
         foreach(var instrucao in m_programa.Instrucoes)
         {
             var tipo = instrucao.GetType();
-            Console.WriteLine(instrucao.GetType());
+            
             if(tipo == typeof(NodoInstrucaoSair))
             {
                 Escrever($"    exit({instrucao.Avaliar()});");
