@@ -20,14 +20,18 @@ Libra foi projetada para ser fácil de entender e utilizar, especialmente para i
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
+#def exemplo exibir("Macro de exemplo!")
+
 // declarando variáveis
 var a = 10;
 var b = 5;
 var c = a + b * 2;
 
-exibir("Olá, Mundo!"); // exibe 'Olá, Mundo!' no terminal
-exibir(2+2); // exibe 4 no terminal
-exibir(c); // exibe 20 no terminal (c = a + (b*2))
+exibir("Olá, Mundo!"); // exibe 'Olá, Mundo!' no console
+exibir(2+2); // exibe 4 no console
+exibir(c); // exibe 20 no console (c = a + (b*2))
+
+exemplo; // executa a macro exemplo (exibe ("Macro de Exemplo"))
 
 sair(0); // encerra o programa com código 0
 ```
