@@ -1,8 +1,11 @@
-﻿internal static class Program 
+﻿using Libra.Arvore;
+
+internal static class Program 
 {
     private static Tokenizador ms_tokenizador;
     private static Parser ms_parser;
     private static GeradorC ms_gerador;
+    private static Interpretador ms_interpretador;
 
     private const string m_ver = "1.0-PREVIEW";
 
@@ -11,6 +14,7 @@
         ms_tokenizador = new Tokenizador();
         ms_parser = new Parser();
         ms_gerador = new GeradorC();
+        ms_interpretador = new Interpretador();
 
         if(args.Length == 1)
         {
@@ -60,10 +64,24 @@
                         }
 
                     }
+                    else if(linha.StartsWith("interpretar"))
+                    {
+                        var cargs = linha.Split();
+                        
+                        if (cargs.Length == 2)
+                        {
+                            ms_interpretador.Interpretar(Interpretar(cargs[1]));
+                        }
+                        else
+                        {
+                            Console.WriteLine("Comando inválido! Use inntepretar {arquivoInicial} {arquivoFinal}");
+                        }
+                
+                    }
 
                     else
                     {
-                        ExecutarModoImperativo(linha);
+                        ms_interpretador.Interpretar(ms_parser.Parse(ms_tokenizador.Tokenizar(linha)));
                     }
                     
                     break;
@@ -71,24 +89,21 @@
         }
     }
 
-    private static void Compilar(string arquivoInicial, string arquivoFinal)
+    private static NodoPrograma Interpretar(string arquivoInicial)
     {
         var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings(); // Sem isso, o Tokenizador buga
         var tokens = ms_tokenizador.Tokenizar(codigoFonte);
         var programa = ms_parser.Parse(tokens);
+        
+        return programa;
+    }
+
+    private static void Compilar(string arquivoInicial, string arquivoFinal)
+    {
+        var programa = Interpretar(arquivoInicial);
         var codigoFinal = ms_gerador.Gerar(programa);
 
         EscreverNoArquivo(codigoFinal, arquivoFinal + ".c");
-    }
-
-    private static void ExecutarModoImperativo(string codigoFonte)
-    {
-        var tokens = ms_tokenizador.Tokenizar(codigoFonte);
-        var programa = ms_parser.Parse(tokens);
-        var codigoFinal = ms_gerador.Gerar(programa);
-
-        Console.WriteLine("Código correspondente em C:\n");
-        Console.WriteLine(codigoFinal);
     }
 
     private static void EscreverNoArquivo(string texto, string arquivo)

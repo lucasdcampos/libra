@@ -1,3 +1,7 @@
+using System;
+using System.Text.RegularExpressions;
+using System.Linq;
+
 public class Tokenizador 
 {
     private int m_posicao;
@@ -5,9 +9,18 @@ public class Tokenizador
     private List<Token>? m_tokens;
     private int m_linha;
 
+
+    public void Teste(string teste)
+    {
+        m_fonte = teste;
+        SubstituirEremoverDef();
+        Console.WriteLine(m_fonte);
+    }
+
     public List<Token> Tokenizar(string source) 
     {
         m_fonte = source;
+        MacrosDefinir();
         m_tokens = new();
         m_linha = 1;
 
@@ -167,6 +180,100 @@ public class Tokenizador
         AdicionarTokenALista(TokenTipo.FimDoArquivo);
 
         return m_tokens;
+    }
+
+    // esse é literalmente o pior método que eu já criei na vida
+    // em minha defesa, é 1 da manhã, eu dormi apenas 4 horas na noite passada
+    // e eu vi algo parecido no c++ e decidi implementar aqui
+    // talvez eu refatore isso depois (isso se for pra build final)
+    private void MacrosDefinir()
+    {
+        Dictionary<string,string> defs = new Dictionary<string, string>();
+
+        string def = "";
+        string buf = "";
+
+        var esq = string.Empty;
+        var dir = string.Empty;
+
+        var lendoDef = false;
+
+        for(int i = 0; i < m_fonte.Length; i++)
+        {
+            if(m_fonte[i] == '#')
+            {
+                def += m_fonte[i];
+                buf += m_fonte[i];
+                i++;
+
+                while(char.IsLetter(m_fonte[i]))
+                {
+                    def += m_fonte[i];
+                    buf += m_fonte[i];
+                    i++;
+                }
+
+                i--;
+
+                if(buf != "#def")
+                    Erro.ErroGenerico($"Macro inválida {buf}");
+                
+                lendoDef = true;
+                buf = "";
+            }
+
+            else if (char.IsLetterOrDigit(m_fonte[i]) || char.IsSymbol(m_fonte[i]))
+            {
+                if(lendoDef)
+                {
+                    def += m_fonte[i];
+                    buf += m_fonte[i];
+                    i++;
+
+                    if(esq == string.Empty)
+                    {
+                        while(m_fonte[i] != ' ')
+                        {
+                            def += m_fonte[i];
+                            buf += m_fonte[i];
+                            i++;
+                        }
+                        i--;
+
+                        esq = buf;
+                    }
+                    else
+                    {
+                        while(m_fonte[i] != '\n')
+                        {
+                            def += m_fonte[i];
+                            buf += m_fonte[i];
+                            i++;
+                        }
+                        i--;
+
+                        dir = buf;
+
+                        defs[esq] = dir;
+
+                        esq = "";
+                        dir = "";
+
+                        lendoDef = false;
+                    }
+
+                    buf = "";
+                }
+                
+            }
+        }
+
+        foreach (string d in defs.Keys)
+        {
+            m_fonte = m_fonte.Replace($"#def {d} {defs[d]}", "");
+
+            m_fonte = m_fonte.Replace(d, defs[d]);
+        }
     }
 
     private char Atual() 
