@@ -51,5 +51,12 @@ Contribua para o código, depois crie um *Pull Request*. Caso for uma contribui�
 Seria interessante criar uma IDE simples pra Libra, onde fosse possível escrever e analisar código Libra de forma mais conveniente, com syntax highligthing e IntelliSense.
 Isso fica pra uma outra hora, ou até o momento que alguém tenha a boa vontade de fazer.
 
+
+## FAQ
+
+- **Por que C#?** R: O objetivo era criar uma linguagem simples, eu não vi necessidade de usar C ou C++.
+- **A linguagem é compilada ou interpretada?** R: Os dois, ela possui um interpretador, mas também compila pra C.
+- **Por quê compilar pra C?** R: Compilar diretamente pra assembly seria uma tarefa complicada, e eu não tinha muito tempo pra fazer isso. Quem sabe no futuro.
+
 **Dúvidas?**
 Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucas.campos44@fatec.sp.gov.br</a>
