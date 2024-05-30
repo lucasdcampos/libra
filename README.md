@@ -1,7 +1,10 @@
 <h1 align=center>Libra 🇧🇷</h1>
-<p align=center>A linguagem brasileira</p>
-
+<p align=center><strong>A linguagem brasileira</strong></p>
 <br>
+
+> **Aviso:** Libra ainda está em desenvolvimento e não há nenhuma versão disponível publicamente. É possível criar apenas programas extremamentes simples por enquanto.
+
+<hr>
 
 Libra é uma linguagem de programação simples, criada exclusivamente para ser um projeto acadêmico. Este projeto tem como objetivo principal o aprendizado e a experimentação no desenvolvimento de linguagens de programação. O código fonte da linguagem estará disponível publicamente para consulta, uso e contribuição.
 
@@ -42,6 +45,11 @@ Se você deseja contribuir para o projeto, pode fazer um *fork* do repositório,
 `git clone https://github.com/<SEU_USUARIO>/libra.git`
 
 Contribua para o código, depois crie um *Pull Request*. Caso for uma contribuição válida, a aceitaremos ao projeto.
+
+## Planos
+
+Seria interessante criar uma IDE simples pra Libra, onde fosse possível escrever e analisar código Libra de forma mais conveniente, com syntax highligthing e IntelliSense.
+Isso fica pra uma outra hora, ou até o momento que alguém tenha a boa vontade de fazer.
 
 **Dúvidas?**
 Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucas.campos44@fatec.sp.gov.br</a>
