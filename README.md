@@ -2,7 +2,7 @@
 <p align=center><strong>A linguagem brasileira</strong></p>
 <br>
 
-> **Aviso:** Libra ainda está em desenvolvimento e não há nenhuma versão disponível publicamente. É possível criar apenas programas extremamentes simples por enquanto.
+> **⚠️ Aviso:** Libra ainda está em desenvolvimento e não há nenhuma versão disponível publicamente. É possível criar apenas programas extremamentes simples por enquanto.
 
 <hr>
 
@@ -23,7 +23,7 @@ Libra foi projetada para ser fácil de entender e utilizar, especialmente para i
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
-#def exemplo exibir("Macro de exemplo!")
+#def MACRO_EXEMPLO exibir("Macro de exemplo!");
 
 // declarando variáveis
 var a = 10;
@@ -34,7 +34,9 @@ exibir("Olá, Mundo!"); // exibe 'Olá, Mundo!' no console
 exibir(2+2); // exibe 4 no console
 exibir(c); // exibe 20 no console (c = a + (b*2))
 
-exemplo; // executa a macro exemplo (exibe ("Macro de Exemplo"))
+exibir(verdadeiro); // exibe "Verdadeiro" no console (valor booleano)
+
+MACRO_EXEMPLO // executa a macro exemplo (exibe "Macro de Exemplo" no console)
 
 sair(0); // encerra o programa com código 0
 ```
@@ -49,7 +51,7 @@ Contribua para o código, depois crie um *Pull Request*. Caso for uma contribui�
 ## Planos
 
 Seria interessante criar uma IDE simples pra Libra, onde fosse possível escrever e analisar código Libra de forma mais conveniente, com syntax highligthing e IntelliSense.
-Isso fica pra uma outra hora, ou até o momento que alguém tenha a boa vontade de fazer.
+Isso fica pra uma outra hora, ou até o momento que alguém tiver a boa vontade de fazer.
 
 
 ## FAQ
@@ -57,6 +59,8 @@ Isso fica pra uma outra hora, ou até o momento que alguém tenha a boa vontade 
 - **Por que C#?** R: O objetivo era criar uma linguagem simples, eu não vi necessidade de usar C ou C++.
 - **A linguagem é compilada ou interpretada?** R: Os dois, ela possui um interpretador, mas também compila pra C.
 - **Por quê compilar pra C?** R: Compilar diretamente pra assembly seria uma tarefa complicada, e eu não tinha muito tempo pra fazer isso. Quem sabe no futuro.
+- **O código não está um pouco bagunçado?** R: Sim, está... Por isso eu deixei ele open-source! Assim você pode me ajudar a melhorá-lo. Eu queria ter escrito um código mais limpo,
+porém com pouco tempo, pressa para acabar, e a falta de experiência na criação de um parser contribuíram para o estado atual do código (Mas no final ele ficou Ok)
 
 **Dúvidas?**
 Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucas.campos44@fatec.sp.gov.br</a>
