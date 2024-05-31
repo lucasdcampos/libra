@@ -1,1 +1,1 @@
-dotnet run --project src/libra --property WarningLevel=0 
+dotnet run --project src/libra --property WarningLevel=0 teste.libra

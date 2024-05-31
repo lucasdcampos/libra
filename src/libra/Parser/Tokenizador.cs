@@ -9,14 +9,6 @@ public class Tokenizador
     private List<Token>? m_tokens;
     private int m_linha;
 
-
-    public void Teste(string teste)
-    {
-        m_fonte = teste;
-        SubstituirEremoverDef();
-        Console.WriteLine(m_fonte);
-    }
-
     public List<Token> Tokenizar(string source) 
     {
         m_fonte = source;

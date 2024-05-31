@@ -103,7 +103,9 @@ internal static class Program
         var programa = Interpretar(arquivoInicial);
         var codigoFinal = ms_gerador.Gerar(programa);
 
-        EscreverNoArquivo(codigoFinal, arquivoFinal + ".c");
+        Console.WriteLine(codigoFinal);
+        
+        //EscreverNoArquivo(codigoFinal, arquivoFinal + ".c");
     }
 
     private static void EscreverNoArquivo(string texto, string arquivo)
