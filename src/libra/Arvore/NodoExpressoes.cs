@@ -18,7 +18,10 @@ namespace Libra.Arvore
                     case TokenTipo.NumeroLiteral:
                         return m_token.Valor;
                     case TokenTipo.Identificador:
+                        if(!LibraHelper.Variaveis.ContainsKey(m_token.Valor.ToString()))
+                            Erro.ErroGenerico($"Variável não declarada: `{m_token.Valor.ToString()}`", m_token.Linha);
                         return double.Parse(LibraHelper.Variaveis[m_token.Valor.ToString()].ToString());
+
                 }
             
             return 0;
