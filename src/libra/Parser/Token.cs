@@ -4,6 +4,7 @@ public enum TokenTipo
     // Tipos
     NumeroLiteral,
     StringLiteral,
+    BoolLiteral,
     Identificador,
     TokenInvalido,
 

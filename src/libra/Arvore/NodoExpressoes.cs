@@ -26,6 +26,29 @@ namespace Libra.Arvore
 
     }
 
+    public class NodoExpressaoBooleana : Nodo
+    {
+        private Token m_bool;
+
+        public NodoExpressaoBooleana(Token token)
+        {
+            if(token.Tipo != TokenTipo.BoolLiteral)
+                Erro.ErroGenerico($"{token.Tipo} não é válido para uma expressão booleana");
+            
+            m_bool = token;
+        }
+
+        public override object Avaliar()
+        {
+            if((bool)m_bool.Valor == true)
+            {
+                return "Verdadeiro";
+            }
+
+            return "Falso";
+        }
+    }
+
     public class NodoExpressaoBinaria : NodoExpressao
     {
         private NodoExpressao m_esquerda;
@@ -69,6 +92,11 @@ namespace Libra.Arvore
         public NodoString(NodoExpressao expressao)
         {
             m_texto = expressao.Avaliar().ToString();
+        }
+
+        public NodoString(NodoExpressaoBooleana booleana)
+        {
+            m_texto = booleana.Avaliar().ToString();
         }
 
         public NodoString(Token str)

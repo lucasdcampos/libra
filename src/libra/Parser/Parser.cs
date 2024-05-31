@@ -162,6 +162,11 @@ public class Parser
         {
             nodoString = new NodoString(ConsumirToken());
         }
+
+        else if (Atual().Tipo == TokenTipo.BoolLiteral)
+        {
+            nodoString = new NodoString(new NodoExpressaoBooleana(ConsumirToken()));
+        }
         else
         {
             var expr = ParseExpressao();

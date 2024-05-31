@@ -54,6 +54,12 @@ public class Tokenizador
                     case "exibir":
                         AdicionarTokenALista(TokenTipo.Exibir);
                         break;
+                    case "verdadeiro":
+                        AdicionarTokenALista(TokenTipo.BoolLiteral, true);
+                        break;
+                    case "falso":
+                        AdicionarTokenALista(TokenTipo.BoolLiteral, false);
+                        break;
                     default:
                         AdicionarTokenALista(TokenTipo.Identificador, texto);
                         break;
