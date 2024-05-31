@@ -2,7 +2,7 @@
 <p align=center><strong>A linguagem brasileira</strong></p>
 <br>
 
-> **Aviso:** Libra ainda está em desenvolvimento e não há nenhuma versão disponível publicamente. É possível criar apenas programas extremamentes simples por enquanto.
+> **⚠️ Aviso:** Libra ainda está em desenvolvimento e não há nenhuma versão disponível publicamente. É possível criar apenas programas extremamentes simples por enquanto.
 
 <hr>
 
@@ -36,7 +36,7 @@ exibir(c); // exibe 20 no console (c = a + (b*2))
 
 exibir(verdadeiro); // exibe "Verdadeiro" no console (valor booleano)
 
-MACRO_EXEMPLO // executa a macro exemplo (exibe ("Macro de Exemplo"))
+MACRO_EXEMPLO // executa a macro exemplo (exibe "Macro de Exemplo" no console)
 
 sair(0); // encerra o programa com código 0
 ```
@@ -51,7 +51,7 @@ Contribua para o código, depois crie um *Pull Request*. Caso for uma contribui�
 ## Planos
 
 Seria interessante criar uma IDE simples pra Libra, onde fosse possível escrever e analisar código Libra de forma mais conveniente, com syntax highligthing e IntelliSense.
-Isso fica pra uma outra hora, ou até o momento que alguém tenha a boa vontade de fazer.
+Isso fica pra uma outra hora, ou até o momento que alguém tiver a boa vontade de fazer.
 
 
 ## FAQ
