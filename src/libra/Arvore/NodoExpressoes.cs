@@ -29,27 +29,55 @@ namespace Libra.Arvore
 
     }
 
-    public class NodoExpressaoBooleana : Nodo
+    public class NodoTermoBooleano : Nodo
     {
-        private Token m_bool;
-
-        public NodoExpressaoBooleana(Token token)
+        private Token m_bool = null;
+        public NodoTermoBooleano(Token token)
         {
-            if(token.Tipo != TokenTipo.BoolLiteral)
+            if (token.Tipo != TokenTipo.BoolLiteral)
                 Erro.ErroGenerico($"{token.Tipo} não é válido para uma expressão booleana");
-            
+
             m_bool = token;
         }
 
         public override object Avaliar()
         {
-            if((bool)m_bool.Valor == true)
+            if ((bool)m_bool.Valor == true)
             {
                 return "Verdadeiro";
             }
 
             return "Falso";
         }
+    }
+
+    public class NodoExpressaoBooleana : Nodo
+    {
+        private NodoTermoBooleano termo;
+
+        public NodoExpressaoBooleana(Token token)
+        {
+            termo = new NodoTermoBooleano(token);
+        }
+
+        public NodoExpressaoBooleana(NodoExpressao esq, Token opr, NodoExpressao dir)
+        {
+            if(opr.Tipo == TokenTipo.OperadorMaiorQue)
+            {
+                var val = double.Parse(esq.Avaliar().ToString()) > double.Parse(dir.Avaliar().ToString());
+
+                termo = new NodoTermoBooleano(new Token(TokenTipo.BoolLiteral, val == true ? 1 : 0));
+                
+            }
+
+            termo = new NodoTermoBooleano(new Token(TokenTipo.BoolLiteral, 0));
+        }
+
+        public override object Avaliar()
+        {
+            return termo.Avaliar();
+        }
+
     }
 
     public class NodoExpressaoBinaria : NodoExpressao
@@ -100,6 +128,11 @@ namespace Libra.Arvore
         public NodoString(NodoExpressaoBooleana booleana)
         {
             m_texto = booleana.Avaliar().ToString();
+        }
+
+        public NodoString(NodoInstrucaoTipo tipo)
+        {
+            m_texto = tipo.Avaliar().ToString();
         }
 
         public NodoString(Token str)

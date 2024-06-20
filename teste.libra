@@ -1,1 +1,3 @@
-exibir(teste);
+se (verdade)
+    exibir(verdade);
+fim

@@ -1,10 +1,10 @@
 ﻿using Libra.Arvore;
+using System.Diagnostics;
 
 internal static class Program 
 {
     private static Tokenizador ms_tokenizador;
     private static Parser ms_parser;
-    private static GeradorC ms_gerador;
     private static Interpretador ms_interpretador;
 
     private const string m_ver = "1.0-PREVIEW";
@@ -13,12 +13,16 @@ internal static class Program
     {
         ms_tokenizador = new Tokenizador();
         ms_parser = new Parser();
-        ms_gerador = new GeradorC();
         ms_interpretador = new Interpretador();
 
         if(args.Length == 1)
         {
-            Compilar(args[0], args[0]);
+            var programa = Interpretar(args[0]);
+            if(programa != null)
+            {
+                ms_interpretador.Interpretar(programa);
+            }
+
             return;
         }
 
@@ -43,28 +47,10 @@ internal static class Program
                     Console.WriteLine("Acesse https://github.com/lukazof/libra para mais detalhes");
                     break;
                 case "ajuda":
-                    Console.WriteLine("Comandos disponíveis: sair, limpar, licenca, ajuda");
+                    Console.WriteLine("Comandos disponíveis: sair, limpar, licenca, ajuda, interpretar");
                     break;
                 default:
-                    if(linha.StartsWith("compilar"))
-                    {
-                        var cargs = linha.Split();
-                        
-                        if(cargs.Length == 3)
-                        {
-                            Compilar(cargs[1], cargs[2]);
-                        }
-                        else if (cargs.Length == 2)
-                        {
-                            Compilar(cargs[1], cargs[1]);
-                        }
-                        else
-                        {
-                            Console.WriteLine("Comando inválido! Use compilar {arquivoInicial} {arquivoFinal}");
-                        }
-
-                    }
-                    else if(linha.StartsWith("interpretar"))
+                    if(linha.StartsWith("interpretar"))
                     {
                         var cargs = linha.Split();
                         
@@ -74,7 +60,7 @@ internal static class Program
                         }
                         else
                         {
-                            Console.WriteLine("Comando inválido! Use inntepretar {arquivoInicial} {arquivoFinal}");
+                            Console.WriteLine("Comando inválido! Use intepretar <arquivo.lb>");
                         }
                 
                     }
@@ -91,40 +77,17 @@ internal static class Program
 
     private static NodoPrograma Interpretar(string arquivoInicial)
     {
-        var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings(); // Sem isso, o Tokenizador buga
+        if (!File.Exists(arquivoInicial))
+        {
+            Console.WriteLine($"Não foi possível localizar `{arquivoInicial}`");
+            return null;
+        }
+
+        var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings("\n"); // Sem isso, o Tokenizador buga
         var tokens = ms_tokenizador.Tokenizar(codigoFonte);
         var programa = ms_parser.Parse(tokens);
         
         return programa;
     }
-
-    private static void Compilar(string arquivoInicial, string arquivoFinal)
-    {
-        var programa = Interpretar(arquivoInicial);
-        var codigoFinal = ms_gerador.Gerar(programa);
-
-        Console.WriteLine(codigoFinal);
-        
-        //EscreverNoArquivo(codigoFinal, arquivoFinal + ".c");
-    }
-
-    private static void EscreverNoArquivo(string texto, string arquivo)
-    {
-        try
-        {
-            using (FileStream fs = new FileStream(arquivo, FileMode.Create))
-            {
-                using (StreamWriter sw = new StreamWriter(fs))
-                {
-                    sw.Write(texto);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.ToString());
-        }
-    }
-
 
 }

@@ -12,12 +12,11 @@ public class Tokenizador
     public List<Token> Tokenizar(string source) 
     {
         m_fonte = source;
-        MacrosDefinir();
         m_tokens = new();
         m_linha = 1;
 
         var texto = "";
-        
+
         while (Atual() != '\0')
         {
             if(char.IsDigit(Atual()))
@@ -54,7 +53,22 @@ public class Tokenizador
                     case "exibir":
                         AdicionarTokenALista(TokenTipo.Exibir);
                         break;
-                    case "verdadeiro":
+                    case "tipo":
+                        AdicionarTokenALista(TokenTipo.Tipo);
+                        break;
+                    case "se":
+                        AdicionarTokenALista(TokenTipo.Se);
+                        break;
+                    case "entao":
+                        AdicionarTokenALista(TokenTipo.Entao);
+                        break;
+                    case "fim":
+                        AdicionarTokenALista(TokenTipo.Fim);
+                        break;
+                    case "bytes":
+                        AdicionarTokenALista(TokenTipo.Bytes);
+                        break;
+                    case "verdade":
                         AdicionarTokenALista(TokenTipo.BoolLiteral, true);
                         break;
                     case "falso":
@@ -68,7 +82,6 @@ public class Tokenizador
                 texto = "";
                     
             }
-
             else 
             {
 
@@ -81,12 +94,22 @@ public class Tokenizador
                         m_linha++;
                         Passar();
                         break;
+                    case '\r':
+                        Passar();
+                        break;
+                    case '\t':
+                        Passar();
+                        break;
                     case ';':
                         AdicionarTokenALista(TokenTipo.PontoEVirgula);
                         Passar();
                         break;
                     case '(':
                         AdicionarTokenALista(TokenTipo.AbrirParen);
+                        Passar();
+                        break;
+                    case '>':
+                        AdicionarTokenALista(TokenTipo.OperadorMaiorQue);
                         Passar();
                         break;
                     case '+':
@@ -103,7 +126,7 @@ public class Tokenizador
                         break;
                     case '/':
                         
-                        if(Peek(1) == '/')
+                        if(Proximo(1) == '/')
                         {
                             Passar();
 
@@ -112,7 +135,7 @@ public class Tokenizador
                                 // solução imbecil pra conseguir parar o comentário sem quebrar linha
                                 if(Atual() == '*')
                                 {
-                                    if(Peek(1) == '\\')
+                                    if(Proximo(1) == '\\')
                                     {
                                         Passar();
                                         Passar();
@@ -167,7 +190,7 @@ public class Tokenizador
                         Passar();
                         break;
                     default:
-                        Erro.ErroGenerico($"Simbolo inválido '{Atual()}'");
+                        Erro.ErroGenerico($"Simbolo inválido '{Atual()}' (ASCII = {(int)Atual()})");
                         break;
                 }
                 
@@ -180,106 +203,12 @@ public class Tokenizador
         return m_tokens;
     }
 
-    // esse é literalmente o pior método que eu já criei na vida
-    // em minha defesa, é 1 da manhã, eu dormi apenas 4 horas na noite passada
-    // e eu vi algo parecido no c++ e decidi implementar aqui
-    // talvez eu refatore isso depois (isso se for pra build final)
-    private void MacrosDefinir()
-    {
-        Dictionary<string,string> defs = new Dictionary<string, string>();
-
-        string def = "";
-        string buf = "";
-
-        var esq = string.Empty;
-        var dir = string.Empty;
-
-        var lendoDef = false;
-
-        for(int i = 0; i < m_fonte.Length; i++)
-        {
-            if(m_fonte[i] == '#')
-            {
-                def += m_fonte[i];
-                buf += m_fonte[i];
-                i++;
-
-                while(char.IsLetter(m_fonte[i]))
-                {
-                    def += m_fonte[i];
-                    buf += m_fonte[i];
-                    i++;
-                }
-
-                i--;
-
-                if(buf != "#def")
-                    Erro.ErroGenerico($"Macro inválida {buf}");
-                
-                lendoDef = true;
-                buf = "";
-            }
-
-            else if (char.IsLetterOrDigit(m_fonte[i]) || char.IsSymbol(m_fonte[i]))
-            {
-                if(lendoDef)
-                {
-                    def += m_fonte[i];
-                    buf += m_fonte[i];
-                    i++;
-
-                    if(esq == string.Empty)
-                    {
-                        while(m_fonte[i] != ' ')
-                        {
-                            def += m_fonte[i];
-                            buf += m_fonte[i];
-                            i++;
-                        }
-                        i--;
-
-                        esq = buf;
-                    }
-                    else
-                    {
-                        while(m_fonte[i] != '\n')
-                        {
-                            def += m_fonte[i];
-                            buf += m_fonte[i];
-                            i++;
-                        }
-                        i--;
-
-                        dir = buf;
-
-                        defs[esq] = dir;
-
-                        esq = "";
-                        dir = "";
-
-                        lendoDef = false;
-                    }
-
-                    buf = "";
-                }
-                
-            }
-        }
-
-        foreach (string d in defs.Keys)
-        {
-            m_fonte = m_fonte.Replace($"#def {d} {defs[d]}", "");
-
-            m_fonte = m_fonte.Replace(d, defs[d]);
-        }
-    }
-
     private char Atual() 
     {
-        return Peek(0);
+        return Proximo(0);
     }
     
-    private char Peek(int offset)
+    private char Proximo(int offset)
     {
         if(m_posicao + offset < m_fonte.Length)
         {

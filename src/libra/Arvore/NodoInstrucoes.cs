@@ -32,7 +32,43 @@ namespace Libra.Arvore
         }
     }
 
-    public class NodoInstrucaoExibir: NodoInstrucao
+    public class NodoInstrucaoTipo : NodoInstrucao
+    {
+        public NodoInstrucaoTipo(Token token)
+        {
+            Token = token;
+        }
+
+        public Token Token { get; private set; }
+
+        public override object Avaliar()
+        {
+            return Token.TipoParaString(Token.Tipo);
+        }
+
+    }
+
+    public class NodoInstrucaoSe : NodoInstrucao
+    {
+        public NodoInstrucaoSe(NodoExpressaoBooleana condicao, List<NodoInstrucao> instrucoes)
+        {
+            Condicao = condicao;
+            Escopo = instrucoes;
+        }
+
+        public NodoExpressaoBooleana Condicao { get; private set; }
+        public List<NodoInstrucao> Escopo = new List<NodoInstrucao>();
+
+        public override object Avaliar()
+        {
+            var valor = Condicao.Avaliar().ToString();
+
+            return valor;
+        }
+
+    }
+
+    public class NodoInstrucaoExibir : NodoInstrucao
     {
         public NodoInstrucaoExibir(NodoString str)
         {

@@ -71,9 +71,31 @@ public class Parser
                 Erro.ErroGenerico("Instrução exibir() inválida!", m_linha);
         }
 
+        else if (TentarConsumirToken(TokenTipo.Tipo) != null)
+        {
+            var tipo = ParseInstrucaoTipo();
+
+            //TentarConsumirToken(TokenTipo.PontoEVirgula);
+
+            instrucao = tipo;
+
+            if (instrucao == null)
+                Erro.ErroGenerico("Instrução tipo() inválida!", m_linha);
+        }
+
+        else if (TentarConsumirToken(TokenTipo.Se) != null)
+        {
+            var se = ParseInstrucaoSe();
+
+            instrucao = se;
+
+            if (instrucao == null)
+                Erro.ErroGenerico("Instrução se() inválida!", m_linha);
+        }
+
         else
         { 
-            Erro.ErroGenerico($"Instrução inválida: {Peek(0).Tipo} --> {ConsumirToken().Valor}");
+            Erro.ErroGenerico($"Instrução inválida: {Proximo(0).Tipo} --> {ConsumirToken().Valor}");
         }
 
 
@@ -91,6 +113,40 @@ public class Parser
         TentarConsumirToken(TokenTipo.FecharParen);
 
         return sair;
+    }
+
+    private NodoInstrucaoSe? ParseInstrucaoSe()
+    {
+        NodoInstrucaoSe? se = null;
+        List<NodoInstrucao> escopo = new List<NodoInstrucao>();
+        NodoExpressaoBooleana expressao = null;
+
+        TentarConsumirToken(TokenTipo.AbrirParen);
+
+        expressao = ParseExpressaoBooleana();
+
+        TentarConsumirToken(TokenTipo.FecharParen);
+        TentarConsumirToken(TokenTipo.Entao);
+
+        while(Atual().Tipo != TokenTipo.Fim)
+        {
+            var instrucao = ParseInstrucao();
+
+            if(instrucao != null)
+            {
+                escopo.Add(instrucao);
+            }
+            else
+            {
+                Erro.ErroGenerico("Instrução inválida!", m_linha);
+            }
+        }
+
+        TentarConsumirToken(TokenTipo.Fim);
+
+        se = new NodoInstrucaoSe(expressao, escopo);
+
+        return se;
     }
 
     private NodoInstrucaoVar? ParseInstrucaoVar()
@@ -154,6 +210,19 @@ public class Parser
         return exibir;
     }
 
+    private NodoInstrucaoTipo? ParseInstrucaoTipo()
+    {
+        NodoInstrucaoTipo? tipo = null;
+
+        TentarConsumirToken(TokenTipo.AbrirParen, "Esperado `(`");
+
+        tipo = new NodoInstrucaoTipo(ConsumirToken());
+
+        TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
+
+        return tipo;
+    }
+
     private NodoString? ParseString()
     {
         NodoString? nodoString;
@@ -166,6 +235,10 @@ public class Parser
         else if (Atual().Tipo == TokenTipo.BoolLiteral)
         {
             nodoString = new NodoString(new NodoExpressaoBooleana(ConsumirToken()));
+        }
+        else if (Atual().Tipo == TokenTipo.Tipo)
+        {
+            nodoString = new NodoString(ParseInstrucaoTipo());
         }
         else
         {
@@ -186,8 +259,8 @@ public class Parser
 
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
-            if(Peek(1).Tipo == TokenTipo.OperadorSoma || Peek(1).Tipo == TokenTipo.OperadorSub
-            || Peek(1).Tipo == TokenTipo.OperadorMult || Peek(1).Tipo == TokenTipo.OperadorDiv)
+            if(Proximo(1).Tipo == TokenTipo.OperadorSoma || Proximo(1).Tipo == TokenTipo.OperadorSub
+            || Proximo(1).Tipo == TokenTipo.OperadorMult || Proximo(1).Tipo == TokenTipo.OperadorDiv)
             {
                 expressao = ParseExpressaoBinaria();
             }
@@ -236,11 +309,35 @@ public class Parser
         return binaria;
     }
 
+    private NodoExpressaoBooleana? ParseExpressaoBooleana()
+    {
+        NodoExpressaoBooleana booleana = null;
+
+        object esq = null;
+        Token opr = null;
+        object dir = null;
+
+        if (Proximo(1).Tipo == TokenTipo.OperadorMaiorQue)
+        {
+            esq = ParseExpressao();
+            opr = ConsumirToken();
+            dir = ParseExpressao();
+        }
+
+        if (esq != null && dir != null)
+        {
+            booleana = new NodoExpressaoBooleana((NodoExpressao)esq, opr, (NodoExpressao)dir);
+        }
+
+        return booleana;
+    }
+
     private Token Atual() 
     {
-        return Peek(0);
+        return Proximo(0);
     }
-    private Token Peek(int offset)
+    
+    private Token Proximo(int offset)
     {
         if(m_posicao + offset < m_tokens.Count)
         {

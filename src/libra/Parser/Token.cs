@@ -15,6 +15,10 @@ public enum TokenTipo
     OperadorDiv,
     OperadorComparacao,
     OperadorDefinir,
+    OperadorMaiorQue,
+    OperadorMenorQue,
+    OperadorMaiorIgualQue,
+    OperadorMenorIgualQue,
 
     // Simbolos
     AbrirParen, 
@@ -25,6 +29,11 @@ public enum TokenTipo
     // Palavras Reservadas
     Sair, 
     Var,
+    Se,
+    Entao,
+    Fim,
+    Tipo,
+    Bytes,
     Exibir
     
 }
