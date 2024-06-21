@@ -1,6 +1,8 @@
 using Libra.Arvore;
 using System;
 
+namespace Libra;
+
 public class Interpretador
 {
     public void Interpretar(NodoPrograma programa)
@@ -37,11 +39,13 @@ public class Interpretador
             else if (tipo == typeof(NodoInstrucaoSe))
             {
                 var se = (NodoInstrucaoSe)instrucao;
-
-                if (instrucao.Avaliar().ToString() == "Verdadeiro")
+                var resultado = instrucao.Avaliar().ToString();
+                
+                if (resultado == "True")
                 {
                     InterpretarInstrucoes(se.Escopo);
                 }
+
             }
         }
     }

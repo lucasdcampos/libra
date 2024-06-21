@@ -2,6 +2,8 @@ using System;
 using System.Text.RegularExpressions;
 using System.Linq;
 
+namespace Libra;
+
 public class Tokenizador 
 {
     private int m_posicao;

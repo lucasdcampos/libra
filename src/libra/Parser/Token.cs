@@ -1,3 +1,5 @@
+namespace Libra;
+
 public enum TokenTipo
 {
     
@@ -37,6 +39,7 @@ public enum TokenTipo
     Exibir
     
 }
+
 
 public class Token
 {

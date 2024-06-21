@@ -44,7 +44,7 @@ namespace Libra.Arvore
         {
             if ((bool)m_bool.Valor == true)
             {
-                return "Verdadeiro";
+                return "Verdade";
             }
 
             return "Falso";
@@ -69,8 +69,10 @@ namespace Libra.Arvore
                 termo = new NodoTermoBooleano(new Token(TokenTipo.BoolLiteral, val == true ? 1 : 0));
                 
             }
-
-            termo = new NodoTermoBooleano(new Token(TokenTipo.BoolLiteral, 0));
+            else
+            {
+                termo = new NodoTermoBooleano(new Token(TokenTipo.BoolLiteral, 0));
+            }
         }
 
         public override object Avaliar()
@@ -108,7 +110,7 @@ namespace Libra.Arvore
                     return esquerda * direita;
                 case TokenTipo.OperadorDiv:
                     if(direita == 0)
-                        Erro.ErroGenerico("Divisão por zero"); // TODO: Isso deveria ser checado aqui?
+                        Erro.ErroGenerico("Divisão por zero"); // TODO: Isso deveria ser checado aqui? R: não porra
                     return esquerda / direita;
             }
             

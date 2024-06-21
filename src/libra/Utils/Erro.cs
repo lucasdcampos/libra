@@ -1,9 +1,22 @@
+namespace Libra;
+
 public static class Erro
 {
-   public static void ErroEsperado(TokenTipo tipo, int linha = 0)
-   {
+    public static void Aviso(string aviso, int linha = 0)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        if(linha == 0)
+            Console.WriteLine(aviso);
+        else
+            Console.WriteLine(aviso + " na linha " + linha);
+
+        Console.ResetColor();
+    }
+
+    public static void ErroEsperado(TokenTipo tipo, int linha = 0)
+    {
         MostrarErro($"Esperado `{Token.TipoParaString(tipo)}`", linha);
-   }
+    }
 
     public static void ErroGenerico(string mensagem, int linha = 0)
     {

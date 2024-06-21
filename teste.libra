@@ -1,3 +1,8 @@
-se (verdade)
-    exibir(verdade);
+var condicao = verdade;
+
+se (condicao)
+    exibir("Condição verdadeira!");
+    sair(0);
 fim
+
+exibir("Condição falsa");

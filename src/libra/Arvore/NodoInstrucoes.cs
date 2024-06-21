@@ -56,13 +56,20 @@ namespace Libra.Arvore
             Escopo = instrucoes;
         }
 
-        public NodoExpressaoBooleana Condicao { get; private set; }
+        public NodoInstrucaoSe(Token condicao, List<NodoInstrucao> instrucoes)
+        {
+            Condicao = condicao;
+            Escopo = instrucoes;
+        }
+
+        public object Condicao { get; private set; }
         public List<NodoInstrucao> Escopo = new List<NodoInstrucao>();
 
         public override object Avaliar()
         {
-            var valor = Condicao.Avaliar().ToString();
-
+            //var valor = Condicao.Avaliar().ToString();
+            Token token = (Token)Condicao;
+            var valor = token.Valor.ToString();
             return valor;
         }
 

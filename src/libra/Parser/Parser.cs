@@ -1,4 +1,11 @@
+// TODO: O Parser por completo precisa ser revisado e reescrito.
+// Quando eu programei isso, provavelmente era de madrugada e eu só fui escrevendo.
+// Agora eu criei um documento especificando a gramática que vai ajudar.
+// Além disso, vou seguir o planejamento, ao invés de sair programando aleatoriamente,
+// que nao da certo ¯\_(ツ)_/¯ 
 using Libra.Arvore;
+
+namespace Libra;
 
 public class Parser
 {
@@ -107,6 +114,14 @@ public class Parser
         NodoInstrucaoSair? sair = null;
 
         TentarConsumirToken(TokenTipo.AbrirParen);
+        if(Atual().Tipo == TokenTipo.FecharParen)
+        {
+            sair = new NodoInstrucaoSair(new NodoExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0)));
+
+            TentarConsumirToken(TokenTipo.FecharParen);
+
+            return sair;
+        }
 
         sair = new NodoInstrucaoSair(ParseExpressao());
 
@@ -115,15 +130,16 @@ public class Parser
         return sair;
     }
 
+    // Isso ainda não funciona (tá quase funcionando!)
     private NodoInstrucaoSe? ParseInstrucaoSe()
     {
         NodoInstrucaoSe? se = null;
         List<NodoInstrucao> escopo = new List<NodoInstrucao>();
-        NodoExpressaoBooleana expressao = null;
-
+        //NodoExpressaoBooleana expressao = null;
+        Token expressao = null; 
         TentarConsumirToken(TokenTipo.AbrirParen);
 
-        expressao = ParseExpressaoBooleana();
+        expressao = TentarConsumirToken(TokenTipo.BoolLiteral);
 
         TentarConsumirToken(TokenTipo.FecharParen);
         TentarConsumirToken(TokenTipo.Entao);
@@ -277,6 +293,7 @@ public class Parser
         return expressao;
     }
 
+    // TODO: Implementar ordem correta das operações
     private NodoExpressaoBinaria? ParseExpressaoBinaria()
     {
         NodoExpressaoBinaria? binaria = null;
@@ -309,6 +326,7 @@ public class Parser
         return binaria;
     }
 
+    // TODO: Fazer funcionar e adicionar outros operadores
     private NodoExpressaoBooleana? ParseExpressaoBooleana()
     {
         NodoExpressaoBooleana booleana = null;
@@ -336,7 +354,7 @@ public class Parser
     {
         return Proximo(0);
     }
-    
+
     private Token Proximo(int offset)
     {
         if(m_posicao + offset < m_tokens.Count)

@@ -1,4 +1,5 @@
-﻿using Libra.Arvore;
+﻿using Libra;
+using Libra.Arvore;
 using System.Diagnostics;
 
 internal static class Program 
@@ -17,11 +18,7 @@ internal static class Program
 
         if(args.Length == 1)
         {
-            var programa = Interpretar(args[0]);
-            if(programa != null)
-            {
-                ms_interpretador.Interpretar(programa);
-            }
+            Interpretar(args[0]);
 
             return;
         }
@@ -86,6 +83,7 @@ internal static class Program
         var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings("\n"); // Sem isso, o Tokenizador buga
         var tokens = ms_tokenizador.Tokenizar(codigoFonte);
         var programa = ms_parser.Parse(tokens);
+        ms_interpretador.Interpretar(programa);
         
         return programa;
     }
