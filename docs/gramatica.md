@@ -34,7 +34,12 @@ $$
     [\text{Expressao}]\\
 \end{cases}\\
 [\text{NumeroLiteral}] &\to [0-9]+\\
-[\text{TextoLiteral}] &\to \text{``[A-Za-z0-9\_]``*}
+[\text{TextoLiteral}] &\to \text{``[A-Za-z0-9\_]``*}\\
+[\text{BoolLiteral}] &\to
+\begin{cases}
+    verdade\\
+    falso\\
+\end{cases}
 \end{align}
 $$
 
