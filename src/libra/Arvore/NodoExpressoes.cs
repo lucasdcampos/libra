@@ -6,21 +6,21 @@ namespace Libra.Arvore
     {
         public NodoExpressaoTermo(Token token)
         {
-            m_token = token;
+            _token = token;
         }
 
-        private Token m_token;
+        private Token _token;
 
         public override object Avaliar()
         {
-            switch (m_token.Tipo)
+            switch (_token.Tipo)
                 {
                     case TokenTipo.NumeroLiteral:
-                        return m_token.Valor;
+                        return _token.Valor;
                     case TokenTipo.Identificador:
-                        if(!LibraHelper.Variaveis.ContainsKey(m_token.Valor.ToString()))
-                            Erro.ErroGenerico($"Variável não declarada: `{m_token.Valor.ToString()}`", m_token.Linha);
-                        return double.Parse(LibraHelper.Variaveis[m_token.Valor.ToString()].ToString());
+                        if(!LibraHelper.Variaveis.ContainsKey(_token.Valor.ToString()))
+                            Erro.ErroGenerico($"Variável não declarada: `{_token.Valor.ToString()}`", _token.Linha);
+                        return double.Parse(LibraHelper.Variaveis[_token.Valor.ToString()].ToString());
 
                 }
             
@@ -31,18 +31,18 @@ namespace Libra.Arvore
 
     public class NodoTermoBooleano : Nodo
     {
-        private Token m_bool = null;
+        private Token _bool = null;
         public NodoTermoBooleano(Token token)
         {
             if (token.Tipo != TokenTipo.BoolLiteral)
                 Erro.ErroGenerico($"{token.Tipo} não é válido para uma expressão booleana");
 
-            m_bool = token;
+            _bool = token;
         }
 
         public override object Avaliar()
         {
-            if ((bool)m_bool.Valor == true)
+            if ((bool)_bool.Valor == true)
             {
                 return "Verdade";
             }
@@ -84,23 +84,23 @@ namespace Libra.Arvore
 
     public class NodoExpressaoBinaria : NodoExpressao
     {
-        private NodoExpressao m_esquerda;
-        private Token m_operador;
-        private NodoExpressao m_direita;
+        private NodoExpressao _esquerda;
+        private Token _operador;
+        private NodoExpressao _direita;
 
         public NodoExpressaoBinaria(NodoExpressao esquerda, Token operador, NodoExpressao direita)
         {
-            m_esquerda = esquerda;
-            m_operador = operador;
-            m_direita = direita;
+            _esquerda = esquerda;
+            _operador = operador;
+            _direita = direita;
         }
 
         public override object Avaliar()
         {
-            var esquerda = double.Parse(m_esquerda.Avaliar().ToString());
-            var direita = double.Parse(m_direita.Avaliar().ToString());
+            var esquerda = double.Parse(_esquerda.Avaliar().ToString());
+            var direita = double.Parse(_direita.Avaliar().ToString());
 
-            switch(m_operador.Tipo)
+            switch(_operador.Tipo)
             {
                 case TokenTipo.OperadorSoma:
                     return esquerda + direita;
@@ -120,21 +120,21 @@ namespace Libra.Arvore
 
     public class NodoString : Nodo
     {
-        private string m_texto;
+        private string _texto;
 
         public NodoString(NodoExpressao expressao)
         {
-            m_texto = expressao.Avaliar().ToString();
+            _texto = expressao.Avaliar().ToString();
         }
 
         public NodoString(NodoExpressaoBooleana booleana)
         {
-            m_texto = booleana.Avaliar().ToString();
+            _texto = booleana.Avaliar().ToString();
         }
 
         public NodoString(NodoInstrucaoTipo tipo)
         {
-            m_texto = tipo.Avaliar().ToString();
+            _texto = tipo.Avaliar().ToString();
         }
 
         public NodoString(Token str)
@@ -142,12 +142,12 @@ namespace Libra.Arvore
             if(str.Tipo != TokenTipo.StringLiteral)
                 Erro.ErroGenerico($"Não é possível converter {str.Tipo} para String!");
 
-            m_texto = str.Valor.ToString();
+            _texto = str.Valor.ToString();
         }
 
         public override object Avaliar()
         {
-            return m_texto;
+            return _texto;
         }
     }
 }

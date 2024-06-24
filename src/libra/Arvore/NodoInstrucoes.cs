@@ -21,14 +21,14 @@ namespace Libra.Arvore
     {
         public NodoInstrucaoVar(Variavel var)
         {
-            m_var = var;
+            _var = var;
         }
 
-        private Variavel m_var;
+        private Variavel _var;
 
         public override object Avaliar()
         {
-            return m_var;
+            return _var;
         }
     }
 
@@ -79,14 +79,14 @@ namespace Libra.Arvore
     {
         public NodoInstrucaoExibir(NodoString str)
         {
-            m_string = str;
+            _string = str;
         }
 
-        private NodoString m_string;
+        private NodoString _string;
 
         public override object Avaliar()
         {
-            return m_string.Avaliar();
+            return _string.Avaliar();
         }
     }
 }

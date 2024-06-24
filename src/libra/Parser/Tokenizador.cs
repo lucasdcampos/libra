@@ -6,16 +6,16 @@ namespace Libra;
 
 public class Tokenizador 
 {
-    private int m_posicao;
-    private string? m_fonte;
-    private List<Token>? m_tokens;
-    private int m_linha;
+    private int _posicao;
+    private string? _fonte;
+    private List<Token>? _tokens;
+    private int _linha;
 
     public List<Token> Tokenizar(string source) 
     {
-        m_fonte = source;
-        m_tokens = new();
-        m_linha = 1;
+        _fonte = source;
+        _tokens = new();
+        _linha = 1;
 
         var texto = "";
 
@@ -93,7 +93,7 @@ public class Tokenizador
                         Passar();
                         break;
                     case '\n':
-                        m_linha++;
+                        _linha++;
                         Passar();
                         break;
                     case '\r':
@@ -202,7 +202,7 @@ public class Tokenizador
         
         AdicionarTokenALista(TokenTipo.FimDoArquivo);
 
-        return m_tokens;
+        return _tokens;
     }
 
     private char Atual() 
@@ -212,9 +212,9 @@ public class Tokenizador
     
     private char Proximo(int offset)
     {
-        if(m_posicao + offset < m_fonte.Length)
+        if(_posicao + offset < _fonte.Length)
         {
-            return m_fonte[m_posicao + offset];
+            return _fonte[_posicao + offset];
         }
 
         return '\0';
@@ -222,7 +222,7 @@ public class Tokenizador
 
     private void Passar(int quantidade = 1) 
     {
-        m_posicao += quantidade;
+        _posicao += quantidade;
     }
 
     private char ConsumirChar()
@@ -235,12 +235,12 @@ public class Tokenizador
 
     private void AdicionarTokenALista(TokenTipo tipo)
     {
-        m_tokens.Add(new Token(tipo, m_linha));
+        _tokens.Add(new Token(tipo, _linha));
     }
 
     private void AdicionarTokenALista(TokenTipo tipo, object valor)
     {
-        m_tokens.Add(new Token(tipo, m_linha, valor));
+        _tokens.Add(new Token(tipo, _linha, valor));
     }
 
 }

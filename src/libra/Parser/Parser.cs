@@ -9,13 +9,13 @@ namespace Libra;
 
 public class Parser
 {
-    private List<Token> m_tokens;
-    private int m_posicao;
-    private int m_linha;
+    private List<Token> _tokens;
+    private int _posicao;
+    private int _linha;
 
     public NodoPrograma Parse(List<Token> tokens, bool debugTokens = false)
     {
-        m_tokens = tokens;
+        _tokens = tokens;
 
         if(debugTokens)
             foreach(var t in tokens)
@@ -51,7 +51,7 @@ public class Parser
             instrucao = sair;
 
             if(instrucao == null)
-                Erro.ErroGenerico("Instrução sair() inválida!", m_linha);
+                Erro.ErroGenerico("Instrução sair() inválida!", _linha);
         }
 
         else if(TentarConsumirToken(TokenTipo.Var) != null)
@@ -63,7 +63,7 @@ public class Parser
             instrucao = ident;
 
             if(instrucao == null)
-                Erro.ErroGenerico("Declaração de variáveis inválida!", m_linha);
+                Erro.ErroGenerico("Declaração de variáveis inválida!", _linha);
         }
 
         else if(TentarConsumirToken(TokenTipo.Exibir) != null)
@@ -75,7 +75,7 @@ public class Parser
             instrucao = exibir;
 
             if(instrucao == null)
-                Erro.ErroGenerico("Instrução exibir() inválida!", m_linha);
+                Erro.ErroGenerico("Instrução exibir() inválida!", _linha);
         }
 
         else if (TentarConsumirToken(TokenTipo.Tipo) != null)
@@ -87,7 +87,7 @@ public class Parser
             instrucao = tipo;
 
             if (instrucao == null)
-                Erro.ErroGenerico("Instrução tipo() inválida!", m_linha);
+                Erro.ErroGenerico("Instrução tipo() inválida!", _linha);
         }
 
         else if (TentarConsumirToken(TokenTipo.Se) != null)
@@ -97,7 +97,7 @@ public class Parser
             instrucao = se;
 
             if (instrucao == null)
-                Erro.ErroGenerico("Instrução se() inválida!", m_linha);
+                Erro.ErroGenerico("Instrução se() inválida!", _linha);
         }
 
         else
@@ -154,7 +154,7 @@ public class Parser
             }
             else
             {
-                Erro.ErroGenerico("Instrução inválida!", m_linha);
+                Erro.ErroGenerico("Instrução inválida!", _linha);
             }
         }
 
@@ -261,7 +261,7 @@ public class Parser
             var expr = ParseExpressao();
 
             if(expr == null)
-                Erro.ErroGenerico("Expressão inválida", m_linha);
+                Erro.ErroGenerico("Expressão inválida", _linha);
 
             nodoString = new NodoString(expr);
         }
@@ -288,7 +288,7 @@ public class Parser
         }
 
         if(expressao == null)
-            Erro.ErroGenerico("Expressão inválida!", m_linha);
+            Erro.ErroGenerico("Expressão inválida!", _linha);
 
         return expressao;
     }
@@ -321,7 +321,7 @@ public class Parser
         }
 
         if(binaria == null)
-            Erro.ErroGenerico("Expressão binária inválida", m_linha);
+            Erro.ErroGenerico("Expressão binária inválida", _linha);
 
         return binaria;
     }
@@ -357,17 +357,17 @@ public class Parser
 
     private Token Proximo(int offset)
     {
-        if(m_posicao + offset < m_tokens.Count)
+        if(_posicao + offset < _tokens.Count)
         {
-            return m_tokens[m_posicao + offset];
+            return _tokens[_posicao + offset];
         }
 
-        return new Token(TokenTipo.FimDoArquivo, m_linha);
+        return new Token(TokenTipo.FimDoArquivo, _linha);
     }
 
     private void Passar(int quantidade = 1) 
     {
-        m_posicao += quantidade;
+        _posicao += quantidade;
     }
 
     private Token? ConsumirToken()
@@ -375,7 +375,7 @@ public class Parser
         var token = Atual();
         Passar();
 
-        m_linha = token.Linha;
+        _linha = token.Linha;
 
         return token;
     }
@@ -387,7 +387,7 @@ public class Parser
             return ConsumirToken();
         }
 
-        Erro.ErroEsperado(tipo, m_linha);
+        Erro.ErroEsperado(tipo, _linha);
 
         return null;
     }

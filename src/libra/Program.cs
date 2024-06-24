@@ -4,17 +4,17 @@ using System.Diagnostics;
 
 internal static class Program 
 {
-    private static Tokenizador ms_tokenizador;
-    private static Parser ms_parser;
-    private static Interpretador ms_interpretador;
+    private static Tokenizador _tokenizador;
+    private static Parser _parser;
+    private static Interpretador _interpretador;
 
-    private const string m_ver = "1.0-PREVIEW";
+    private const string _ver = "1.0-PREVIEW";
 
     internal static void Main(string[] args)
     {
-        ms_tokenizador = new Tokenizador();
-        ms_parser = new Parser();
-        ms_interpretador = new Interpretador();
+        _tokenizador = new Tokenizador();
+        _parser = new Parser();
+        _interpretador = new Interpretador();
 
         if(args.Length == 1)
         {
@@ -23,7 +23,7 @@ internal static class Program
             return;
         }
 
-        Console.WriteLine($"Libra Versão {m_ver}");
+        Console.WriteLine($"Libra Versão {_ver}");
         Console.WriteLine($"Digite 'ajuda', 'licenca' ou uma instrução\n");
 
         while (true) 
@@ -53,7 +53,7 @@ internal static class Program
                         
                         if (cargs.Length == 2)
                         {
-                            ms_interpretador.Interpretar(Interpretar(cargs[1]));
+                            _interpretador.Interpretar(Interpretar(cargs[1]));
                         }
                         else
                         {
@@ -64,7 +64,7 @@ internal static class Program
 
                     else
                     {
-                        ms_interpretador.Interpretar(ms_parser.Parse(ms_tokenizador.Tokenizar(linha)));
+                        _interpretador.Interpretar(_parser.Parse(_tokenizador.Tokenizar(linha)));
                     }
                     
                     break;
@@ -81,9 +81,9 @@ internal static class Program
         }
 
         var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings("\n"); // Sem isso, o Tokenizador buga
-        var tokens = ms_tokenizador.Tokenizar(codigoFonte);
-        var programa = ms_parser.Parse(tokens);
-        ms_interpretador.Interpretar(programa);
+        var tokens = _tokenizador.Tokenizar(codigoFonte);
+        var programa = _parser.Parse(tokens);
+        _interpretador.Interpretar(programa);
         
         return programa;
     }
