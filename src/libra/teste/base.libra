@@ -1,0 +1,4 @@
+const VERDADEIRO = 1
+const FALSO = 0
+const PI = 3
+

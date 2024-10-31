@@ -35,11 +35,11 @@ public class Tokenizador
                 continue;
             }
 
-            else if(char.IsLetter(Atual()))
+            else if(char.IsLetter(Atual()) || Atual() == '_')
             {
                 texto += ConsumirChar();
 
-                while(char.IsLetterOrDigit(Atual()))
+                while(char.IsLetterOrDigit(Atual()) || Atual() == '_')
                 {
                     texto += ConsumirChar();
                 }
@@ -52,6 +52,12 @@ public class Tokenizador
                     case "var":
                         AdicionarTokenALista(TokenTipo.Var);
                         break;
+                    case "const":
+                        AdicionarTokenALista(TokenTipo.Const);
+                        break;
+                    case "funcao":
+                        AdicionarTokenALista(TokenTipo.Funcao);
+                        break;
                     case "exibir":
                         AdicionarTokenALista(TokenTipo.Exibir);
                         break;
@@ -60,6 +66,21 @@ public class Tokenizador
                         break;
                     case "se":
                         AdicionarTokenALista(TokenTipo.Se);
+                        break;
+                    case "senao":
+                        AdicionarTokenALista(TokenTipo.Senao);
+                        break;
+                    case "enquanto":
+                        AdicionarTokenALista(TokenTipo.Enquanto);
+                        break;
+                    case "faca":
+                        AdicionarTokenALista(TokenTipo.Faca);
+                        break;
+                    case "romper":
+                        AdicionarTokenALista(TokenTipo.Romper);
+                        break;
+                    case "retornar":
+                        AdicionarTokenALista(TokenTipo.Retornar);
                         break;
                     case "entao":
                         AdicionarTokenALista(TokenTipo.Entao);
@@ -70,11 +91,11 @@ public class Tokenizador
                     case "bytes":
                         AdicionarTokenALista(TokenTipo.Bytes);
                         break;
-                    case "verdade":
-                        AdicionarTokenALista(TokenTipo.BoolLiteral, true);
+                    case "ou":
+                        AdicionarTokenALista(TokenTipo.OperadorOu);
                         break;
-                    case "falso":
-                        AdicionarTokenALista(TokenTipo.BoolLiteral, false);
+                    case "e":
+                        AdicionarTokenALista(TokenTipo.OperadorE);
                         break;
                     default:
                         AdicionarTokenALista(TokenTipo.Identificador, texto);
@@ -94,6 +115,7 @@ public class Tokenizador
                         break;
                     case '\n':
                         _linha++;
+                        //AdicionarTokenALista(TokenTipo.NovaLinha);
                         Passar();
                         break;
                     case '\r':
@@ -111,7 +133,39 @@ public class Tokenizador
                         Passar();
                         break;
                     case '>':
+                        if(Proximo(1) == '=')
+                        {
+                            AdicionarTokenALista(TokenTipo.OperadorMaiorIgualQue);
+                            Passar();
+                            Passar();
+                            break;
+                        }
+
                         AdicionarTokenALista(TokenTipo.OperadorMaiorQue);
+                        Passar();
+                        break;
+                    case '<':
+                        if(Proximo(1) == '=')
+                        {
+                            AdicionarTokenALista(TokenTipo.OperadorMenorIgualQue);
+                            Passar();
+                            Passar();
+                            break;
+                        }
+
+                        AdicionarTokenALista(TokenTipo.OperadorMenorQue);
+                        Passar();
+                        break;
+                    case '!':
+                        if(Proximo(1) == '=')
+                        {
+                            AdicionarTokenALista(TokenTipo.OperadorDiferente);
+                            Passar();
+                            Passar();
+                            break;
+                        }
+
+                        AdicionarTokenALista(TokenTipo.OperadorNeg);
                         Passar();
                         break;
                     case '+':
@@ -179,8 +233,19 @@ public class Tokenizador
                             texto += ConsumirChar();
                         }
 
-                        AdicionarTokenALista(TokenTipo.StringLiteral, texto);
+                        AdicionarTokenALista(TokenTipo.TextoLiteral, texto);
                         texto = "";
+                        Passar();
+                        break;
+                    case '\'':
+                        Passar();
+                        texto += ConsumirChar();
+                        AdicionarTokenALista(TokenTipo.CaractereLiteral, texto);
+                        texto = "";
+                        if(Proximo(1) != '\'')
+                        {
+                            Erro.ErroGenerico("Esperado `'`");
+                        }
                         Passar();
                         break;
                     case '#':
@@ -190,6 +255,9 @@ public class Tokenizador
                         }
 
                         Passar();
+                        break;
+                    case ',':
+                        AdicionarTokenALista(TokenTipo.Virgula);
                         break;
                     default:
                         Erro.ErroGenerico($"Simbolo inválido '{Atual()}' (ASCII = {(int)Atual()})");
@@ -238,7 +306,7 @@ public class Tokenizador
         _tokens.Add(new Token(tipo, _linha));
     }
 
-    private void AdicionarTokenALista(TokenTipo tipo, object valor)
+    private void AdicionarTokenALista(TokenTipo tipo, string valor)
     {
         _tokens.Add(new Token(tipo, _linha, valor));
     }

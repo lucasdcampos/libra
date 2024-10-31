@@ -1,6 +1,7 @@
+
 namespace Libra.Arvore
 {
-    public abstract class NodoInstrucao : Nodo {} // TODO: Por que não interface? Não me pergunte
+    public abstract class NodoInstrucao : Nodo {}
 
     public class NodoInstrucaoSair : NodoInstrucao
     {
@@ -11,82 +12,102 @@ namespace Libra.Arvore
 
         public NodoExpressao Expressao { get; private set; }
 
-        public override object Avaliar()
-        {
-            return Expressao.Avaliar();
-        }
     }
 
     public class NodoInstrucaoVar : NodoInstrucao
     {
-        public NodoInstrucaoVar(Variavel var)
+        public NodoInstrucaoVar(string identificador, NodoExpressao expressao, bool declaracao)
         {
-            _var = var;
+            Expressao = expressao;
+            Identificador = identificador;
+            EhDeclaracao = declaracao;
         }
 
-        private Variavel _var;
+        public NodoExpressao Expressao { get; private set; }
+        public string Identificador {get; private set; }
+        internal bool EhDeclaracao; // usada para saber se estamos declarando uma nova variável ou só modificando uma
 
-        public override object Avaliar()
-        {
-            return _var;
-        }
     }
 
-    public class NodoInstrucaoTipo : NodoInstrucao
+    public class NodoInstrucaoConst : NodoInstrucao
     {
-        public NodoInstrucaoTipo(Token token)
+        public NodoInstrucaoConst(string identificador, NodoExpressao expressao)
         {
-            Token = token;
+            Expressao = expressao;
+            Identificador = identificador;
         }
 
-        public Token Token { get; private set; }
+        public NodoExpressao Expressao { get; private set; }
+        public string Identificador {get; private set; }
+    }
 
-        public override object Avaliar()
+    public class NodoInstrucaoFuncao : NodoInstrucao
+    {
+        public NodoInstrucaoFuncao(string identificador, NodoEscopo escopo, List<string> parametros = null)
         {
-            return Token.TipoParaString(Token.Tipo);
+            Escopo = escopo;
+            Identificador = identificador;
+            Parametros = parametros;
         }
+
+        public NodoEscopo Escopo { get; private set; }
+        public string Identificador {get; private set; }
+        public List<string> Parametros { get; private set; }
 
     }
 
     public class NodoInstrucaoSe : NodoInstrucao
     {
-        public NodoInstrucaoSe(NodoExpressaoBooleana condicao, List<NodoInstrucao> instrucoes)
+        public NodoInstrucaoSe(NodoExpressao expressao, NodoEscopo escopo, NodoEscopo senaoEscopo = null)
         {
-            Condicao = condicao;
-            Escopo = instrucoes;
+            Expressao = expressao;
+            Escopo = escopo;
+            SenaoEscopo = senaoEscopo;
         }
 
-        public NodoInstrucaoSe(Token condicao, List<NodoInstrucao> instrucoes)
-        {
-            Condicao = condicao;
-            Escopo = instrucoes;
-        }
-
-        public object Condicao { get; private set; }
-        public List<NodoInstrucao> Escopo = new List<NodoInstrucao>();
-
-        public override object Avaliar()
-        {
-            //var valor = Condicao.Avaliar().ToString();
-            Token token = (Token)Condicao;
-            var valor = token.Valor.ToString();
-            return valor;
-        }
+        public NodoExpressao Expressao { get; private set; }
+        public NodoEscopo Escopo {get; private set; }
+        public NodoEscopo SenaoEscopo {get; private set; }
 
     }
 
-    public class NodoInstrucaoExibir : NodoInstrucao
+    public class NodoInstrucaoEnquanto : NodoInstrucao
     {
-        public NodoInstrucaoExibir(NodoString str)
+        public NodoInstrucaoEnquanto(NodoExpressao expressao, NodoEscopo escopo)
         {
-            _string = str;
+            Expressao = expressao;
+            Escopo = escopo;
         }
 
-        private NodoString _string;
+        public NodoExpressao Expressao { get; private set; }
+        public NodoEscopo Escopo {get; private set; }
 
-        public override object Avaliar()
+    }
+
+    public class NodoInstrucaoRomper() : NodoInstrucao
+    {
+        // Nada de interessante...
+    }
+
+    public class NodoInstrucaoRetornar() : NodoInstrucao
+    {
+        // Nada de interessante...
+    }
+
+    public class NodoInstrucaoChamadaFuncao : NodoInstrucao
+    {
+        public string Identificador;
+        public List<NodoExpressao> Argumentos;
+
+        public NodoInstrucaoChamadaFuncao(string ident, List<NodoExpressao> argumentos = null)
         {
-            return _string.Avaliar();
+            Identificador = ident;
+            Argumentos = argumentos;
+
+            if(Argumentos == null)
+            {
+                Argumentos = new List<NodoExpressao>();
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Libra;
 using Libra.Arvore;
-using System.Diagnostics;
 
 internal static class Program 
 {
@@ -40,36 +39,27 @@ internal static class Program
                     Console.Clear();
                     break;
                 case "licenca":
-                    Console.WriteLine("MIT License - Copyright 2024 Lucas M. Campos");
-                    Console.WriteLine("Acesse https://github.com/lukazof/libra para mais detalhes");
+                    MostrarLicenca();
                     break;
                 case "ajuda":
-                    Console.WriteLine("Comandos disponíveis: sair, limpar, licenca, ajuda, interpretar");
+                    MostrarAjuda();
                     break;
                 default:
-                    if(linha.StartsWith("interpretar"))
-                    {
-                        var cargs = linha.Split();
-                        
-                        if (cargs.Length == 2)
-                        {
-                            _interpretador.Interpretar(Interpretar(cargs[1]));
-                        }
-                        else
-                        {
-                            Console.WriteLine("Comando inválido! Use intepretar <arquivo.lb>");
-                        }
-                
-                    }
-
-                    else
-                    {
-                        _interpretador.Interpretar(_parser.Parse(_tokenizador.Tokenizar(linha)));
-                    }
-                    
+                    _interpretador.Interpretar(_parser.Parse(_tokenizador.Tokenizar(linha)));
                     break;
             }
         }
+    }
+
+    private static void MostrarLicenca()
+    {
+        Console.WriteLine("MIT License - Copyright 2024 Lucas M. Campos");
+        Console.WriteLine("Acesse https://github.com/lucasdcampos/libra para mais detalhes");
+    }
+
+    private static void MostrarAjuda()
+    {
+        Console.WriteLine("Comandos disponíveis: sair, limpar, licenca, ajuda, interpretar");
     }
 
     private static NodoPrograma Interpretar(string arquivoInicial)
@@ -80,7 +70,10 @@ internal static class Program
             return null;
         }
 
-        var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings("\n"); // Sem isso, o Tokenizador buga
+        var codigoFonte = File.ReadAllText("teste/base.libra").ReplaceLineEndings(Environment.NewLine); 
+            codigoFonte += File.ReadAllText(arquivoInicial).ReplaceLineEndings(Environment.NewLine); // Sem isso, o Tokenizador buga
+        
+
         var tokens = _tokenizador.Tokenizar(codigoFonte);
         var programa = _parser.Parse(tokens);
         _interpretador.Interpretar(programa);

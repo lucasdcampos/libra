@@ -5,8 +5,8 @@ public enum TokenTipo
     
     // Tipos
     NumeroLiteral,
-    StringLiteral,
-    BoolLiteral,
+    CaractereLiteral,
+    TextoLiteral,
     Identificador,
     TokenInvalido,
 
@@ -21,18 +21,32 @@ public enum TokenTipo
     OperadorMenorQue,
     OperadorMaiorIgualQue,
     OperadorMenorIgualQue,
+    OperadorE,
+    OperadorOu,
+    OperadorOuExclusivo,
+    OperadorDiferente,
+    OperadorNeg,
 
     // Simbolos
     AbrirParen, 
     FecharParen,
     PontoEVirgula,
+    Virgula,
+    NovaLinha,
     FimDoArquivo,
 
     // Palavras Reservadas
     Sair, 
     Var,
+    Const,
+    Funcao,
     Se,
+    Senao,
     Entao,
+    Enquanto,
+    Faca,
+    Romper,
+    Retornar,
     Fim,
     Tipo,
     Bytes,
@@ -43,7 +57,7 @@ public enum TokenTipo
 
 public class Token
 {
-    public Token(TokenTipo tipo, int linha, object valor = null)
+    public Token(TokenTipo tipo, int linha, string valor = null)
     {
         Tipo = tipo;
         Valor = valor;
@@ -51,7 +65,7 @@ public class Token
     }
 
     public TokenTipo Tipo { get; private set; }
-    public object Valor { get; private set; }
+    public string Valor { get; private set; }
     public int Linha { get; private set; }
 
     public override string ToString()
@@ -90,8 +104,8 @@ public class Token
                 return "sair()";
             case TokenTipo.Exibir:
                 return "exibir()";
-            case TokenTipo.StringLiteral:
-                return "string";
+            case TokenTipo.TextoLiteral:
+                return "Texto";
             case TokenTipo.NumeroLiteral:
                 return "Numero";
             default:

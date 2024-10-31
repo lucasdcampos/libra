@@ -1,0 +1,5 @@
+x = 1 > 0
+
+se x == VERDADEIRO entao
+    sair(10)
+fim

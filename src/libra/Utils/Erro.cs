@@ -23,6 +23,11 @@ public static class Erro
         MostrarErro(mensagem, linha);
     }
 
+    public static void ErroDivisaoPorZero(int linha = 0)
+    {
+        MostrarErro("Divisão por zero", linha);
+    }
+
    private static void MostrarErro(string mensagem, int linha)
     {
         Console.ForegroundColor = ConsoleColor.Red;

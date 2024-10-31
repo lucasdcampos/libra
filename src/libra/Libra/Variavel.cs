@@ -5,24 +5,14 @@ namespace Libra
     public class Variavel
     {
             public string Identificador;
-            public string Valor;
-
-            public Nodo Nodo { get; private set; }
-
-            public Variavel(string identificador, Nodo nodo)
+            public Token Token {get; private set; }
+            public string Valor => Token.Valor;
+            public bool Constante {get; private set;}
+            public Variavel(string ident, Token token, bool constante = false)
             {
-                if(nodo.GetType().IsSubclassOf(typeof(NodoExpressao)) ||
-                nodo.GetType() == typeof(NodoString))
-                {
-                    Nodo = nodo;
-                }
-                else
-                {
-                    Erro.ErroGenerico($"Não é possível atribuir {nodo.GetType()} à {identificador}");
-                }
-
-                Identificador = identificador;
-                Valor = Nodo.Avaliar().ToString();
+                Identificador = ident;
+                Token = token;
+                Constante = constante;
             }
 
     }
