@@ -146,7 +146,7 @@ public class Parser
         while(Atual().Tipo != TokenTipo.FecharParen)
         {
             if(Atual().Tipo != TokenTipo.Identificador)
-                Erro.ErroGenerico($"Esperado argumento para função {identificador}", Atual().Linha);
+                Erros.LancarErro(new ErroEsperado($"Identificador", Atual().Linha));
             
             parametros.Add(ConsumirToken().Valor);
             TentarConsumirToken(TokenTipo.Virgula);
@@ -312,7 +312,7 @@ public class Parser
             return ConsumirToken();
         }
 
-        Erro.ErroEsperado(tipo, _linha);
+        Erros.LancarErro(new ErroEsperado(tipo.ToString(), _linha));
 
         return null;
     }

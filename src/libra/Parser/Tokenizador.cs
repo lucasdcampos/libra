@@ -244,7 +244,7 @@ public class Tokenizador
                         texto = "";
                         if(Proximo(1) != '\'')
                         {
-                            Erro.ErroGenerico("Esperado `'`");
+                            Erros.LancarErro(new ErroEsperado("`'`"));
                         }
                         Passar();
                         break;
@@ -260,7 +260,7 @@ public class Tokenizador
                         AdicionarTokenALista(TokenTipo.Virgula);
                         break;
                     default:
-                        Erro.ErroGenerico($"Simbolo inválido '{Atual()}' (ASCII = {(int)Atual()})");
+                        Erros.LancarErro(new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})"));
                         break;
                 }
                 

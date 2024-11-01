@@ -1,52 +1,115 @@
 namespace Libra;
-
-public static class Erro
+public class Erro
 {
-    public static void Aviso(string aviso, int linha = 0)
+    public int Codigo { get; protected set; }
+    public string Mensagem { get; protected set; }
+    public int Linha { get; protected set; }
+    public int Coluna { get; protected set; }
+
+    public Erro(string mensagem)
     {
-        Console.ForegroundColor = ConsoleColor.Yellow;
-        if(linha == 0)
-            Console.WriteLine(aviso);
+        Codigo = 1;
+        Mensagem = mensagem;
+    }
+
+    protected Erro(int codigo, string mensagem, int linha = 0, int coluna = 0)
+    {
+        Codigo = codigo;
+        Mensagem = mensagem;
+        Linha = linha;
+        Coluna = coluna;
+    }
+
+    // TODO: Arrumar essa feiura
+    public override string ToString()
+    {
+        string msg = "";
+        string categoria = "";
+
+        if(Codigo > 1000 && Codigo < 2000)
+            categoria = "ErroSintaxe: ";
+        else if(Codigo > 2000 && Codigo < 3000)
+            categoria = "ErroExecucao: ";
         else
-            Console.WriteLine(aviso + " na linha " + linha);
+            categoria = "Erro: ";
 
-        Console.ResetColor();
-    }
+        msg += categoria;
 
-    public static void ErroEsperado(TokenTipo tipo, int linha = 0)
-    {
-        MostrarErro($"Esperado `{Token.TipoParaString(tipo)}`", linha);
-    }
-
-    public static void ErroGenerico(string mensagem, int linha = 0)
-    {
-        MostrarErro(mensagem, linha);
-    }
-
-    public static void ErroDivisaoPorZero(int linha = 0)
-    {
-        MostrarErro("Divisão por zero", linha);
-    }
-
-   private static void MostrarErro(string mensagem, int linha)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-
-        if(linha == 0)
-            Console.WriteLine($"Erro: {mensagem}");
+        if(Linha == 0)
+            msg += $"{Mensagem}";
         else
-            Console.WriteLine($"Erro: {mensagem} na linha {linha}");
+            msg +=$"{Mensagem} na linha {Linha}";
         
         string arrows = "";
 
-        foreach(var c in mensagem)
+        foreach(var c in Mensagem)
             arrows += "^";
+        
 
-        Console.WriteLine($"      {arrows}");
+        msg += Environment.NewLine + String.Concat(Enumerable.Repeat(' ', categoria.Length)) + arrows;
+
+        return msg;
+    }
+}
+
+public class ErroTokenInvalido : Erro
+{
+    public ErroTokenInvalido(string token, int linha = 0, int coluna = 0) 
+        : base(1001, $"Token inválido `{token}`", linha, coluna) { }
+}
+
+public class ErroEsperado : Erro
+{
+    public ErroEsperado(string token, int linha = 0, int coluna = 0) 
+        : base(1002, $"Esperado Token {token}", linha, coluna) { }
+}
+
+public class ErroDivisaoPorZero : Erro
+{
+    public ErroDivisaoPorZero(int linha = 0, int coluna = 0) 
+        : base(2001, "Divisão por zero.", linha, coluna) { }
+}
+
+public class ErroVariavelNaoDeclarada : Erro
+{
+    public ErroVariavelNaoDeclarada(string variavel, int linha = 0, int coluna = 0) 
+        : base(2002, $"Variável não declarada `{variavel}`.", linha, coluna) { }
+}
+
+public class ErroVariavelJaDeclarada : Erro
+{
+    public ErroVariavelJaDeclarada(string variavel, int linha = 0, int coluna = 0) 
+        : base(2003, $"Variável já declarada `{variavel}`.", linha, coluna) { }
+}
+
+public class ErroFuncaoNaoDefinida : Erro
+{
+    public ErroFuncaoNaoDefinida(string variavel, int linha = 0, int coluna = 0) 
+        : base(2004, $"Função não definida `{variavel}`.", linha, coluna) { }
+}
+
+public class ErroFuncaoJaDefinida : Erro
+{
+    public ErroFuncaoJaDefinida(string variavel, int linha = 0, int coluna = 0) 
+        : base(2005, $"Função já definida `{variavel}`.", linha, coluna) { }
+}
+
+public class ErroModificacaoConstante : Erro
+{
+    public ErroModificacaoConstante(string variavel, int linha = 0, int coluna = 0) 
+        : base(2006, $"Não é possível modificar a constante `{variavel}`.", linha, coluna) { }
+}
+
+public static class Erros
+{
+    public static void LancarErro(Erro e)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+
+        Console.WriteLine(e.ToString());
 
         Console.ResetColor();
 
-        Environment.Exit(1);
+        Environment.Exit(e.Codigo);
     }
-
 }

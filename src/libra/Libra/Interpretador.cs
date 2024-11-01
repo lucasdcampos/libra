@@ -54,12 +54,12 @@ public class Interpretador
 
             if(string.IsNullOrWhiteSpace(identificador))
             {
-                Erro.ErroGenerico("Identificador inválido!");
+                Erros.LancarErro(new Erro("Identificador inválido!"));
             }
 
             if(_programa.FuncaoExiste(identificador))
             {
-                Erro.ErroGenerico($"Função já declarada! {identificador}");
+                Erros.LancarErro(new ErroFuncaoJaDefinida(identificador));
             }
             
             var novaFuncao = new Funcao(identificador, funcao.Escopo, funcao.Parametros);
@@ -83,7 +83,7 @@ public class Interpretador
                 }
                 else
                 {
-                    Erro.ErroGenerico($"Função base não encontrada {nomeFuncao}");
+                    Erros.LancarErro(new ErroFuncaoNaoDefinida(nomeFuncao));
                 }
             }
             else
@@ -184,7 +184,7 @@ public class Interpretador
                 case TokenTipo.OperadorMult: return a*b;
                 case TokenTipo.OperadorDiv:
                     if(b == 0)
-                        Erro.ErroDivisaoPorZero();
+                        Erros.LancarErro(new ErroDivisaoPorZero());
                     return a/b;
                 case TokenTipo.OperadorMaiorQue: return LibraHelper.BoolParaInt(a>b);
                 case TokenTipo.OperadorMaiorIgualQue: return LibraHelper.BoolParaInt(a>=b);
@@ -203,18 +203,18 @@ public class Interpretador
     {
         if(string.IsNullOrWhiteSpace(identificador))
         {
-            Erro.ErroGenerico("Identificador inválido!");
+            Erros.LancarErro(new Erro("Identificador inválido!"));
         }
 
         if(declaracao && _programa.VariavelExiste(identificador))
         {
-            Erro.ErroGenerico($"Variável já declarada! {identificador}");
+            Erros.LancarErro(new ErroVariavelJaDeclarada(identificador));
         }
 
         if(_programa.Variaveis.ContainsKey(identificador))
         {
             if(_programa.Variaveis[identificador].Constante)
-                Erro.ErroGenerico($"Não é possível modificar o valor de `{identificador}` pois ela foi marcada como uma constante!");
+                Erros.LancarErro(new ErroModificacaoConstante(identificador));
         }
         
         var token = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(expressao).ToString());

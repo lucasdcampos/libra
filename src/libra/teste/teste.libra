@@ -1,9 +1,2 @@
-funcao minhaFuncao()
-    var x = 1
-    __EscreverInt__(x)
-fim
-
+var x = 1 + 2 * 3
 __EscreverInt__(x)
-
-minhaFuncao()
-minhaFuncao()
