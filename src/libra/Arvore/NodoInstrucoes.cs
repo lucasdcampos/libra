@@ -1,112 +1,127 @@
 
 namespace Libra.Arvore
 {
-    public abstract class NodoInstrucao : Nodo {}
+    public abstract class Instrucao { }
 
-    public class NodoInstrucaoSair : NodoInstrucao
+    public class Escopo : Instrucao
     {
-        public NodoInstrucaoSair(NodoExpressao expressao)
+        public Escopo(List<Instrucao> instrucoes = null)
+        {
+            Instrucoes = instrucoes;
+
+            if(instrucoes == null)
+            {
+                Instrucoes = new List<Instrucao>();
+            }
+        }
+        
+        public List<Instrucao> Instrucoes { get; internal set; }
+    }
+
+    public class InstrucaoSair : Instrucao
+    {
+        public InstrucaoSair(Expressao expressao)
         {
             Expressao = expressao;
         }
 
-        public NodoExpressao Expressao { get; private set; }
+        public Expressao Expressao { get; private set; }
 
     }
 
-    public class NodoInstrucaoVar : NodoInstrucao
+    public class InstrucaoVar : Instrucao
     {
-        public NodoInstrucaoVar(string identificador, NodoExpressao expressao, bool declaracao)
+        public InstrucaoVar(string identificador, Expressao expressao, bool declaracao)
         {
             Expressao = expressao;
             Identificador = identificador;
             EhDeclaracao = declaracao;
         }
 
-        public NodoExpressao Expressao { get; private set; }
+        public Expressao Expressao { get; private set; }
         public string Identificador {get; private set; }
         internal bool EhDeclaracao; // usada para saber se estamos declarando uma nova variável ou só modificando uma
 
     }
 
-    public class NodoInstrucaoConst : NodoInstrucao
+    public class InstrucaoConst : Instrucao
     {
-        public NodoInstrucaoConst(string identificador, NodoExpressao expressao)
+        public InstrucaoConst(string identificador, Expressao expressao)
         {
             Expressao = expressao;
             Identificador = identificador;
         }
 
-        public NodoExpressao Expressao { get; private set; }
+        public Expressao Expressao { get; private set; }
         public string Identificador {get; private set; }
     }
 
-    public class NodoInstrucaoFuncao : NodoInstrucao
+    public class InstrucaoFuncao : Instrucao
     {
-        public NodoInstrucaoFuncao(string identificador, NodoEscopo escopo, List<string> parametros = null)
+        public InstrucaoFuncao(string identificador, Escopo escopo, List<string> parametros = null)
         {
             Escopo = escopo;
             Identificador = identificador;
             Parametros = parametros;
         }
 
-        public NodoEscopo Escopo { get; private set; }
+        public Escopo Escopo { get; private set; }
         public string Identificador {get; private set; }
         public List<string> Parametros { get; private set; }
 
     }
 
-    public class NodoInstrucaoSe : NodoInstrucao
+    public class InstrucaoSe : Instrucao
     {
-        public NodoInstrucaoSe(NodoExpressao expressao, NodoEscopo escopo, NodoEscopo senaoEscopo = null)
+        public InstrucaoSe(Expressao expressao, Escopo escopo, Escopo senaoEscopo = null)
         {
             Expressao = expressao;
             Escopo = escopo;
             SenaoEscopo = senaoEscopo;
         }
 
-        public NodoExpressao Expressao { get; private set; }
-        public NodoEscopo Escopo {get; private set; }
-        public NodoEscopo SenaoEscopo {get; private set; }
+        public Expressao Expressao { get; private set; }
+        public Escopo Escopo {get; private set; }
+        public Escopo SenaoEscopo {get; private set; }
 
     }
 
-    public class NodoInstrucaoEnquanto : NodoInstrucao
+    public class InstrucaoEnquanto : Instrucao
     {
-        public NodoInstrucaoEnquanto(NodoExpressao expressao, NodoEscopo escopo)
+        public InstrucaoEnquanto(Expressao expressao, Escopo escopo)
         {
             Expressao = expressao;
             Escopo = escopo;
         }
 
-        public NodoExpressao Expressao { get; private set; }
-        public NodoEscopo Escopo {get; private set; }
+        public Expressao Expressao { get; private set; }
+        public Escopo Escopo {get; private set; }
 
     }
 
-    public class NodoInstrucaoRomper() : NodoInstrucao
+    public class InstrucaoRomper() : Instrucao
     {
         // Nada de interessante...
     }
 
-    public class NodoInstrucaoRetornar() : NodoInstrucao
+    public class InstrucaoRetornar() : Instrucao
     {
         // Nada de interessante...
     }
 
-    public class NodoInstrucaoChamadaFuncao : NodoInstrucao
+    public class InstrucaoChamadaFuncao : Instrucao
     {
         public string Identificador;
-        public List<NodoExpressao> Argumentos;
+        public List<Expressao> Argumentos;
 
-        public NodoInstrucaoChamadaFuncao(string ident, List<NodoExpressao> argumentos = null)
+        public InstrucaoChamadaFuncao(string ident, List<Expressao> argumentos = null)
         {
             Identificador = ident;
             Argumentos = argumentos;
 
             if(Argumentos == null)
             {
-                Argumentos = new List<NodoExpressao>();
+                Argumentos = new List<Expressao>();
             }
         }
     }

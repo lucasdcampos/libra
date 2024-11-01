@@ -62,7 +62,7 @@ internal static class Program
         Console.WriteLine("Comandos disponíveis: sair, limpar, licenca, ajuda, interpretar");
     }
 
-    private static NodoPrograma Interpretar(string arquivoInicial)
+    private static Programa Interpretar(string arquivoInicial)
     {
         if (!File.Exists(arquivoInicial))
         {
@@ -70,8 +70,8 @@ internal static class Program
             return null;
         }
 
-        var codigoFonte = File.ReadAllText("teste/base.libra").ReplaceLineEndings(Environment.NewLine); 
-            codigoFonte += File.ReadAllText(arquivoInicial).ReplaceLineEndings(Environment.NewLine); // Sem isso, o Tokenizador buga
+        //var codigoFonte = File.ReadAllText("teste/base.libra").ReplaceLineEndings(Environment.NewLine); 
+        var codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings(Environment.NewLine); // Sem isso, o Tokenizador buga
         
 
         var tokens = _tokenizador.Tokenizar(codigoFonte);

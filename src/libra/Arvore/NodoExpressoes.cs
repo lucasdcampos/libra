@@ -1,10 +1,10 @@
 namespace Libra.Arvore
 {
-    public abstract class NodoExpressao : Nodo { }
+    public abstract class Expressao { }
 
-    public class NodoExpressaoTermo : NodoExpressao
+    public class ExpressaoTermo : Expressao
     {
-        public NodoExpressaoTermo(Token token)
+        public ExpressaoTermo(Token token)
         {
             Token = token;
         }
@@ -14,13 +14,13 @@ namespace Libra.Arvore
         public string Valor => Token.Valor;        
     }
 
-    public class NodoExpressaoBinaria : NodoExpressao
+    public class ExpressaoBinaria : Expressao
     {
-        public NodoExpressao Esquerda { get; private set; }
+        public Expressao Esquerda { get; private set; }
         public Token Operador { get; private set; }
-        public NodoExpressao Direita { get; private set; }
+        public Expressao Direita { get; private set; }
 
-        public NodoExpressaoBinaria(NodoExpressao esquerda, Token operador, NodoExpressao direita)
+        public ExpressaoBinaria(Expressao esquerda, Token operador, Expressao direita)
         {
             Esquerda = esquerda;
             Operador = operador;

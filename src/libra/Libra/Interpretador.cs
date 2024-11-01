@@ -6,139 +6,169 @@ namespace Libra;
 
 public class Interpretador
 {
-    private NodoPrograma _programa;
-    
-    public void Interpretar(NodoPrograma programa)
+    public static int NivelDebug = 0;
+    private Programa _programa;
+    private int _enderecoInicialEscopo;
+    private List<int> _enderecosIniciaisEscopos = new List<int>();
+
+    public void Interpretar(Programa programa)
     {
         _programa = programa;
+        
+        LibraBase.ProgramaAtual = _programa;
 
-        InterpretarInstrucoes(_programa.Escopo);
+        for(int i = 0; i < _programa.Instrucoes.Count; i++)
+        {
+            InterpretarInstrucao(_programa.Instrucoes[i]);
+        }
+
+        LibraBase.ProgramaAtual = null;
     }
 
-    private int InterpretarInstrucoes(NodoEscopo escopo)
+    private int InterpretarInstrucao(Instrucao instrucao)
     {
-        foreach (var instrucao in escopo.Instrucoes)
+        if (instrucao is InstrucaoSair)
         {
-            if (instrucao is NodoInstrucaoSair)
-            {
-                var sair = (NodoInstrucaoSair)instrucao;
-                int codigoSaida = InterpretarExpressao(sair.Expressao);
+            var sair = (InstrucaoSair)instrucao;
+            int codigoSaida = InterpretarExpressao(sair.Expressao);
 
-                LibraBase.Sair(codigoSaida);
+            LibraBase.Sair(codigoSaida);
+        }
+
+        else if (instrucao is InstrucaoVar)
+        {
+            var var = (InstrucaoVar)instrucao;
+            DefinirVariavel(var.Identificador, var.EhDeclaracao, false, var.Expressao);
+        }
+        else if (instrucao is InstrucaoConst)
+        {
+            var constante = (InstrucaoConst)instrucao;
+            
+            DefinirVariavel(constante.Identificador, true, true, constante.Expressao);
+        }
+        else if (instrucao is InstrucaoFuncao)
+        {
+            var funcao = (InstrucaoFuncao)instrucao;
+            
+            string identificador = funcao.Identificador;
+
+            if(string.IsNullOrWhiteSpace(identificador))
+            {
+                Erro.ErroGenerico("Identificador inválido!");
             }
 
-            else if (instrucao is NodoInstrucaoVar)
+            if(_programa.FuncaoExiste(identificador))
             {
-                var var = (NodoInstrucaoVar)instrucao;
-                DefinirVariavel(var.Identificador, var.EhDeclaracao, false, var.Expressao);
+                Erro.ErroGenerico($"Função já declarada! {identificador}");
             }
-            else if (instrucao is NodoInstrucaoConst)
-            {
-                var constante = (NodoInstrucaoConst)instrucao;
-                
-                DefinirVariavel(constante.Identificador, true, true, constante.Expressao);
-            }
-            else if (instrucao is NodoInstrucaoFuncao)
-            {
-                var funcao = (NodoInstrucaoFuncao)instrucao;
-                
-                string identificador = funcao.Identificador;
+            
+            var novaFuncao = new Funcao(identificador, funcao.Escopo, funcao.Parametros);
 
-                if(string.IsNullOrWhiteSpace(identificador))
+            _programa.Funcoes[identificador] = novaFuncao;
+
+        }
+        else if (instrucao is InstrucaoChamadaFuncao)
+        {
+            var chamada = (InstrucaoChamadaFuncao)instrucao;
+
+            if(chamada.Identificador.StartsWith("__") && chamada.Identificador.EndsWith("__"))
+            {
+                string nomeFuncao = chamada.Identificador.Replace("__", "");
+
+                MethodInfo funcao = typeof(LibraBase).GetMethod(nomeFuncao, BindingFlags.Static | BindingFlags.Public);
+
+                if (funcao != null)
                 {
-                    Erro.ErroGenerico("Identificador inválido!");
-                }
-
-                if(_programa.FuncaoExiste(identificador))
-                {
-                    Erro.ErroGenerico($"Função já declarada! {identificador}");
-                }
-                
-                var novaFuncao = new Funcao(identificador, funcao.Escopo, funcao.Parametros);
-
-                _programa.Funcoes[identificador] = novaFuncao;
-
-            }
-            else if (instrucao is NodoInstrucaoChamadaFuncao)
-            {
-                var chamada = (NodoInstrucaoChamadaFuncao)instrucao;
-
-                if(chamada.Identificador.StartsWith("__") && chamada.Identificador.EndsWith("__"))
-                {
-                    string nomeFuncao = chamada.Identificador.Replace("__", "");
-
-                    MethodInfo funcao = typeof(LibraBase).GetMethod(nomeFuncao, BindingFlags.Static | BindingFlags.Public);
-
-                    if (funcao != null)
-                    {
-                        funcao.Invoke(null, ExtrairArgumentos(chamada));
-                    }
-                    else
-                    {
-                        Erro.ErroGenerico($"Função base não encontrada {nomeFuncao}");
-                    }
+                    funcao.Invoke(null, ExtrairArgumentos(chamada));
                 }
                 else
                 {
-                    InterpretarInstrucoes(_programa.Funcoes[chamada.Identificador].Escopo);
+                    Erro.ErroGenerico($"Função base não encontrada {nomeFuncao}");
                 }
             }
-
-            else if (instrucao is NodoInstrucaoSe)
+            else
             {
-                var se = (NodoInstrucaoSe)instrucao;
+                InterpretarEscopo(_programa.Funcoes[chamada.Identificador].Escopo);
+            }
+        }
 
-                if(InterpretarExpressao(se.Expressao) != 0)
+        else if (instrucao is InstrucaoSe)
+        {
+            var se = (InstrucaoSe)instrucao;
+
+            if(InterpretarExpressao(se.Expressao) != 0)
+            {
+                InterpretarEscopo(se.Escopo);
+            }
+            else
+            {
+                if(se.SenaoEscopo != null)
                 {
-                    InterpretarInstrucoes(se.Escopo);
-                }
-                else
-                {
-                    if(se.SenaoEscopo != null)
-                    {
-                        InterpretarInstrucoes(se.SenaoEscopo);
-                    }
+                    InterpretarEscopo(se.SenaoEscopo);
                 }
             }
-            else if (instrucao is NodoInstrucaoEnquanto)
-            {
-                var enquanto = (NodoInstrucaoEnquanto)instrucao;
+        }
+        else if (instrucao is InstrucaoEnquanto)
+        {
+            var enquanto = (InstrucaoEnquanto)instrucao;
 
-                while(InterpretarExpressao(enquanto.Expressao) != 0)
-                {
-                    if(InterpretarInstrucoes(enquanto.Escopo) == LibraHelper.ROMPER)
-                        break;
-                }
-            }
-
-            else if (instrucao is NodoInstrucaoRomper)
+            while(InterpretarExpressao(enquanto.Expressao) != 0)
             {
-                return LibraHelper.ROMPER;
+                //Console.WriteLine(InterpretarExpressao(enquanto.Expressao));
+                InterpretarEscopo(enquanto.Escopo);
             }
+        }
 
-            else if (instrucao is NodoInstrucaoRetornar)
-            {
-                return LibraHelper.RETORNAR;
-            }
+        else if (instrucao is InstrucaoRomper)
+        {
+            return LibraHelper.ROMPER;
+        }
+
+        else if (instrucao is InstrucaoRetornar)
+        {
+            return LibraHelper.RETORNAR;
         }
 
         return 0;
     }
 
-    private int InterpretarExpressao(NodoExpressao expressao)
+    private int InterpretarEscopo(Escopo escopo)
     {
-        if(expressao is NodoExpressaoTermo)
+        _enderecosIniciaisEscopos.Add(_programa.Variaveis.Count -1);
+
+        for(int i = 0; i < escopo.Instrucoes.Count; i++)
         {
-            var termo = (NodoExpressaoTermo)expressao;
+            InterpretarInstrucao(escopo.Instrucoes[i]);
+        }
+
+        int enderecoInicialUltimoEscopo = _enderecosIniciaisEscopos.Last();
+
+        // limpando a memória depois da finalização do escopo
+        for (int i = _programa.Variaveis.Count - 1; i > enderecoInicialUltimoEscopo; i--)
+        {
+            var variavelAtual = _programa.Variaveis.ElementAt(i).Key;
+            _programa.Variaveis.Remove(variavelAtual);
+        }
+
+        _enderecosIniciaisEscopos.RemoveAt(_enderecosIniciaisEscopos.Count - 1);
+
+        return 0;
+    }
+
+    private int InterpretarExpressao(Expressao expressao)
+    {
+        if(expressao is ExpressaoTermo)
+        {
+            var termo = (ExpressaoTermo)expressao;
 
             return int.Parse(ExtrairValorTermo(termo));
         }
 
-        else if(expressao is NodoExpressaoBinaria)
+        else if(expressao is ExpressaoBinaria)
         {
-            var binaria = (NodoExpressaoBinaria)expressao;
+            var binaria = (ExpressaoBinaria)expressao;
 
-            var esq = (NodoExpressaoTermo)binaria.Esquerda;
+            var esq = (ExpressaoTermo)binaria.Esquerda;
             var dir = binaria.Direita;
 
             int a, b = 0;
@@ -169,7 +199,7 @@ public class Interpretador
         return 0;
     }
 
-    private void DefinirVariavel(string identificador, bool declaracao, bool constante, NodoExpressao expressao)
+    private void DefinirVariavel(string identificador, bool declaracao, bool constante, Expressao expressao)
     {
         if(string.IsNullOrWhiteSpace(identificador))
         {
@@ -194,7 +224,7 @@ public class Interpretador
         _programa.Variaveis[identificador] = variavel;
     }
 
-    private string[] ExtrairArgumentos(NodoInstrucaoChamadaFuncao chamada)
+    private string[] ExtrairArgumentos(InstrucaoChamadaFuncao chamada)
     {
         var argumentos = new List<string>();
 
@@ -207,7 +237,7 @@ public class Interpretador
         return argumentos.ToArray();
     }
 
-    private string ExtrairValorTermo(NodoExpressaoTermo termo)
+    private string ExtrairValorTermo(ExpressaoTermo termo)
     {
         if(termo.Token.Tipo == TokenTipo.Identificador)
         {

@@ -1,9 +1,13 @@
 // Classe usada para ser chamada internamente pelo interpretador da Libra
 // É possível chamar uma função Base usando __nomeDaFuncao__() dentro do código-fonte em Libra
+using Libra.Arvore;
+
 public static class LibraBase
 {
 
     public static bool DEBUG = true;
+
+    public static Programa ProgramaAtual;
 
     public static void Sair(int codigo)
     {
@@ -44,11 +48,29 @@ public static class LibraBase
         Console.Write((char)i);
     }
 
+    public static void EscreverInt(string i)
+    {
+        Console.WriteLine(int.Parse(i));
+    }
+
     public static void Pausar(string ms)
     {
         var i = int.Parse(ms);
 
         Thread.Sleep(i);
+    }
+
+    // TODO: Só uma estimativa por enquanto, o programa pega muito mais memória que isso
+    // fora que, salvar variáveis como strings não é uma boa opção.
+    public static void AnaliseMem()
+    {
+        int mem = 0;
+        foreach(var v in ProgramaAtual.Variaveis.Keys)
+        {
+            mem += ProgramaAtual.Variaveis[v].Valor.Length;
+        }
+
+        LibraLogger.Log($"Memória:\nQuantidade de variáveis: {ProgramaAtual.Variaveis.Keys.Count}\nMemória Ocupada: {mem} bytes");
     }
 
 }

@@ -8,133 +8,87 @@ public class Parser
     private int _posicao;
     private int _linha;
 
-    public NodoPrograma Parse(List<Token> tokens, bool debugTokens = false)
+    public Programa Parse(List<Token> tokens)
     {
         _tokens = tokens;
 
-        if(debugTokens)
-            foreach(var t in tokens)
-                Console.WriteLine(t.ToString());
+        foreach(var t in tokens)
+            LibraLogger.Debug(t.ToString(),5);
         
+        var instrucoes = new List<Instrucao>();
 
-        NodoPrograma? programa = null;
+        var i = ParseInstrucao();
 
-        var escopo = new NodoEscopo();
-        var instrucoes = new List<NodoInstrucao>();
-
-        while(Atual().Tipo != TokenTipo.FimDoArquivo)
+        while(i != null)
         {
-            instrucoes.Add(ParseInstrucao(escopo));
+            instrucoes.Add(i);
+            i = ParseInstrucao();
         }
 
-        escopo.Instrucoes = instrucoes;
-
-        programa = new NodoPrograma(escopo);
-
-        if(programa == null)
-            Erro.ErroGenerico("Programa inválido. Não foi possível determinar as instruções");
-
-        return programa;
+        return new Programa(instrucoes);
     }
 
-    private NodoInstrucao? ParseInstrucao(NodoEscopo pai = null)
+    private Instrucao? ParseInstrucao()
     {
-        NodoInstrucao? instrucao = null;
-
-        if(TentarConsumirToken(TokenTipo.Sair) != null)
+        switch(Atual().Tipo)
         {
-            var sair = ParseInstrucaoSair();
-
-            instrucao = sair;
-
-            if(instrucao == null)
-                Erro.ErroGenerico("Instrução sair() inválida!", _linha);
+            case TokenTipo.Sair: return ParseInstrucaoSair();
+            case TokenTipo.Var: return ParseInstrucaoVar();
+            case TokenTipo.Const: return ParseInstrucaoConst();
+            case TokenTipo.Funcao: return ParseInstrucaoFuncao();
+            case TokenTipo.Se: return ParseInstrucaoSe();
+            case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
+            case TokenTipo.Romper: return new InstrucaoRomper();
+            case TokenTipo.Identificador:
+                if(Proximo(1).Tipo == TokenTipo.AbrirParen)
+                    return ParseInstrucaoChamadaFuncao();
+                else
+                    return ParseInstrucaoVar(false);
         }
 
-        else if(TentarConsumirToken(TokenTipo.Var) != null)
-        {
-            instrucao = ParseInstrucaoVar();
-
-            if(instrucao == null)
-                Erro.ErroGenerico("Instrução var inválida!", _linha);
-        }
-
-        else if(TentarConsumirToken(TokenTipo.Const) != null)
-        {
-            instrucao = ParseInstrucaoConst();
-
-            if(instrucao == null)
-                Erro.ErroGenerico("Instrução var inválida!", _linha);
-        }
-
-        else if(Atual().Tipo == TokenTipo.Identificador)
-        {
-            if(Proximo(1).Tipo == TokenTipo.AbrirParen)
-            {
-                instrucao = ParseInstrucaoChamadaFuncao();
-            }
-            else
-            {
-                instrucao = ParseInstrucaoVar(false);
-            }
-
-        }
-
-        else if(TentarConsumirToken(TokenTipo.Funcao) != null)
-        {
-            instrucao = ParseInstrucaoFuncao();
-        }
-
-        else if(TentarConsumirToken(TokenTipo.Se) != null)
-        {
-            instrucao = ParseInstrucaoSe();
-
-            if(instrucao == null)
-                Erro.ErroGenerico("Instrução var inválida!", _linha);
-        }
-        else if(TentarConsumirToken(TokenTipo.Enquanto) != null)
-        {
-            instrucao = ParseInstrucaoEnquanto();
-
-            if(instrucao == null)
-                Erro.ErroGenerico("Instrução var inválida!", _linha);
-        }
-        else if(TentarConsumirToken(TokenTipo.Romper) != null)
-        {
-            instrucao = new NodoInstrucaoRomper();
-        }
-        else
-        { 
-            Erro.ErroGenerico($"Instrução inválida: {Proximo(0).Tipo} --> {ConsumirToken().Valor}");
-        }
-
-        return instrucao;
+        return null;
     }
 
-    private NodoInstrucaoSair? ParseInstrucaoSair()
+    private Escopo? ParseEscopo()
     {
-        NodoInstrucaoSair? sair = null;
+        var instrucoes = new List<Instrucao>();
 
+        var i = ParseInstrucao();
+
+        while(i != null)
+        {
+            Console.WriteLine(i);
+            instrucoes.Add(i);
+            i = ParseInstrucao();
+        }
+
+        TentarConsumirToken(TokenTipo.Fim);
+        
+        return new Escopo(instrucoes);
+    }
+
+    private InstrucaoSair? ParseInstrucaoSair()
+    {
+        TentarConsumirToken(TokenTipo.Sair);
         TentarConsumirToken(TokenTipo.AbrirParen);
+
+        // Assim podemos sair sem passar nenhum argumento. Ex: sair()
         if(Atual().Tipo == TokenTipo.FecharParen)
         {
-            sair = new NodoInstrucaoSair(new NodoExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0)));
-
-            TentarConsumirToken(TokenTipo.FecharParen);
-
-            return sair;
+            ConsumirToken();
+            return new InstrucaoSair(new ExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0)));;
         }
 
-        sair = new NodoInstrucaoSair(ParseExpressao());
+        var expr = ParseExpressao();
 
         TentarConsumirToken(TokenTipo.FecharParen);
 
-        return sair;
+        return new InstrucaoSair(expr);
     }
 
-    private NodoInstrucaoVar? ParseInstrucaoVar(bool declaracao = true)
+    private InstrucaoVar? ParseInstrucaoVar(bool declaracao = true)
     {
-        NodoInstrucaoVar? instrucao = null;
+        TentarConsumirToken(TokenTipo.Var);
 
         string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
 
@@ -142,14 +96,12 @@ public class Parser
 
         var expressao = ParseExpressao();
 
-        instrucao = new NodoInstrucaoVar(identificador, expressao, declaracao);
-
-        return instrucao;
+        return new InstrucaoVar(identificador, expressao, declaracao);
     }
 
-    private NodoInstrucaoConst? ParseInstrucaoConst()
+    private InstrucaoConst? ParseInstrucaoConst()
     {
-        NodoInstrucaoConst? instrucao = null;
+        TentarConsumirToken(TokenTipo.Const);
 
         string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
 
@@ -157,20 +109,16 @@ public class Parser
 
         var expressao = ParseExpressao();
 
-        instrucao = new NodoInstrucaoConst(identificador, expressao);
-
-        return instrucao;
+        return new InstrucaoConst(identificador, expressao);
     }
 
-    private NodoInstrucaoChamadaFuncao? ParseInstrucaoChamadaFuncao()
+    private InstrucaoChamadaFuncao? ParseInstrucaoChamadaFuncao()
     {
-        NodoInstrucaoChamadaFuncao? instrucao = null;
-
         string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
 
         TentarConsumirToken(TokenTipo.AbrirParen);
 
-        var argumentos = new List<NodoExpressao>();
+        var argumentos = new List<Expressao>();
         while(Atual().Tipo != TokenTipo.FecharParen)
         {
             var expr = ParseExpressao();
@@ -181,17 +129,15 @@ public class Parser
 
         TentarConsumirToken(TokenTipo.FecharParen);
 
-        instrucao = new NodoInstrucaoChamadaFuncao(identificador, argumentos);
-
-        return instrucao;
+        return new InstrucaoChamadaFuncao(identificador, argumentos);
     }
 
-    private NodoInstrucaoFuncao? ParseInstrucaoFuncao()
+    private InstrucaoFuncao? ParseInstrucaoFuncao()
     {
-        NodoInstrucaoFuncao? instrucao = null;
-
+        TentarConsumirToken(TokenTipo.Funcao);
+        
         string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
-        var instrucoes = new List<NodoInstrucao>();
+        var instrucoes = new List<Instrucao>();
 
         TentarConsumirToken(TokenTipo.AbrirParen);
 
@@ -208,152 +154,79 @@ public class Parser
 
         TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
 
-        while(Atual().Tipo != TokenTipo.Fim)
-        {
-            var i = ParseInstrucao();
-
-            if(i != null)
-            {
-                instrucoes.Add(i);
-            }
-            else
-            {
-                Erro.ErroGenerico("Instrução inválida!", _linha);
-            }
-        }
+        var escopo = ParseEscopo();
 
         TentarConsumirToken(TokenTipo.Fim);
 
-        instrucao = new NodoInstrucaoFuncao(identificador, new NodoEscopo(instrucoes), parametros);
-
-        return instrucao;
+        return new InstrucaoFuncao(identificador, escopo, parametros);
     }
 
     
-    private NodoInstrucaoSe? ParseInstrucaoSe()
+    private InstrucaoSe? ParseInstrucaoSe()
     {
-        NodoInstrucaoSe? instrucao = null;
+        TentarConsumirToken(TokenTipo.Se);
 
         var expressao = ParseExpressao();
 
         TentarConsumirToken(TokenTipo.Entao);
 
-        var instrucoes = new List<NodoInstrucao>();
-        var senaoInstrucoes = new List<NodoInstrucao>();
-
-        while(Atual().Tipo != TokenTipo.Fim)
-        {
-            var i = ParseInstrucao();
-
-            if(i != null)
-            {
-                instrucoes.Add(i);
-            }
-            else
-            {
-                Erro.ErroGenerico("Instrução inválida!", _linha);
-            }
-        }
+        var escopo = ParseEscopo();
 
         TentarConsumirToken(TokenTipo.Fim);
-
-        if(TentarConsumirToken(TokenTipo.Senao) != null)
-        {
-            while(Atual().Tipo != TokenTipo.Fim)
-            {
-                var i = ParseInstrucao();
-
-                if(i != null)
-                {
-                    senaoInstrucoes.Add(i);
-                }
-                else
-                {
-                    Erro.ErroGenerico("Instrução inválida!", _linha);
-                }
-            }
-
-            TentarConsumirToken(TokenTipo.Fim);
-        }
         
-        var senaoEscopo = new NodoEscopo();
-        if(senaoInstrucoes.Count > 0)
-        {
-            senaoEscopo = new NodoEscopo(senaoInstrucoes);
-        }
+        Escopo escopoSenao = null;
+        if(TentarConsumirToken(TokenTipo.Senao) != null)
+            escopoSenao = ParseEscopo();
 
-        instrucao = new NodoInstrucaoSe(expressao, new NodoEscopo(instrucoes), senaoEscopo);
-
-        return instrucao;
+        return new InstrucaoSe(expressao, escopo, escopoSenao);
     }
 
-    private NodoInstrucaoEnquanto? ParseInstrucaoEnquanto()
+    private InstrucaoEnquanto? ParseInstrucaoEnquanto()
     {
-        NodoInstrucaoEnquanto? instrucao = null;
+        TentarConsumirToken(TokenTipo.Enquanto);
 
         var expressao = ParseExpressao();
-
         TentarConsumirToken(TokenTipo.Faca);
 
-        var instrucoes = new List<NodoInstrucao>();
-        var escopo = new NodoEscopo(instrucoes);
-
-        while(Atual().Tipo != TokenTipo.Fim)
-        {
-            var i = ParseInstrucao();
-
-            if(i != null)
-            {
-                instrucoes.Add(i);
-            }
-            else
-            {
-                Erro.ErroGenerico("Instrução inválida!", _linha);
-            }
-        }
+        var escopo = ParseEscopo();
 
         TentarConsumirToken(TokenTipo.Fim);
 
-        instrucao = new NodoInstrucaoEnquanto(expressao, new NodoEscopo(instrucoes));
-
-        return instrucao;
+        return new InstrucaoEnquanto(expressao, escopo);
     }
 
-    private NodoExpressao? ParseExpressao()
+    private Expressao? ParseExpressao()
     {
-        NodoExpressao? expressao = null;
 
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
             if(TokenEhOperador(Proximo(1)))
             {
-                expressao = ParseExpressaoBinaria();
+                return ParseExpressaoBinaria();
             }
             else
             {
-                expressao = new NodoExpressaoTermo(ConsumirToken());
+                return new ExpressaoTermo(ConsumirToken());
             }
-
         }
 
-        if(expressao == null)
-            Erro.ErroGenerico("Expressão inválida!", _linha);
-
-        return expressao;
+        return null;
     }
 
     // TODO: Implementar ordem correta das operações
-    private NodoExpressaoBinaria? ParseExpressaoBinaria()
+    private ExpressaoBinaria? ParseExpressaoBinaria()
     {
-        NodoExpressaoBinaria? binaria = null;
+        ExpressaoBinaria? binaria = null;
 
-        NodoExpressaoTermo? esquerda = null; // TEM que ser um TERMO
+        ExpressaoTermo? esquerda = null; // TEM que ser um TERMO
         Token? operador = null;
-        NodoExpressao? direita = null;
+        Expressao? direita = null;
+
+        TentarConsumirToken(TokenTipo.AbrirParen);
 
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
         {
-            esquerda = new NodoExpressaoTermo(ConsumirToken());
+            esquerda = new ExpressaoTermo(ConsumirToken());
         }
 
         if(TokenEhOperador(Atual()))
@@ -365,11 +238,10 @@ public class Parser
 
         if(esquerda != null && direita != null)
         {
-            binaria = new NodoExpressaoBinaria(esquerda, operador, direita);
+            binaria = new ExpressaoBinaria(esquerda, operador, direita);
         }
 
-        if(binaria == null)
-            Erro.ErroGenerico("Expressão binária inválida", _linha);
+        TentarConsumirToken(TokenTipo.AbrirParen);
 
         return binaria;
     }
@@ -396,6 +268,11 @@ public class Parser
         }
 
         return false;
+    }
+
+    private bool NaoForFim()
+    {
+        return Atual().Tipo != TokenTipo.FimDoArquivo;
     }
 
     private Token Atual() 
