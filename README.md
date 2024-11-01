@@ -23,22 +23,19 @@ Libra foi projetada para ser fácil de entender e utilizar, especialmente para i
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
-#def MACRO_EXEMPLO exibir("Macro de exemplo!");
-
 // declarando variáveis
-var a = 10;
-var b = 5;
-var c = a + b * 2;
+funcao minhaFuncao()
+  var i = 0
+  enquanto (1 > 0) faca
+    i = i + 1
+  fim
+  sair(i) // encerra o programa com código 10
+fim
 
-exibir("Olá, Mundo!"); // exibe 'Olá, Mundo!' no console
-exibir(2+2); // exibe 4 no console
-exibir(c); // exibe 20 no console (c = a + (b*2))
-
-exibir(verdadeiro); // exibe "Verdadeiro" no console (valor booleano)
-
-MACRO_EXEMPLO // executa a macro exemplo (exibe "Macro de Exemplo" no console)
-
-sair(0); // encerra o programa com código 0
+const x = 1
+se (x > 0) entao
+  minhaFuncao()
+fim
 ```
 
 ## Como contribuir?
@@ -56,11 +53,9 @@ Isso fica pra uma outra hora, ou até o momento que alguém tiver a boa vontade 
 
 ## FAQ
 
-- **Por que C#?** R: O objetivo era criar uma linguagem simples, eu não vi necessidade de usar C ou C++.
-- **A linguagem é compilada ou interpretada?** R: Os dois, ela possui um interpretador, mas também compila pra C.
-- **Por quê compilar pra C?** R: Compilar diretamente pra assembly seria uma tarefa complicada, e eu não tinha muito tempo pra fazer isso. Quem sabe no futuro.
-- **O código não está um pouco bagunçado?** R: Sim, está... Por isso eu deixei ele open-source! Assim você pode me ajudar a melhorá-lo. Eu queria ter escrito um código mais limpo,
-porém com pouco tempo, pressa para acabar, e a falta de experiência na criação de um parser contribuíram para o estado atual do código (Mas no final ele ficou Ok)
+- **Libra é Turing Completa?** R: Está no caminho
+- **Compilada ou Interpretada?** R: A Libra possui apenas um Interpretador. Talvez no futuro eu pense em desenvolver uma VM para rodar a linguagem.
+- **Por que C#?** R: A ideia era criar uma linguagem simples, na época eu não tinha muito conhecimento de C ou C++, e C# era minha linguagem mais avançada.
 
 **Dúvidas?**
 Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucas.campos44@fatec.sp.gov.br</a>
