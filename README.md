@@ -58,7 +58,8 @@ Isso fica pra uma outra hora, ou até o momento que alguém tiver a boa vontade 
 
 - **Libra é Turing Completa?** R: Está no caminho
 - **Compilada ou Interpretada?** R: A Libra possui apenas um Interpretador. Talvez no futuro eu pense em desenvolver uma VM para rodar a linguagem.
-- **Por que C#?** R: A ideia era criar uma linguagem simples, na época eu não tinha muito conhecimento de C ou C++, e C# era minha linguagem mais avançada.
+- **Por que C# para o Interpretador?** R: A ideia era criar uma linguagem simples, na época eu não tinha muito conhecimento de C ou C++, e C# era minha linguagem mais avançada.
 
 **Dúvidas?**
-Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucas.campos44@fatec.sp.gov.br</a>
+Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucasm.campos@hotmail.com.br</a>
+ou entre no Discord: https://discord.gg/mnGkSD4CsA
