@@ -83,25 +83,25 @@ public class Token
         switch(tipo)
         {
             case TokenTipo.PontoEVirgula:
-                return ";";
+                return "';'";
             case TokenTipo.AbrirParen:
-                return "(";
+                return "'('";
             case TokenTipo.FecharParen:
-                return ")";
+                return "')'";
             case TokenTipo.OperadorComparacao:
-                return "==";
+                return "'=='";
             case TokenTipo.OperadorDefinir:
-                return "=";
+                return "'='";
             case TokenTipo.OperadorSoma:
-                return "+";
+                return "'+'";
             case TokenTipo.OperadorSub:
-                return "-";
+                return "'-'";
             case TokenTipo.OperadorMult:
-                return "*";
+                return "'*'";
             case TokenTipo.OperadorDiv:
-                return "/";
+                return "'/'";
             case TokenTipo.Sair:
-                return "sair()";
+                return "sair";
             case TokenTipo.Exibir:
                 return "exibir()";
             case TokenTipo.TextoLiteral:

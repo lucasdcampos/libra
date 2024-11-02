@@ -1,10 +1,7 @@
-var x = 0
-funcao a()
-    se x < 10
-        x = x+1
-        a()
-    fim
+funcao soma(a, b)
+    var resultado = a + b
+    __EscreverInt__(resultado)
 fim
 
-a()
-__EscreverInt__(x)
+soma(1,2)
+soma(1,2,3)

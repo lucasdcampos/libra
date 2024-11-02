@@ -43,7 +43,7 @@ public class Parser
                     return ParseInstrucaoVar(false);
         }
 
-        Erros.LancarErro(new Erro($"Instrução inválida: {Atual().Tipo.ToString()}, por {chamador}", Atual().Linha));
+        Erros.LancarErro(new Erro($"Instrução inválida: {Atual().Tipo.ToString()}, por {chamador}", _linha));
 
         return null;
     }
@@ -55,13 +55,9 @@ public class Parser
 
         while(TentarConsumirToken(TokenTipo.Fim) == null)
         {
-            Console.WriteLine(Atual().Tipo);
             var instrucao = ParseInstrucao("Escopo");
 
             instrucoes.Add(instrucao);
-
-            if(TentarConsumirToken(TokenTipo.Fim) != null)
-                break;
         }
 
         escopos++;
@@ -71,19 +67,16 @@ public class Parser
 
     private InstrucaoSair? ParseInstrucaoSair()
     {
-        TentarConsumirToken(TokenTipo.Sair);
-        TentarConsumirToken(TokenTipo.AbrirParen);
+        ConsumirToken(TokenTipo.Sair);
+        ConsumirToken(TokenTipo.AbrirParen);
 
         // Assim podemos sair sem passar nenhum argumento. Ex: sair()
-        if(Atual().Tipo == TokenTipo.FecharParen)
-        {
-            ConsumirToken();
+        if(TentarConsumirToken(TokenTipo.FecharParen) != null)
             return new InstrucaoSair(new ExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0)));;
-        }
 
         var expr = ParseExpressao();
 
-        TentarConsumirToken(TokenTipo.FecharParen);
+        ConsumirToken(TokenTipo.FecharParen);
 
         return new InstrucaoSair(expr);
     }
@@ -92,9 +85,9 @@ public class Parser
     {
         TentarConsumirToken(TokenTipo.Var);
 
-        string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
+        string identificador = ConsumirToken(TokenTipo.Identificador).Valor;
 
-        TentarConsumirToken(TokenTipo.OperadorDefinir);
+        ConsumirToken(TokenTipo.OperadorDefinir);
 
         var expressao = ParseExpressao();
 
@@ -103,11 +96,11 @@ public class Parser
 
     private InstrucaoConst? ParseInstrucaoConst()
     {
-        TentarConsumirToken(TokenTipo.Const);
+        ConsumirToken(TokenTipo.Const);
 
-        string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
+        string identificador = ConsumirToken(TokenTipo.Identificador).Valor;
 
-        TentarConsumirToken(TokenTipo.OperadorDefinir);
+        ConsumirToken(TokenTipo.OperadorDefinir);
 
         var expressao = ParseExpressao();
 
@@ -116,9 +109,9 @@ public class Parser
 
     private InstrucaoChamadaFuncao? ParseInstrucaoChamadaFuncao()
     {
-        string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
+        string identificador = ConsumirToken(TokenTipo.Identificador).Valor;
 
-        TentarConsumirToken(TokenTipo.AbrirParen);
+        ConsumirToken(TokenTipo.AbrirParen);
 
         var argumentos = new List<Expressao>();
         while(Atual().Tipo != TokenTipo.FecharParen)
@@ -126,10 +119,13 @@ public class Parser
             var expr = ParseExpressao();
             argumentos.Add(expr);
 
+            if(expr == null)
+                Erros.LancarErro(new ErroEsperado("expressão", _linha));
+
             TentarConsumirToken(TokenTipo.Virgula);
         }
 
-        TentarConsumirToken(TokenTipo.FecharParen);
+        ConsumirToken(TokenTipo.FecharParen);
 
         return new InstrucaoChamadaFuncao(identificador, argumentos);
     }
@@ -138,37 +134,37 @@ public class Parser
     {
         TentarConsumirToken(TokenTipo.Funcao);
         
-        string identificador = TentarConsumirToken(TokenTipo.Identificador).Valor;
-        var instrucoes = new List<Instrucao>();
+        string? identificador = ConsumirToken(TokenTipo.Identificador)?.Valor;
 
-        TentarConsumirToken(TokenTipo.AbrirParen);
+        ConsumirToken(TokenTipo.AbrirParen);
 
         var parametros = new List<string>();
 
         while(Atual().Tipo != TokenTipo.FecharParen)
         {
             if(Atual().Tipo != TokenTipo.Identificador)
-                Erros.LancarErro(new ErroEsperado($"Identificador", Atual().Linha));
+                ConsumirToken(TokenTipo.FecharParen); // tentar fechar paren (vai dar erro da msm forma)
             
-            parametros.Add(ConsumirToken().Valor);
+            var param = ConsumirToken()?.Valor;
+            parametros.Add(param);
+
             TentarConsumirToken(TokenTipo.Virgula);
         }
 
-        TentarConsumirToken(TokenTipo.FecharParen, "Esperado `)`");
+        ConsumirToken(TokenTipo.FecharParen);
 
         var escopo = ParseEscopo();
 
         return new InstrucaoFuncao(identificador, escopo, parametros);
     }
-
     
     private InstrucaoSe? ParseInstrucaoSe()
     {
-        TentarConsumirToken(TokenTipo.Se);
+        ConsumirToken(TokenTipo.Se);
 
         var expressao = ParseExpressao();
 
-        TentarConsumirToken(TokenTipo.Entao);
+        ConsumirToken(TokenTipo.Entao);
 
         var escopo = ParseEscopo();
         
@@ -181,10 +177,10 @@ public class Parser
 
     private InstrucaoEnquanto? ParseInstrucaoEnquanto()
     {
-        TentarConsumirToken(TokenTipo.Enquanto);
+        ConsumirToken(TokenTipo.Enquanto);
 
         var expressao = ParseExpressao();
-        TentarConsumirToken(TokenTipo.Faca);
+        ConsumirToken(TokenTipo.Faca);
 
         var escopo = ParseEscopo();
 
@@ -206,14 +202,13 @@ public class Parser
             }
         }
 
+        Erros.LancarErro(new Erro("Impossível determinar expressão", _linha, 1000));
         return null;
     }
 
     // TODO: Implementar ordem correta das operações
     private ExpressaoBinaria? ParseExpressaoBinaria()
     {
-        ExpressaoBinaria? binaria = null;
-
         ExpressaoTermo? esquerda = null; // TEM que ser um TERMO
         Token? operador = null;
         Expressao? direita = null;
@@ -232,14 +227,14 @@ public class Parser
             direita = ParseExpressao();
         }
 
-        if(esquerda != null && direita != null)
+        if(esquerda == null || direita == null)
         {
-            binaria = new ExpressaoBinaria(esquerda, operador, direita);
+            Erros.LancarErro(new Erro("Impossível determinar expressão", _linha));
         }
 
-        TentarConsumirToken(TokenTipo.AbrirParen);
+        TentarConsumirToken(TokenTipo.FecharParen);
 
-        return binaria;
+        return new ExpressaoBinaria(esquerda, operador, direita);;
     }
 
     private bool TokenEhOperador(Token token)
@@ -266,11 +261,6 @@ public class Parser
         return false;
     }
 
-    private bool NaoForFim()
-    {
-        return Atual().Tipo != TokenTipo.FimDoArquivo;
-    }
-
     private Token Atual() 
     {
         return Proximo(0);
@@ -291,26 +281,20 @@ public class Parser
         _posicao += quantidade;
     }
 
-    private Token? ConsumirToken()
+    private Token? ConsumirToken(TokenTipo tipo = TokenTipo.TokenInvalido)
     {
         var token = Atual();
+        
+        if(tipo != TokenTipo.TokenInvalido && token.Tipo != tipo)
+        {
+            Erros.LancarErro(new ErroEsperado(Token.TipoParaString(tipo)));
+        }
+
         Passar();
 
         _linha = token.Linha;
 
         return token;
-    }
-
-    private Token? TentarConsumirToken(TokenTipo tipo, string erro)
-    {
-        if(Atual().Tipo == tipo)
-        {
-            return ConsumirToken();
-        }
-
-        Erros.LancarErro(new ErroEsperado(tipo.ToString(), _linha));
-
-        return null;
     }
 
     private Token? TentarConsumirToken(TokenTipo tipo)

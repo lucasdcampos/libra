@@ -27,9 +27,9 @@ public class Erro
         string msg = "";
         string categoria = "";
 
-        if(Codigo > 1000 && Codigo < 2000)
+        if(Codigo >= 1000 && Codigo < 2000)
             categoria = "ErroSintaxe: ";
-        else if(Codigo > 2000 && Codigo < 3000)
+        else if(Codigo >= 2000 && Codigo < 3000)
             categoria = "ErroExecucao: ";
         else
             categoria = "Erro: ";

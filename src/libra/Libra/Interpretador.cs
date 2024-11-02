@@ -70,7 +70,7 @@ public class Interpretador
         else if (instrucao is InstrucaoChamadaFuncao)
         {
             var chamada = (InstrucaoChamadaFuncao)instrucao;
-            
+
             if(chamada.Identificador.StartsWith("__") && chamada.Identificador.EndsWith("__"))
             {
                 string nomeFuncao = chamada.Identificador.Replace("__", "");
@@ -88,7 +88,26 @@ public class Interpretador
             }
             else
             {
-                InterpretarEscopo(_programa.Funcoes[chamada.Identificador].Escopo);
+                var variaveis = new List<Variavel>();
+                var funcao = _programa.Funcoes[chamada.Identificador];
+                var args = chamada.Argumentos.Count;
+                var parametros = funcao.Parametros.Count;
+
+                if(args != parametros)
+                {
+                    Erros.LancarErro(new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {args}"));
+                }
+
+                
+
+                for(int i = 0; i < chamada.Argumentos.Count; i++)
+                {
+                    string nomeVariavel = funcao.Parametros[i];
+
+                    variaveis.Add(new Variavel(nomeVariavel, new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString())));
+                }
+
+                InterpretarEscopo(funcao.Escopo, variaveis);
             }
         }
 
@@ -131,10 +150,18 @@ public class Interpretador
         return 0;
     }
 
-    private int InterpretarEscopo(Escopo escopo)
+    private int InterpretarEscopo(Escopo escopo, List<Variavel> variaveis = null)
     {
         _enderecosIniciaisEscopos.Add(_programa.Variaveis.Count -1);
 
+        if(variaveis != null)
+        {
+            for(int i = 0; i < variaveis.Count; i++)
+            {
+                _programa.Variaveis.Add(variaveis[i].Identificador, variaveis[i]);
+            }
+        }
+        
         for(int i = 0; i < escopo.Instrucoes.Count; i++)
         {
             InterpretarInstrucao(escopo.Instrucoes[i]);

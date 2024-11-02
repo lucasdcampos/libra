@@ -257,6 +257,7 @@ public class Tokenizador
                         break;
                     case ',':
                         AdicionarTokenALista(TokenTipo.Virgula);
+                        Passar();
                         break;
                     default:
                         Erros.LancarErro(new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})"));
