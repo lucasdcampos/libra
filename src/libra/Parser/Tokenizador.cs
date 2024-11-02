@@ -241,7 +241,7 @@ public class Tokenizador
                         texto += ConsumirChar();
                         AdicionarTokenALista(TokenTipo.CaractereLiteral, texto);
                         texto = "";
-                        if(Proximo(1) != '\'')
+                        if(Atual() != '\'')
                         {
                             Erros.LancarErro(new ErroEsperado("`'`"));
                         }

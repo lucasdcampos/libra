@@ -53,6 +53,7 @@ public static class LibraBase
         Console.WriteLine(int.Parse(i));
     }
 
+
     public static void Pausar(string ms)
     {
         var i = int.Parse(ms);

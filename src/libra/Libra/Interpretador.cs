@@ -192,7 +192,7 @@ public class Interpretador
         {
             var termo = (ExpressaoTermo)expressao;
 
-            return int.Parse(ExtrairValorTermo(termo));
+            return ExtrairValorTermo(termo);
         }
 
         else if(expressao is ExpressaoBinaria)
@@ -204,7 +204,7 @@ public class Interpretador
 
             int a, b = 0;
 
-            a = int.Parse(ExtrairValorTermo(esq));
+            a = ExtrairValorTermo(esq);
 
             b = InterpretarExpressao(dir);
             
@@ -255,17 +255,23 @@ public class Interpretador
         _programa.Variaveis[identificador] = variavel;
     }
 
-    private string ExtrairValorTermo(ExpressaoTermo termo)
+    private int ExtrairValorTermo(ExpressaoTermo termo)
     {
         if(termo.Token.Tipo == TokenTipo.Identificador)
         {
-            if(!_programa.VariavelExiste(termo.Valor)) return "0";
-
-            return _programa.Variaveis[termo.Valor].Valor;
+            
         }
 
-        if(termo.Valor == null) return "0"; 
-        return termo.Valor;
+        switch(termo.Token.Tipo)
+        {
+            case TokenTipo.Identificador:
+                if(!_programa.VariavelExiste(termo.Valor)) return 0;
+                return int.Parse(_programa.Variaveis[termo.Valor].Valor);
+            case TokenTipo.CaractereLiteral:
+                return (int)termo.Token.Valor[0];
+        }
+
+        return int.Parse(termo.Valor);
     }
 
 }

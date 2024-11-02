@@ -1,6 +1,0 @@
-funcao soma(a, b)
-    var resultado = a + b
-    __EscreverInt__(resultado)
-fim
-
-soma(1,2)

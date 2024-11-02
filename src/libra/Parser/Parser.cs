@@ -190,7 +190,8 @@ public class Parser
     private Expressao? ParseExpressao()
     {
 
-        if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
+        if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.CaractereLiteral ||
+           Atual().Tipo == TokenTipo.Identificador)
         {
             if(TokenEhOperador(Proximo(1)))
             {
