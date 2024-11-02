@@ -181,32 +181,21 @@ public class Tokenizador
                         Passar();
                         break;
                     case '/':
-                        
-                        if(Proximo(1) == '/')
-                        {
-                            Passar();
-
-                            while(Atual() != '\n' || Atual() != '\0')
-                            {
-                                // solução imbecil pra conseguir parar o comentário sem quebrar linha
-                                if(Atual() == '*')
-                                {
-                                    if(Proximo(1) == '\\')
-                                    {
-                                        Passar();
-                                        Passar();
-                                        break;
-                                    }
-                                }
-                                Passar();
-                            }
-                                
-                            break;
-                        }
-
-                        AdicionarTokenALista(TokenTipo.OperadorDiv);
                         Passar();
+                        if (Atual() == '/')
+                        {
+                            ConsumirComentarioLinha();
+                        }
+                        else if (Atual() == '*')
+                        {
+                            ConsumirComentarioBloco();
+                        }
+                        else
+                        {
+                            AdicionarTokenALista(TokenTipo.OperadorDiv);
+                        }
                         break;
+
                     case ')':
                         AdicionarTokenALista(TokenTipo.FecharParen);
                         Passar();
@@ -247,14 +236,6 @@ public class Tokenizador
                         }
                         Passar();
                         break;
-                    case '#':
-                        while(Atual() != '\n')
-                        {
-                            Passar();
-                        }
-
-                        Passar();
-                        break;
                     case ',':
                         AdicionarTokenALista(TokenTipo.Virgula);
                         Passar();
@@ -272,6 +253,31 @@ public class Tokenizador
 
         return _tokens;
     }
+
+    private void ConsumirComentarioLinha()
+    {
+        Passar();
+        while (Proximo(1) != '\n' && Proximo(1) != '\0')
+        {
+            Passar();
+        }
+    }
+
+    private void ConsumirComentarioBloco()
+    {
+        Passar();
+        while (Proximo(1) != '\0')
+        {
+            if (Atual() == '*' && Proximo(1) == '/')
+            {
+                Passar(); // Consome '*'
+                Passar(); // Consome '/'
+                break;
+            }
+            Passar();
+        }
+    }
+
 
     private char Atual() 
     {
