@@ -23,19 +23,22 @@ Libra foi projetada para ser fácil de entender e utilizar, especialmente para i
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
-// declarando variáveis
-funcao minhaFuncao()
-  var i = 0
-  enquanto (1 > 0) faca
-    i = i + 1
-  fim
-  sair(i) // encerra o programa com código 10
+// Declarando uma função
+funcao fibonacci(n):
+    var a = 0
+    var b = 1
+    var contador = 0
+    enquanto (contador < n) faca
+        escrever(a)
+        var temp = a
+        a = b
+        b = temp + b
+        contador = contador+1 // incrementando o contador
+    fim
 fim
 
-const x = 1
-se (x > 0) entao
-  minhaFuncao()
-fim
+// Escreve os primeiros 10 números de Fibonacci
+fibonacci(10)
 ```
 
 ## Como contribuir?
