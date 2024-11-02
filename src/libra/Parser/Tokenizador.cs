@@ -222,7 +222,6 @@ public class Tokenizador
                         else
                         {
                             AdicionarTokenALista(TokenTipo.OperadorDefinir);
-                            Passar();
                         }
                         break;
                     case '"':

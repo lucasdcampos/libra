@@ -17,18 +17,15 @@ public class Parser
         
         var instrucoes = new List<Instrucao>();
 
-        var i = ParseInstrucao();
-
-        while(i != null)
+        while(TentarConsumirToken(TokenTipo.FimDoArquivo) == null)
         {
-            instrucoes.Add(i);
-            i = ParseInstrucao();
+            instrucoes.Add(ParseInstrucao("'Programa'"));
         }
 
         return new Programa(instrucoes);
     }
 
-    private Instrucao? ParseInstrucao()
+    private Instrucao? ParseInstrucao(string chamador = "")
     {
         switch(Atual().Tipo)
         {
@@ -46,24 +43,29 @@ public class Parser
                     return ParseInstrucaoVar(false);
         }
 
+        Erros.LancarErro(new Erro($"Instrução inválida: {Atual().Tipo.ToString()}, por {chamador}", Atual().Linha));
+
         return null;
     }
 
+    int escopos = 0;
     private Escopo? ParseEscopo()
     {
         var instrucoes = new List<Instrucao>();
 
-        var i = ParseInstrucao();
-
-        while(i != null)
+        while(TentarConsumirToken(TokenTipo.Fim) == null)
         {
-            Console.WriteLine(i);
-            instrucoes.Add(i);
-            i = ParseInstrucao();
+            Console.WriteLine(Atual().Tipo);
+            var instrucao = ParseInstrucao("Escopo");
+
+            instrucoes.Add(instrucao);
+
+            if(TentarConsumirToken(TokenTipo.Fim) != null)
+                break;
         }
 
-        TentarConsumirToken(TokenTipo.Fim);
-        
+        escopos++;
+
         return new Escopo(instrucoes);
     }
 
@@ -156,8 +158,6 @@ public class Parser
 
         var escopo = ParseEscopo();
 
-        TentarConsumirToken(TokenTipo.Fim);
-
         return new InstrucaoFuncao(identificador, escopo, parametros);
     }
 
@@ -171,8 +171,6 @@ public class Parser
         TentarConsumirToken(TokenTipo.Entao);
 
         var escopo = ParseEscopo();
-
-        TentarConsumirToken(TokenTipo.Fim);
         
         Escopo escopoSenao = null;
         if(TentarConsumirToken(TokenTipo.Senao) != null)
@@ -189,8 +187,6 @@ public class Parser
         TentarConsumirToken(TokenTipo.Faca);
 
         var escopo = ParseEscopo();
-
-        TentarConsumirToken(TokenTipo.Fim);
 
         return new InstrucaoEnquanto(expressao, escopo);
     }

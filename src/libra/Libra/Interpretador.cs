@@ -70,7 +70,7 @@ public class Interpretador
         else if (instrucao is InstrucaoChamadaFuncao)
         {
             var chamada = (InstrucaoChamadaFuncao)instrucao;
-
+            
             if(chamada.Identificador.StartsWith("__") && chamada.Identificador.EndsWith("__"))
             {
                 string nomeFuncao = chamada.Identificador.Replace("__", "");
@@ -114,7 +114,6 @@ public class Interpretador
 
             while(InterpretarExpressao(enquanto.Expressao) != 0)
             {
-                //Console.WriteLine(InterpretarExpressao(enquanto.Expressao));
                 InterpretarEscopo(enquanto.Escopo);
             }
         }
@@ -151,7 +150,7 @@ public class Interpretador
         }
 
         _enderecosIniciaisEscopos.RemoveAt(_enderecosIniciaisEscopos.Count - 1);
-
+        
         return 0;
     }
 

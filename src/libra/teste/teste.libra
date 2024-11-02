@@ -1,2 +1,10 @@
-var x = 1 + 2 * 3
+var x = 0
+funcao a()
+    se x < 10
+        x = x+1
+        a()
+    fim
+fim
+
+a()
 __EscreverInt__(x)
