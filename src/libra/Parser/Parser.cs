@@ -72,7 +72,10 @@ public class Parser
 
         // Assim podemos sair sem passar nenhum argumento. Ex: sair()
         if(TentarConsumirToken(TokenTipo.FecharParen) != null)
-            return new InstrucaoSair(new ExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0)));;
+        {
+            return new InstrucaoSair(new ExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0, "0")));;
+        }
+            
 
         var expr = ParseExpressao();
 
