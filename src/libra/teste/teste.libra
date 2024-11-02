@@ -2,7 +2,22 @@ funcao soma(a, b)
     retornar a+b
 fim
 
-var x = soma(1,2)
-var y = soma(10, 5)
+funcao somaMaiorQueN(a1, b1, n)
+    var resultado = soma(a1, b1)
 
-sair(soma(100,100))
+    retornar resultado > n
+fim
+
+var num1 = 10
+var num2 = 5
+var total = 5
+
+se somaMaiorQueN(num1, num2, total) entao
+    __Escrever__('S')
+    __Escrever__('I')
+    __Escrever__('M')
+    __Escrever__(13)
+    __Escrever__(10)
+fim
+
+__Escrever__(65)

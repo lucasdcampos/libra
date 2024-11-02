@@ -19,7 +19,15 @@ namespace Libra.Arvore
 
         public Token Token { get; private set; }
 
-        public string Valor => Token.Valor;        
+        public string Valor => Token.Valor;
+
+        public override string ToString()
+        {
+            if(Token != null)
+                return Token.Valor;
+            
+            return ChamadaFuncao.Identificador + "()"; // TODO: Printar os argumentos
+        }
     }
 
     public class ExpressaoBinaria : Expressao
@@ -33,6 +41,11 @@ namespace Libra.Arvore
             Esquerda = esquerda;
             Operador = operador;
             Direita = direita;
+        }
+
+        public override string ToString()
+        {
+            return $"{Esquerda.ToString()} {Token.TipoParaString(Operador.Tipo)} {Direita.ToString()}";
         }
 
     }

@@ -109,18 +109,10 @@ public class Interpretador
                 for(int i = 0; i < chamada.Argumentos.Count; i++)
                 {
                     string nomeVariavel = funcao.Parametros[i];
-
                     variaveis.Add(new Variavel(nomeVariavel, new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString())));
                 }
 
                 int retorno = InterpretarEscopo(funcao.Escopo, variaveis);
-
-                for(int i = 0; i < chamada.Argumentos.Count; i++)
-                {
-                    string nomeVariavel = funcao.Parametros[i];
-
-                    _programa.Variaveis.Remove(nomeVariavel);
-                }
 
                 _ultimoRetorno = retorno; // TODO: melhorar isso 
             }
@@ -183,7 +175,17 @@ public class Interpretador
             if(instrucao is InstrucaoRetornar)
             {
                 var retorno = (InstrucaoRetornar)instrucao;
-                return InterpretarExpressao(retorno.Expressao);
+                var resultado = InterpretarExpressao(retorno.Expressao);
+
+                if(variaveis != null)
+                {
+                    for(int j = 0; j < variaveis.Count; j++)
+                    {
+                        _programa.Variaveis.Remove(variaveis[j].Identificador);
+                    }
+                }
+
+                return resultado;
             }
         }
 
