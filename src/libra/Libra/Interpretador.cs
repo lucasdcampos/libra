@@ -70,16 +70,24 @@ public class Interpretador
         else if (instrucao is InstrucaoChamadaFuncao)
         {
             var chamada = (InstrucaoChamadaFuncao)instrucao;
-
+            var args = chamada.Argumentos.Count;
+            
             if(chamada.Identificador.StartsWith("__") && chamada.Identificador.EndsWith("__"))
             {
                 string nomeFuncao = chamada.Identificador.Replace("__", "");
 
-                MethodInfo funcao = typeof(LibraBase).GetMethod(nomeFuncao, BindingFlags.Static | BindingFlags.Public);
+                MethodInfo funcaoBase = typeof(LibraBase).GetMethod(nomeFuncao, BindingFlags.Static | BindingFlags.Public);
 
-                if (funcao != null)
+                if (funcaoBase != null)
                 {
-                    funcao.Invoke(null, ExtrairArgumentos(chamada));
+                    var argsBase = new List<string>();
+                    for(int i = 0; i < args; i++)
+                    {
+                        var expr = InterpretarExpressao(chamada.Argumentos[i]);
+                        argsBase.Add(expr.ToString());
+                    }
+
+                    funcaoBase.Invoke(null, argsBase.ToArray());
                 }
                 else
                 {
@@ -90,15 +98,12 @@ public class Interpretador
             {
                 var variaveis = new List<Variavel>();
                 var funcao = _programa.Funcoes[chamada.Identificador];
-                var args = chamada.Argumentos.Count;
                 var parametros = funcao.Parametros.Count;
 
                 if(args != parametros)
                 {
                     Erros.LancarErro(new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {args}"));
                 }
-
-                
 
                 for(int i = 0; i < chamada.Argumentos.Count; i++)
                 {
@@ -248,19 +253,6 @@ public class Interpretador
         var variavel = new Variavel(identificador, token, constante);
 
         _programa.Variaveis[identificador] = variavel;
-    }
-
-    private string[] ExtrairArgumentos(InstrucaoChamadaFuncao chamada)
-    {
-        var argumentos = new List<string>();
-
-        foreach(var argumento in chamada.Argumentos)
-        {
-            var valor = InterpretarExpressao(argumento).ToString();
-            argumentos.Add(valor);
-        }
-
-        return argumentos.ToArray();
     }
 
     private string ExtrairValorTermo(ExpressaoTermo termo)

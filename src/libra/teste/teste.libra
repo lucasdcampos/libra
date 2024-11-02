@@ -4,4 +4,3 @@ funcao soma(a, b)
 fim
 
 soma(1,2)
-soma(1,2,3)
