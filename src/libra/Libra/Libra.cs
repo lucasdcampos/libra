@@ -1,5 +1,6 @@
 // Classe usada para ser chamada internamente pelo interpretador da Libra
 // É possível chamar uma função Base usando __nomeDaFuncao__() dentro do código-fonte em Libra
+using Libra;
 using Libra.Arvore;
 
 public static class LibraBase
@@ -59,6 +60,12 @@ public static class LibraBase
         var i = int.Parse(ms);
 
         Thread.Sleep(i);
+    }
+
+    public static void Erro(string codigo)
+    {
+        Erro erro = new Erro(codigo);
+        Erros.LancarErro(erro);
     }
 
     // TODO: Só uma estimativa por enquanto, o programa pega muito mais memória que isso

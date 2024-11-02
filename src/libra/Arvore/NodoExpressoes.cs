@@ -2,6 +2,7 @@ namespace Libra.Arvore
 {
     public abstract class Expressao { }
 
+    // TODO: melhorar isso!
     public class ExpressaoTermo : Expressao
     {
         public ExpressaoTermo(Token token)
@@ -9,7 +10,14 @@ namespace Libra.Arvore
             Token = token;
         }
 
-        public Token Token {get; private set;}
+        public ExpressaoTermo(InstrucaoChamadaFuncao chamada)
+        {
+            ChamadaFuncao = chamada;
+        }
+
+        public InstrucaoChamadaFuncao ChamadaFuncao { get; private set; }
+
+        public Token Token { get; private set; }
 
         public string Valor => Token.Valor;        
     }

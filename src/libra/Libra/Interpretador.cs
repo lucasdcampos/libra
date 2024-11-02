@@ -10,6 +10,7 @@ public class Interpretador
     private Programa _programa;
     private int _enderecoInicialEscopo;
     private List<int> _enderecosIniciaisEscopos = new List<int>();
+    private int _ultimoRetorno = 0;
 
     public void Interpretar(Programa programa)
     {
@@ -25,7 +26,7 @@ public class Interpretador
         LibraBase.ProgramaAtual = null;
     }
 
-    private int InterpretarInstrucao(Instrucao instrucao)
+    private Instrucao InterpretarInstrucao(Instrucao instrucao)
     {
         if (instrucao is InstrucaoSair)
         {
@@ -112,7 +113,16 @@ public class Interpretador
                     variaveis.Add(new Variavel(nomeVariavel, new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString())));
                 }
 
-                InterpretarEscopo(funcao.Escopo, variaveis);
+                int retorno = InterpretarEscopo(funcao.Escopo, variaveis);
+
+                for(int i = 0; i < chamada.Argumentos.Count; i++)
+                {
+                    string nomeVariavel = funcao.Parametros[i];
+
+                    _programa.Variaveis.Remove(nomeVariavel);
+                }
+
+                _ultimoRetorno = retorno; // TODO: melhorar isso 
             }
         }
 
@@ -144,15 +154,15 @@ public class Interpretador
 
         else if (instrucao is InstrucaoRomper)
         {
-            return LibraHelper.ROMPER;
+            return instrucao;
         }
 
         else if (instrucao is InstrucaoRetornar)
         {
-            return LibraHelper.RETORNAR;
+            return instrucao;
         }
 
-        return 0;
+        return null;
     }
 
     private int InterpretarEscopo(Escopo escopo, List<Variavel> variaveis = null)
@@ -169,7 +179,12 @@ public class Interpretador
         
         for(int i = 0; i < escopo.Instrucoes.Count; i++)
         {
-            InterpretarInstrucao(escopo.Instrucoes[i]);
+            var instrucao = InterpretarInstrucao(escopo.Instrucoes[i]);
+            if(instrucao is InstrucaoRetornar)
+            {
+                var retorno = (InstrucaoRetornar)instrucao;
+                return InterpretarExpressao(retorno.Expressao);
+            }
         }
 
         int enderecoInicialUltimoEscopo = _enderecosIniciaisEscopos.Last();
@@ -257,9 +272,10 @@ public class Interpretador
 
     private int ExtrairValorTermo(ExpressaoTermo termo)
     {
-        if(termo.Token.Tipo == TokenTipo.Identificador)
+        if(termo.ChamadaFuncao != null)
         {
-            
+            InterpretarInstrucao(termo.ChamadaFuncao);
+            return _ultimoRetorno;
         }
 
         switch(termo.Token.Tipo)

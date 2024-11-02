@@ -99,14 +99,19 @@ namespace Libra.Arvore
 
     }
 
-    public class InstrucaoRomper() : Instrucao
+    public class InstrucaoRomper : Instrucao
     {
         // Nada de interessante...
     }
 
-    public class InstrucaoRetornar() : Instrucao
+    public class InstrucaoRetornar : Instrucao
     {
-        // Nada de interessante...
+        public Expressao Expressao { get; private set; }
+
+        public InstrucaoRetornar(Expressao expressao)
+        {
+            Expressao = expressao;
+        }
     }
 
     public class InstrucaoChamadaFuncao : Instrucao

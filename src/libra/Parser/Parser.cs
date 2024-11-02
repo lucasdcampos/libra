@@ -36,6 +36,7 @@ public class Parser
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
             case TokenTipo.Romper: return new InstrucaoRomper();
+            case TokenTipo.Retornar: ConsumirToken(); return new InstrucaoRetornar(ParseExpressao());
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return ParseInstrucaoChamadaFuncao();
@@ -75,7 +76,6 @@ public class Parser
         {
             return new InstrucaoSair(new ExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0, "0")));;
         }
-            
 
         var expr = ParseExpressao();
 
@@ -135,7 +135,7 @@ public class Parser
 
     private InstrucaoFuncao? ParseInstrucaoFuncao()
     {
-        TentarConsumirToken(TokenTipo.Funcao);
+        ConsumirToken(TokenTipo.Funcao);
         
         string? identificador = ConsumirToken(TokenTipo.Identificador)?.Valor;
 
@@ -192,7 +192,6 @@ public class Parser
 
     private Expressao? ParseExpressao()
     {
-
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.CaractereLiteral ||
            Atual().Tipo == TokenTipo.Identificador)
         {
@@ -202,6 +201,11 @@ public class Parser
             }
             else
             {
+                if(Proximo(1).Tipo == TokenTipo.AbrirParen)
+                {
+                    return new ExpressaoTermo(ParseInstrucaoChamadaFuncao());
+                }
+
                 return new ExpressaoTermo(ConsumirToken());
             }
         }
@@ -235,8 +239,6 @@ public class Parser
         {
             Erros.LancarErro(new Erro("Impossível determinar expressão", _linha));
         }
-
-        TentarConsumirToken(TokenTipo.FecharParen);
 
         return new ExpressaoBinaria(esquerda, operador, direita);;
     }

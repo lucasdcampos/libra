@@ -1,1 +1,8 @@
-sair()
+funcao soma(a, b)
+    retornar a+b
+fim
+
+var x = soma(1,2)
+var y = soma(10, 5)
+
+sair(soma(100,100))
