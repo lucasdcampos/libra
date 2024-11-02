@@ -6,9 +6,10 @@ public class Erro
     public int Linha { get; protected set; }
     public int Coluna { get; protected set; }
 
-    public Erro(string mensagem)
+    public Erro(string mensagem, int linha = 0, int codigo = 1)
     {
-        Codigo = 1;
+        Codigo = codigo;
+        Linha = linha;
         Mensagem = mensagem;
     }
 
