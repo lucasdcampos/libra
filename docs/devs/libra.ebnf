@@ -1,0 +1,18 @@
+
+programa                ::= instrucao* FIM
+
+instrucao               ::= "var" IDENTIFICADOR "=" expressao ";"
+                          | IDENTIFICADOR "=" expressao ";"
+                          | "se" expressao "entao" instrucao* "fim"
+                          | "exibir" "(" expressao ")" ";"
+                          | "sair" "(" expressao ")" ";"
+
+expressao               ::= multiplicacao ( ( "+" | "-" ) multiplicacao )*
+
+multiplicacao           ::= unario ( ( "*" | "/" ) unario )*
+
+unario                  ::= "-" unario | primario
+
+primario                ::= "verdade" | "falso" | NUMERO | TEXTO
+                          | IDENTIFICADOR
+                          | "(" expressao ")"
