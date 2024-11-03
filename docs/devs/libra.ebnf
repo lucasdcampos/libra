@@ -1,11 +1,11 @@
 
 programa                ::= instrucao* FIM
 
-instrucao               ::= "var" IDENTIFICADOR "=" expressao ";"
-                          | IDENTIFICADOR "=" expressao ";"
+instrucao               ::= "var" IDENTIFICADOR "=" expressao
+                          | IDENTIFICADOR "=" expressao
                           | "se" expressao "entao" instrucao* "fim"
-                          | "exibir" "(" expressao ")" ";"
-                          | "sair" "(" expressao ")" ";"
+                          | "exibir" "(" expressao ")"
+                          | "sair" "(" expressao ")"
 
 expressao               ::= multiplicacao ( ( "+" | "-" ) multiplicacao )*
 
