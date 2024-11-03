@@ -1,6 +1,4 @@
-var x = 0
-enquanto x < 10 faca
-	__EscreverInt__(x)
-	x = x+1
-fim
+var lista = [10]
+lista[0] = 100
 
+sair(lista[0])
