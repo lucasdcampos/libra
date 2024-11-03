@@ -54,7 +54,6 @@ public static class LibraBase
         Console.WriteLine(int.Parse(i));
     }
 
-
     public static void Pausar(string ms)
     {
         var i = int.Parse(ms);
@@ -64,8 +63,7 @@ public static class LibraBase
 
     public static void Erro(string codigo)
     {
-        Erro erro = new Erro(codigo);
-        Erros.LancarErro(erro);
+        new Erro(codigo).LancarErro();
     }
 
     // TODO: Só uma estimativa por enquanto, o programa pega muito mais memória que isso
@@ -75,7 +73,9 @@ public static class LibraBase
         int mem = 0;
         foreach(var v in ProgramaAtual.Variaveis.Keys)
         {
-            mem += ProgramaAtual.Variaveis[v].Valor.Length;
+            object valor = ProgramaAtual.Variaveis[v].Valor;
+
+            mem += sizeof(int);
         }
 
         LibraLogger.Log($"Memória:\nQuantidade de variáveis: {ProgramaAtual.Variaveis.Keys.Count}\nMemória Ocupada: {mem} bytes");

@@ -55,12 +55,12 @@ public class Interpretador
 
             if(string.IsNullOrWhiteSpace(identificador))
             {
-                Erros.LancarErro(new Erro("Identificador inválido!"));
+                new Erro("Identificador inválido!").LancarErro();
             }
 
             if(_programa.FuncaoExiste(identificador))
             {
-                Erros.LancarErro(new ErroFuncaoJaDefinida(identificador));
+                new ErroFuncaoJaDefinida(identificador).LancarErro();
             }
             
             var novaFuncao = new Funcao(identificador, funcao.Escopo, funcao.Parametros);
@@ -92,7 +92,7 @@ public class Interpretador
                 }
                 else
                 {
-                    Erros.LancarErro(new ErroFuncaoNaoDefinida(nomeFuncao));
+                    new ErroFuncaoNaoDefinida(nomeFuncao).LancarErro();
                 }
             }
             else
@@ -103,7 +103,7 @@ public class Interpretador
 
                 if(args != parametros)
                 {
-                    Erros.LancarErro(new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {args}"));
+                    new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {args}").LancarErro();
                 }
 
                 for(int i = 0; i < chamada.Argumentos.Count; i++)
@@ -232,7 +232,7 @@ public class Interpretador
                 case TokenTipo.OperadorMult: return a*b;
                 case TokenTipo.OperadorDiv:
                     if(b == 0)
-                        Erros.LancarErro(new ErroDivisaoPorZero());
+                        new ErroDivisaoPorZero().LancarErro();
                     return a/b;
                 case TokenTipo.OperadorMaiorQue: return LibraHelper.BoolParaInt(a>b);
                 case TokenTipo.OperadorMaiorIgualQue: return LibraHelper.BoolParaInt(a>=b);
@@ -251,18 +251,18 @@ public class Interpretador
     {
         if(string.IsNullOrWhiteSpace(identificador))
         {
-            Erros.LancarErro(new Erro("Identificador inválido!"));
+            new Erro("Identificador inválido!").LancarErro();
         }
 
         if(declaracao && _programa.VariavelExiste(identificador))
         {
-            Erros.LancarErro(new ErroVariavelJaDeclarada(identificador));
+            new ErroVariavelJaDeclarada(identificador).LancarErro();
         }
 
         if(_programa.Variaveis.ContainsKey(identificador))
         {
             if(_programa.Variaveis[identificador].Constante)
-                Erros.LancarErro(new ErroModificacaoConstante(identificador));
+                new ErroModificacaoConstante(identificador).LancarErro();
         }
         
         var token = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(expressao).ToString());
@@ -283,13 +283,13 @@ public class Interpretador
         switch(termo.Token.Tipo)
         {
             case TokenTipo.Identificador:
-                if(!_programa.VariavelExiste(termo.Valor)) return 0;
-                return int.Parse(_programa.Variaveis[termo.Valor].Valor);
+                if(!_programa.VariavelExiste((string)termo.Valor)) return 0; // TODO: Lançar erro
+                return int.Parse(_programa.Variaveis[(string)termo.Valor].Valor.ToString());
             case TokenTipo.CaractereLiteral:
-                return (int)termo.Token.Valor[0];
+                return (int)termo.Token.Valor.ToString()[0];
         }
 
-        return int.Parse(termo.Valor);
+        return (int)termo.Valor;
     }
 
 }

@@ -3,25 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{98637C6B-E38A-4F51-AB7E-406636644B6E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libra-CLI", "src\Libra-CLI\Libra-CLI.csproj", "{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libra", "src\libra\libra.csproj", "{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libra", "src\Libra\Libra.csproj", "{D30AD733-B6A0-4AC0-9309-3ED14EEEC806}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D30AD733-B6A0-4AC0-9309-3ED14EEEC806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D30AD733-B6A0-4AC0-9309-3ED14EEEC806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D30AD733-B6A0-4AC0-9309-3ED14EEEC806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D30AD733-B6A0-4AC0-9309-3ED14EEEC806}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C} = {98637C6B-E38A-4F51-AB7E-406636644B6E}
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AAE83A92-6901-4779-8C91-64ED50564BF8}
 	EndGlobalSection
 EndGlobal

@@ -19,12 +19,12 @@ namespace Libra.Arvore
 
         public Token Token { get; private set; }
 
-        public string Valor => Token.Valor;
+        public object Valor => Token.Valor;
 
         public override string ToString()
         {
             if(Token != null)
-                return Token.Valor;
+                return (string)Token.Valor;
             
             return ChamadaFuncao.Identificador + "()"; // TODO: Printar os argumentos
         }

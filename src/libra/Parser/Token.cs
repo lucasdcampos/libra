@@ -7,6 +7,7 @@ public enum TokenTipo
     NumeroLiteral,
     CaractereLiteral,
     TextoLiteral,
+    Vetor,
     Identificador,
     TokenInvalido,
 
@@ -30,6 +31,8 @@ public enum TokenTipo
     // Simbolos
     AbrirParen, 
     FecharParen,
+    AbrirCol,
+    FecharCol,
     PontoEVirgula,
     Virgula,
     NovaLinha,
@@ -54,10 +57,9 @@ public enum TokenTipo
     
 }
 
-
 public class Token
 {
-    public Token(TokenTipo tipo, int linha, string valor = null)
+    public Token(TokenTipo tipo, int linha, object valor = null)
     {
         Tipo = tipo;
         Valor = valor;
@@ -65,7 +67,7 @@ public class Token
     }
 
     public TokenTipo Tipo { get; private set; }
-    public string Valor { get; private set; }
+    public object Valor { get; private set; }
     public int Linha { get; private set; }
 
     public override string ToString()

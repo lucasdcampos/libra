@@ -21,6 +21,17 @@ public class Erro
         Coluna = coluna;
     }
 
+    public void LancarErro()
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+
+        Console.WriteLine(this.ToString());
+
+        Console.ResetColor();
+
+        Environment.Exit(this.Codigo);
+    }
+
     // TODO: Arrumar essa feiura
     public override string ToString()
     {
@@ -99,18 +110,4 @@ public class ErroModificacaoConstante : Erro
 {
     public ErroModificacaoConstante(string variavel, int linha = 0, int coluna = 0) 
         : base(2006, $"Não é possível modificar a constante `{variavel}`.", linha, coluna) { }
-}
-
-public static class Erros
-{
-    public static void LancarErro(Erro e)
-    {
-        Console.ForegroundColor = ConsoleColor.Red;
-
-        Console.WriteLine(e.ToString());
-
-        Console.ResetColor();
-
-        Environment.Exit(e.Codigo);
-    }
 }

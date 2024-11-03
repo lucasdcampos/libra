@@ -30,7 +30,7 @@ public class Tokenizador
                     texto += ConsumirChar();
                 }
 
-                AdicionarTokenALista(TokenTipo.NumeroLiteral, texto);
+                AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(texto));
                 texto = "";
                 continue;
             }
@@ -107,7 +107,6 @@ public class Tokenizador
             }
             else 
             {
-
                 switch(Atual())
                 {
                     case ' ':
@@ -130,6 +129,32 @@ public class Tokenizador
                         break;
                     case '(':
                         AdicionarTokenALista(TokenTipo.AbrirParen);
+                        Passar();
+                        break;
+                    case '[':
+                        ConsumirChar();
+                        if(Char.IsDigit(Atual()))
+                        {
+                            texto = "";
+                            texto += ConsumirChar();
+
+                            while(char.IsDigit(Atual()))
+                            {
+                                ConsumirChar();
+                            }
+
+                            if(Atual() != ']')
+                                new ErroEsperado($"], recebido {Proximo(2)}").LancarErro();
+
+                            AdicionarTokenALista(TokenTipo.Vetor, ConsumirChar());
+                            ConsumirChar();
+                            break;
+                        }
+                        AdicionarTokenALista(TokenTipo.AbrirCol);
+                        Passar();
+                        break;
+                    case ']':
+                        AdicionarTokenALista(TokenTipo.FecharCol);
                         Passar();
                         break;
                     case '>':
@@ -232,7 +257,7 @@ public class Tokenizador
                         texto = "";
                         if(Atual() != '\'')
                         {
-                            Erros.LancarErro(new ErroEsperado("`'`"));
+                            new ErroEsperado("`'`").LancarErro();
                         }
                         Passar();
                         break;
@@ -241,7 +266,7 @@ public class Tokenizador
                         Passar();
                         break;
                     default:
-                        Erros.LancarErro(new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})"));
+                        new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})").LancarErro();
                         break;
                 }
                 
@@ -278,7 +303,6 @@ public class Tokenizador
         }
     }
 
-
     private char Atual() 
     {
         return Proximo(0);
@@ -312,9 +336,8 @@ public class Tokenizador
         _tokens.Add(new Token(tipo, _linha));
     }
 
-    private void AdicionarTokenALista(TokenTipo tipo, string valor)
+    private void AdicionarTokenALista(TokenTipo tipo, object valor)
     {
         _tokens.Add(new Token(tipo, _linha, valor));
     }
-
 }
