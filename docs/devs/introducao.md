@@ -14,7 +14,7 @@ Para funcionar, o código fonte escrito em Libra é lido pelo compilador, onde p
 Token é uma forma mais eficiente de análisarmos pedaços do código. Por exemplo:
 
 ```js
-var x = 10;
+var x = 10
 ```
 Esse código é lido pelo Lexer (também chamado de *Tokenizer*), gerando os seguintes tokens:
 
