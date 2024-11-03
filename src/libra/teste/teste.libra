@@ -1,27 +1,6 @@
-funcao soma(a, b)
-    retornar a+b
+var x = 0
+enquanto x < 10 faca
+	__EscreverInt__(x)
+	x = x+1
 fim
 
-funcao somaMaiorQueN(a1, b1, n)
-    var resultado = soma(a1, b1)
-
-    retornar resultado > n
-fim
-
-var num1 = 10
-var num2 = 5
-var total = 5
-
-se somaMaiorQueN(num1, num2, total) entao
-    __Escrever__('S')
-    __Escrever__('I')
-    __Escrever__('M')
-    __Escrever__(13)
-    __Escrever__(10)
-fim
-
-__Pausar__(5000)
-
-__Escrever__(65)
-
-__AnaliseMem__()

@@ -90,11 +90,23 @@ public class Parser
 
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
 
+        var indiceVetor = ParseVetor();
+
+        if(indiceVetor != null)
+        {
+            ConsumirToken(TokenTipo.OperadorDefinir);
+
+            var expr = ParseExpressao();
+            return new InstrucaoVar(identificador, expr, declaracao, TokenTipo.TokenInvalido, indiceVetor);
+        }
+
         ConsumirToken(TokenTipo.OperadorDefinir);
 
-        if(TentarConsumirToken(TokenTipo.Vetor) != null)
+        indiceVetor = ParseVetor();
+
+        if(indiceVetor != null)
         {
-            //return new InstrucaoVar(identificador, Token, declaracao);
+            return new InstrucaoVar(identificador, indiceVetor, declaracao, TokenTipo.Vetor);
         }
 
         var expressao = ParseExpressao();
@@ -113,6 +125,16 @@ public class Parser
         var expressao = ParseExpressao();
 
         return new InstrucaoConst(identificador, expressao);
+    }
+
+    private Expressao? ParseVetor()
+    {
+        if(TentarConsumirToken(TokenTipo.AbrirCol) == null)
+            { return null; }
+        Expressao expr = ParseExpressao();
+        TentarConsumirToken(TokenTipo.FecharCol);
+
+        return expr;
     }
 
     private InstrucaoChamadaFuncao? ParseInstrucaoChamadaFuncao()
@@ -197,6 +219,18 @@ public class Parser
 
     private Expressao? ParseExpressao()
     {
+        if(Atual().Tipo == TokenTipo.Identificador)
+        {
+            if(Proximo(1).Tipo == TokenTipo.AbrirCol)
+            {
+                var ident = ConsumirToken(TokenTipo.Identificador);
+                ConsumirToken(TokenTipo.AbrirCol);
+
+                var expr = ParseExpressao();
+                ConsumirToken(TokenTipo.FecharCol);
+                return new ExpressaoTermo(new ExpressaoAcessarVetor(ident.Valor.ToString(), expr));
+            }
+        }
         if(Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.CaractereLiteral ||
            Atual().Tipo == TokenTipo.Identificador)
         {
@@ -214,7 +248,6 @@ public class Parser
                 return new ExpressaoTermo(ConsumirToken());
             }
         }
-
         new Erro("Impossível determinar expressão", _linha, 1000).LancarErro();
         return null;
     }

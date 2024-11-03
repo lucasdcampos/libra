@@ -15,7 +15,13 @@ namespace Libra.Arvore
             ChamadaFuncao = chamada;
         }
 
+        public ExpressaoTermo(ExpressaoAcessarVetor vetor)
+        {
+            AcessoVetor = vetor;
+        }
+
         public InstrucaoChamadaFuncao ChamadaFuncao { get; private set; }
+        public ExpressaoAcessarVetor AcessoVetor { get; private set; }
 
         public Token Token { get; private set; }
 
@@ -24,10 +30,21 @@ namespace Libra.Arvore
         public override string ToString()
         {
             if(Token != null)
-                return (string)Token.Valor;
+                return Token.Valor.ToString();
             
             return ChamadaFuncao.Identificador + "()"; // TODO: Printar os argumentos
         }
+    }
+
+    public class ExpressaoAcessarVetor : Expressao
+    {
+        public ExpressaoAcessarVetor(string ident, Expressao expr)
+        {
+            Identificador = ident;
+            Expressao = expr;
+        }
+        public string Identificador {  get; private set; }
+        public Expressao Expressao { get; private set; }
     }
 
     public class ExpressaoBinaria : Expressao

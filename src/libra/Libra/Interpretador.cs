@@ -1,5 +1,6 @@
 using Libra.Arvore;
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Libra;
@@ -31,21 +32,23 @@ public class Interpretador
         if (instrucao is InstrucaoSair)
         {
             var sair = (InstrucaoSair)instrucao;
-            int codigoSaida = InterpretarExpressao(sair.Expressao);
+            int? codigoSaida = (int?)InterpretarExpressao(sair.Expressao);
 
-            LibraBase.Sair(codigoSaida);
+            if (codigoSaida == null)
+                new ErroAcessoNulo().LancarErro();
+
+            LibraBase.Sair((int)codigoSaida);
         }
-
         else if (instrucao is InstrucaoVar)
         {
             var var = (InstrucaoVar)instrucao;
-            DefinirVariavel(var.Identificador, var.EhDeclaracao, false, var.Expressao);
+            DefinirVariavel(var.Identificador, var.EhDeclaracao, false, var.Valor, var.Tipo, var.IndiceVetor);
         }
         else if (instrucao is InstrucaoConst)
         {
             var constante = (InstrucaoConst)instrucao;
             
-            DefinirVariavel(constante.Identificador, true, true, constante.Expressao);
+            DefinirVariavel(constante.Identificador, true, true, constante.Expressao, TokenTipo.TokenInvalido, null); //TODO: Verificar indice
         }
         else if (instrucao is InstrucaoFuncao)
         {
@@ -85,6 +88,10 @@ public class Interpretador
                     for(int i = 0; i < args; i++)
                     {
                         var expr = InterpretarExpressao(chamada.Argumentos[i]);
+
+                        if (expr == null)
+                            new ErroAcessoNulo().LancarErro();
+
                         argsBase.Add(expr.ToString());
                     }
 
@@ -122,7 +129,7 @@ public class Interpretador
         {
             var se = (InstrucaoSe)instrucao;
 
-            if(InterpretarExpressao(se.Expressao) != 0)
+            if((int)InterpretarExpressao(se.Expressao) != 0)
             {
                 InterpretarEscopo(se.Escopo);
             }
@@ -138,7 +145,7 @@ public class Interpretador
         {
             var enquanto = (InstrucaoEnquanto)instrucao;
 
-            while(InterpretarExpressao(enquanto.Expressao) != 0)
+            while((int)InterpretarExpressao(enquanto.Expressao) != 0)
             {
                 InterpretarEscopo(enquanto.Escopo);
             }
@@ -185,7 +192,7 @@ public class Interpretador
                     }
                 }
 
-                return resultado;
+                return (int)resultado;
             }
         }
 
@@ -203,7 +210,7 @@ public class Interpretador
         return 0;
     }
 
-    private int InterpretarExpressao(Expressao expressao)
+    private object InterpretarExpressao(Expressao expressao)
     {
         if(expressao is ExpressaoTermo)
         {
@@ -221,9 +228,9 @@ public class Interpretador
 
             int a, b = 0;
 
-            a = ExtrairValorTermo(esq);
+            a = (int)ExtrairValorTermo(esq);
 
-            b = InterpretarExpressao(dir);
+            b = (int)InterpretarExpressao(dir);
             
             switch(binaria.Operador.Tipo)
             {
@@ -244,10 +251,12 @@ public class Interpretador
                 case TokenTipo.OperadorDiferente: return LibraHelper.BoolParaInt(a!=b);
             }
         }
+
         return 0;
     }
 
-    private void DefinirVariavel(string identificador, bool declaracao, bool constante, Expressao expressao)
+    // TODO: Só um protótipo pra testes. PRECISA DE REFATORAÇÃO!
+    private void DefinirVariavel(string identificador, bool declaracao, bool constante, object valor, TokenTipo tipo, Expressao expressaoIndiceVetor)
     {
         if(string.IsNullOrWhiteSpace(identificador))
         {
@@ -264,20 +273,59 @@ public class Interpretador
             if(_programa.Variaveis[identificador].Constante)
                 new ErroModificacaoConstante(identificador).LancarErro();
         }
-        
-        var token = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(expressao).ToString());
+
+        Token token = null;
+
+        if (valor is Token)
+            token = (Token)valor;
+
+        else if(valor is Expressao)
+        {
+            var expressaoValorFinal = (Expressao)valor;
+            object resultado = InterpretarExpressao(expressaoValorFinal);
+
+            if(expressaoIndiceVetor != null)
+            {
+                int indiceVetor = (int)InterpretarExpressao(expressaoIndiceVetor);
+                var vetor = (Token[])_programa.Variaveis[identificador].Valor;
+
+                vetor[indiceVetor].Valor = resultado;
+                return;
+            }
+
+            // declarando um Vetor (var x = [10])
+            if (tipo == TokenTipo.Vetor)
+            {
+                Token[] tokens = new Token[(int)resultado];
+                for(int i =0; i < tokens.Length; i++)
+                    tokens[i] = new Token(TokenTipo.Nulo, 0);
+
+                token = new Token(tipo, 0, tokens);
+                
+            }
+            else
+                token = new Token(TokenTipo.NumeroLiteral, 0, resultado);
+        }
 
         var variavel = new Variavel(identificador, token, constante);
 
         _programa.Variaveis[identificador] = variavel;
     }
 
-    private int ExtrairValorTermo(ExpressaoTermo termo)
+    private object ExtrairValorTermo(ExpressaoTermo termo)
     {
         if(termo.ChamadaFuncao != null)
         {
             InterpretarInstrucao(termo.ChamadaFuncao);
             return _ultimoRetorno;
+        }
+
+        if(termo.AcessoVetor != null)
+        {
+            var vetor = (Token[])(_programa.Variaveis[termo.AcessoVetor.Identificador].Valor);
+            int indice = (int)InterpretarExpressao(termo.AcessoVetor.Expressao);
+
+            return vetor[indice].Valor;
         }
 
         switch(termo.Token.Tipo)

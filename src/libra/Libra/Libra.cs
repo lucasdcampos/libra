@@ -61,6 +61,20 @@ public static class LibraBase
         Thread.Sleep(i);
     }
 
+    public static void Tipo(string identificador)
+    {
+        Console.WriteLine(identificador);
+
+        var tipo = ProgramaAtual.Variaveis[identificador].Tipo;
+
+        switch (tipo)
+        {
+            case TokenTipo.NumeroLiteral: Console.WriteLine("Numero"); break;
+            case TokenTipo.CaractereLiteral: Console.WriteLine("Caractere"); break;
+            case TokenTipo.Vetor: Console.WriteLine("Vetor"); break;
+        }
+    }
+
     public static void Erro(string codigo)
     {
         new Erro(codigo).LancarErro();

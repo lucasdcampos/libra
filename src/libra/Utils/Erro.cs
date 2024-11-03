@@ -111,3 +111,9 @@ public class ErroModificacaoConstante : Erro
     public ErroModificacaoConstante(string variavel, int linha = 0, int coluna = 0) 
         : base(2006, $"Não é possível modificar a constante `{variavel}`.", linha, coluna) { }
 }
+
+public class ErroAcessoNulo : Erro
+{
+    public ErroAcessoNulo(string msg = "", int linha = 0, int coluna = 0)
+        : base(2007, $"Tentando acessar um valor Nulo`.", linha, coluna) { }
+}

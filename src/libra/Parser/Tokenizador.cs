@@ -133,25 +133,7 @@ public class Tokenizador
                         break;
                     case '[':
                         ConsumirChar();
-                        if(Char.IsDigit(Atual()))
-                        {
-                            texto = "";
-                            texto += ConsumirChar();
-
-                            while(char.IsDigit(Atual()))
-                            {
-                                ConsumirChar();
-                            }
-
-                            if(Atual() != ']')
-                                new ErroEsperado($"], recebido {Proximo(2)}").LancarErro();
-
-                            AdicionarTokenALista(TokenTipo.Vetor, ConsumirChar());
-                            ConsumirChar();
-                            break;
-                        }
                         AdicionarTokenALista(TokenTipo.AbrirCol);
-                        Passar();
                         break;
                     case ']':
                         AdicionarTokenALista(TokenTipo.FecharCol);

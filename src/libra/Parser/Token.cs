@@ -9,6 +9,7 @@ public enum TokenTipo
     TextoLiteral,
     Vetor,
     Identificador,
+    Nulo,
     TokenInvalido,
 
     // Operadores
@@ -67,7 +68,7 @@ public class Token
     }
 
     public TokenTipo Tipo { get; private set; }
-    public object Valor { get; private set; }
+    public object Valor { get; internal set; }
     public int Linha { get; private set; }
 
     public override string ToString()
