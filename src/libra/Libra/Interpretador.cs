@@ -90,14 +90,10 @@ public class Interpretador
         string identificador = funcao.Identificador;
 
         if(string.IsNullOrWhiteSpace(identificador))
-        {
             new Erro("Identificador inválido!").LancarErro();
-        }
-
+        
         if(_programa.FuncaoExiste(identificador))
-        {
             new ErroFuncaoJaDefinida(identificador).LancarErro();
-        }
         
         var novaFuncao = new Funcao(identificador, funcao.Escopo, funcao.Parametros);
 
@@ -166,8 +162,8 @@ public class Interpretador
 
         if(variaveis != null)
             for(int i = 0; i < variaveis.Count; i++)
-                _programa.Variaveis.Add(variaveis[i].Identificador, variaveis[i]);
-            
+                _programa.Variaveis[variaveis[i].Identificador] = variaveis[i];
+                
         for(int i = 0; i < escopo.Instrucoes.Count; i++)
         {
             var instrucao = InterpretarInstrucao(escopo.Instrucoes[i]);
