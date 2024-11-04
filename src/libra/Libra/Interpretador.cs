@@ -111,27 +111,27 @@ public class Interpretador
             string nomeFuncao = chamada.Identificador.Replace("__", "");
             return ChamarFuncaoInterna(nomeFuncao, chamada);
         }
-        else
+
+        if(!_programa.FuncaoExiste(chamada.Identificador))
+            new ErroFuncaoNaoDefinida(chamada.Identificador).LancarErro();
+            
+        var variaveis = new List<Variavel>();
+        var funcao = _programa.Funcoes[chamada.Identificador];
+        var parametros = funcao.Parametros.Count;
+
+        if(qtdArgumentos != parametros)
+            new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {qtdArgumentos}").LancarErro();
+
+        for(int i = 0; i < chamada.Argumentos.Count; i++)
         {
-            var variaveis = new List<Variavel>();
-            var funcao = _programa.Funcoes[chamada.Identificador];
-            var parametros = funcao.Parametros.Count;
-
-            if(qtdArgumentos != parametros)
-                new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {qtdArgumentos}").LancarErro();
-
-            for(int i = 0; i < chamada.Argumentos.Count; i++)
-            {
-                string nomeVariavel = funcao.Parametros[i];
-                variaveis.Add(new Variavel(nomeVariavel, new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString())));
-            }
-
-            int retorno = InterpretarEscopo(funcao.Escopo, variaveis);
-
-            return _ultimoRetorno = retorno; // TODO: melhorar isso
+            string nomeVariavel = funcao.Parametros[i];
+            variaveis.Add(new Variavel(nomeVariavel, new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString())));
         }
 
-        return null;
+        int retorno = InterpretarEscopo(funcao.Escopo, variaveis);
+
+        return _ultimoRetorno = retorno; // TODO: melhorar isso
+        
     }
 
     private object ChamarFuncaoInterna(string nomeFuncao, ExpressaoChamadaFuncao chamada)
@@ -285,6 +285,9 @@ public class Interpretador
 
         var vetor = (Token[])_programa.Variaveis[identificador].Valor;
 
+        if(indiceVetor > vetor.Length || indiceVetor < 0)
+            new ErroIndiceForaVetor().LancarErro();
+
         vetor[indiceVetor].Valor = valor;
 
         return valor;
@@ -309,7 +312,8 @@ public class Interpretador
         switch(termo.Token.Tipo)
         {
             case TokenTipo.Identificador:
-                if(!_programa.VariavelExiste((string)termo.Valor)) return 0; // TODO: Lançar erro
+                if(!_programa.VariavelExiste((string)termo.Valor))
+                    new ErroVariavelNaoDeclarada((string)termo.Valor).LancarErro();
                 return int.Parse(_programa.Variaveis[(string)termo.Valor].Valor.ToString());
             case TokenTipo.CaractereLiteral:
                 return (int)termo.Token.Valor.ToString()[0];

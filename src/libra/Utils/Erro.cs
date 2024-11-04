@@ -115,5 +115,11 @@ public class ErroModificacaoConstante : Erro
 public class ErroAcessoNulo : Erro
 {
     public ErroAcessoNulo(string msg = "", int linha = 0, int coluna = 0)
-        : base(2007, $"Tentando acessar um valor Nulo`.", linha, coluna) { }
+        : base(2007, $"Tentando acessar um valor Nulo.", linha, coluna) { }
+}
+
+public class ErroIndiceForaVetor : Erro
+{
+    public ErroIndiceForaVetor(string msg = "", int linha = 0, int coluna = 0)
+        : base(2008, $"O indice se encontra fora dos limites do Vetor.", linha, coluna) { }
 }

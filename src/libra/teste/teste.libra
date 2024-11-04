@@ -1,6 +1,1 @@
-funcao soma(a, b)
-  retornar a+b
-fim
-
-var x = soma(1,2) + soma(1,2)
-sair(x)
+funcaoQueNaoExiste()
