@@ -1,0 +1,1 @@
+dotnet run --project src/Libra-CLI/Libra-CLI.csproj src/libra/teste/teste.libra

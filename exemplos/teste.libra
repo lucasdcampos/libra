@@ -1,7 +1,0 @@
-var x = 100
-var y = x * 2 + 10 - 4 /2
-var z = y + 50
-
-x = 101
-
-exibir(x)

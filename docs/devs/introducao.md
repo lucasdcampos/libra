@@ -2,7 +2,7 @@
 
 Libra é uma linguagem de programação simples desenvolvida em C#.
 
-Para funcionar, o código fonte escrito em Libra é lido pelo compilador, onde passa pelas seguintes etapas:
+Para funcionar, o código fonte escrito em Libra é lido pelo Interpretador, onde passa pelas seguintes etapas:
 
 **Lexer** &#8594; O código é lido como uma *string*, onde então é analisado caractere por caractere, sendo transformado em uma lista de *tokens*.
 

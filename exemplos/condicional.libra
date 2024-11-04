@@ -1,3 +1,5 @@
 se 1 > 0 entao
-    __EscreverInt__(1)
+    sair(1)
 fim
+
+sair(0)

@@ -1,2 +1,5 @@
-O andamento do projeto pode ser acompanhado em:
-https://trello.com/b/T7oLXT8v/libra
+TODO:
+    - Refatorar o Parser
+    - Implementar ordem correta das operações em Expressões Binárias
+    - CORRIGIR gerenciamento de variáveis em escopos e funções recursivas
+    - Adicionar funções internas
