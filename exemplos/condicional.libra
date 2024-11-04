@@ -1,0 +1,3 @@
+se 1 > 0 entao
+    __EscreverInt__(1)
+fim

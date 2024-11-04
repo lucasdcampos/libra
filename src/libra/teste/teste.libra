@@ -1,4 +1,6 @@
-var lista = [10]
-lista[0] = 100
+funcao soma(a, b)
+  retornar a+b
+fim
 
-sair(lista[0])
+var x = soma(1,2) + soma(1,2)
+sair(x)

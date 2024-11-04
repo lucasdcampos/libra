@@ -31,11 +31,12 @@ namespace Libra.Arvore
 
     public class InstrucaoVar : Instrucao
     {
-        public InstrucaoVar(string identificador, object valor, bool declaracao, TokenTipo tipo = TokenTipo.TokenInvalido, Expressao indice = null)
+        public InstrucaoVar(string identificador, object valor, bool constante, bool declaracao, TokenTipo tipo = TokenTipo.TokenInvalido, Expressao indice = null)
         {
             Valor = valor;
             Identificador = identificador;
             EhDeclaracao = declaracao;
+            Constante = constante;
             Tipo = tipo;   
             IndiceVetor = indice; 
         }
@@ -45,19 +46,8 @@ namespace Libra.Arvore
         public string Identificador {get; private set; }
         public Expressao IndiceVetor { get; private set; }
         internal bool EhDeclaracao; // usada para saber se estamos declarando uma nova variável ou só modificando uma
+        public bool Constante { get; private set; }
 
-    }
-
-    public class InstrucaoConst : Instrucao
-    {
-        public InstrucaoConst(string identificador, Expressao expressao)
-        {
-            Expressao = expressao;
-            Identificador = identificador;
-        }
-
-        public Expressao Expressao { get; private set; }
-        public string Identificador {get; private set; }
     }
 
     public class InstrucaoFuncao : Instrucao
@@ -120,18 +110,11 @@ namespace Libra.Arvore
 
     public class InstrucaoChamadaFuncao : Instrucao
     {
-        public string Identificador;
-        public List<Expressao> Argumentos;
-
-        public InstrucaoChamadaFuncao(string ident, List<Expressao> argumentos = null)
+        public InstrucaoChamadaFuncao(ExpressaoChamadaFuncao chamada)
         {
-            Identificador = ident;
-            Argumentos = argumentos;
-
-            if(Argumentos == null)
-            {
-                Argumentos = new List<Expressao>();
-            }
+            Chamada = chamada;
         }
+
+        public ExpressaoChamadaFuncao Chamada { get; private set; }
     }
 }

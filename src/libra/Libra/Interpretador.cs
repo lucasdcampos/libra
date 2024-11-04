@@ -28,7 +28,7 @@ public class Interpretador
         if (instrucao is InstrucaoVar)
         {
             var var = (InstrucaoVar)instrucao;
-            DefinirVariavel(var.Identificador, var.EhDeclaracao, false, var.Valor, var.Tipo, var.IndiceVetor);
+            DeclararVariavel(var.Identificador, var.EhDeclaracao, var.Constante, var.Valor, var.Tipo, var.IndiceVetor);
         }
 
         else if(instrucao is InstrucaoSair)
@@ -100,8 +100,10 @@ public class Interpretador
         _programa.Funcoes[identificador] = novaFuncao;
     }
 
-    private object InterpretarChamadaFuncao(InstrucaoChamadaFuncao chamada)
+    private object InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
     {
+        var chamada = instrucaoChamada.Chamada;
+
         int qtdArgumentos = chamada.Argumentos.Count;
 
         if(chamada.Identificador.StartsWith("__") && chamada.Identificador.EndsWith("__"))
@@ -132,7 +134,7 @@ public class Interpretador
         return null;
     }
 
-    private object ChamarFuncaoInterna(string nomeFuncao, InstrucaoChamadaFuncao chamada)
+    private object ChamarFuncaoInterna(string nomeFuncao, ExpressaoChamadaFuncao chamada)
     {
         MethodInfo funcaoBase = typeof(LibraBase).GetMethod(nomeFuncao, BindingFlags.Static | BindingFlags.Public);
         int qtdArgumentos = chamada.Argumentos.Count;
@@ -236,7 +238,7 @@ public class Interpretador
         return 0;
     }
 
-    private object DefinirVariavel(string identificador, bool declaracao, bool constante, object valor, TokenTipo tipo, Expressao expressaoIndiceVetor)
+    private object DeclararVariavel(string identificador, bool declaracao, bool constante, object valor, TokenTipo tipo, Expressao expressaoIndiceVetor)
     {
         if(string.IsNullOrWhiteSpace(identificador))
             new Erro("Identificador inválido!").LancarErro();
@@ -292,7 +294,7 @@ public class Interpretador
     {
         if(termo.ChamadaFuncao != null)
         {
-            InterpretarInstrucao(termo.ChamadaFuncao);
+            InterpretarInstrucao(new InstrucaoChamadaFuncao(termo.ChamadaFuncao));
             return _ultimoRetorno;
         }
 
