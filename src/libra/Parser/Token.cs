@@ -40,7 +40,6 @@ public enum TokenTipo
     FimDoArquivo,
 
     // Palavras Reservadas
-    Sair, 
     Var,
     Const,
     Funcao,
@@ -51,11 +50,7 @@ public enum TokenTipo
     Faca,
     Romper,
     Retornar,
-    Fim,
-    Tipo,
-    Bytes,
-    Exibir
-    
+    Fim,    
 }
 
 public class Token
@@ -103,10 +98,6 @@ public class Token
                 return "'*'";
             case TokenTipo.OperadorDiv:
                 return "'/'";
-            case TokenTipo.Sair:
-                return "sair";
-            case TokenTipo.Exibir:
-                return "exibir()";
             case TokenTipo.TextoLiteral:
                 return "Texto";
             case TokenTipo.NumeroLiteral:

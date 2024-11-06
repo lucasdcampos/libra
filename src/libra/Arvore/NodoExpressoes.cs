@@ -3,19 +3,19 @@ namespace Libra.Arvore
     public abstract class Expressao { }
 
     // TODO: melhorar isso!
-    public class ExpressaoTermo : Expressao
+    public class ExpressaoUnaria : Expressao
     {
-        public ExpressaoTermo(Token token)
+        public ExpressaoUnaria(Token token)
         {
             Token = token;
         }
 
-        public ExpressaoTermo(ExpressaoChamadaFuncao chamada)
+        public ExpressaoUnaria(ExpressaoChamadaFuncao chamada)
         {
             ChamadaFuncao = chamada;
         }
 
-        public ExpressaoTermo(ExpressaoAcessarVetor vetor)
+        public ExpressaoUnaria(ExpressaoAcessarVetor vetor)
         {
             AcessoVetor = vetor;
         }

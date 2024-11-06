@@ -31,7 +31,6 @@ public class Parser
     {
         switch(Atual().Tipo)
         {
-            case TokenTipo.Sair: return ParseInstrucaoSair();
             case TokenTipo.Var: return ParseInstrucaoVar();
             case TokenTipo.Const: return ParseInstrucaoVar();
             case TokenTipo.Funcao: return ParseInstrucaoFuncao();
@@ -49,22 +48,6 @@ public class Parser
         new Erro($"Instrução inválida: {Atual().Tipo.ToString()}", _linha, 1000).LancarErro();
 
         return null;
-    }
-
-    private InstrucaoSair? ParseInstrucaoSair()
-    {
-        ConsumirToken(TokenTipo.Sair);
-        ConsumirToken(TokenTipo.AbrirParen);
-
-        // Assim podemos sair sem passar nenhum argumento. Ex: sair()
-        if(TentarConsumirToken(TokenTipo.FecharParen) != null)
-            return new InstrucaoSair(new ExpressaoTermo(new Token(TokenTipo.NumeroLiteral, 0, "0")));;
-        
-        var expr = ParseExpressao();
-
-        ConsumirToken(TokenTipo.FecharParen);
-
-        return new InstrucaoSair(expr);
     }
 
     // Declarando uma variável
@@ -193,9 +176,10 @@ public class Parser
         {
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
+            case TokenTipo.TextoLiteral:
                 if(TokenEhOperador(Proximo(1)))
                     return ParseExpressaoBinaria(); // Expressão Binária
-                return new ExpressaoTermo(ConsumirToken()); // Expressao Unária
+                return new ExpressaoUnaria(ConsumirToken()); // Expressao Unária
 
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
@@ -203,9 +187,9 @@ public class Parser
                     var chamada = ParseExpressaoChamadaFuncao();
 
                     if(TokenEhOperador(Atual()))
-                        return ParseExpressaoBinaria(new ExpressaoTermo(chamada));
+                        return ParseExpressaoBinaria(new ExpressaoUnaria(chamada));
                     
-                    return new ExpressaoTermo(chamada);
+                    return new ExpressaoUnaria(chamada);
                 }
 
                 if(TokenEhOperador(Proximo(1)))
@@ -214,10 +198,10 @@ public class Parser
                 if(Proximo(1).Tipo == TokenTipo.AbrirCol) // Acessando um Vetor -> identificador[expressao]
                 {
                     var ident = ConsumirToken(TokenTipo.Identificador);
-                    return new ExpressaoTermo(new ExpressaoAcessarVetor(ident.Valor.ToString(), ParseVetor()));
+                    return new ExpressaoUnaria(new ExpressaoAcessarVetor(ident.Valor.ToString(), ParseVetor()));
                 }
                 
-               return new ExpressaoTermo(ConsumirToken()); // Expressão Unária (identificador)
+               return new ExpressaoUnaria(ConsumirToken()); // Expressão Unária (identificador)
         }
         
         new Erro("Impossível determinar expressão", _linha, 1000).LancarErro();
@@ -229,8 +213,9 @@ public class Parser
         Token? operador = null;
         Expressao? direita = null;
 
-        if(esquerda == null && Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
-            esquerda = new ExpressaoTermo(ConsumirToken());
+        if(esquerda == null && Atual().Tipo == TokenTipo.NumeroLiteral 
+            || Atual().Tipo == TokenTipo.Identificador || Atual().Tipo == TokenTipo.TextoLiteral)
+                esquerda = new ExpressaoUnaria(ConsumirToken());
 
         if(TokenEhOperador(Atual()))
         {

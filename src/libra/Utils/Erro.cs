@@ -129,3 +129,9 @@ public class ErroTipoIncompativel : Erro
     public ErroTipoIncompativel(string identificador, int linha = 0, int coluna = 0)
         : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", linha, coluna) { }
 }
+
+public class ErroTransbordoDePilha : Erro
+{
+    public ErroTransbordoDePilha(string causador = "", int linha = 0, int coluna = 0)
+        : base(2010, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", linha, coluna) { }
+}

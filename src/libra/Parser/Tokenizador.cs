@@ -46,9 +46,6 @@ public class Tokenizador
 
                 switch(texto)
                 {
-                    case "sair":
-                        AdicionarTokenALista(TokenTipo.Sair);
-                        break;
                     case "var":
                         AdicionarTokenALista(TokenTipo.Var);
                         break;
@@ -58,11 +55,6 @@ public class Tokenizador
                     case "funcao":
                         AdicionarTokenALista(TokenTipo.Funcao);
                         break;
-                    case "exibir":
-                        AdicionarTokenALista(TokenTipo.Exibir);
-                        break;
-                    case "tipo":
-                        AdicionarTokenALista(TokenTipo.Tipo);
                         break;
                     case "se":
                         AdicionarTokenALista(TokenTipo.Se);
@@ -88,8 +80,6 @@ public class Tokenizador
                     case "fim":
                         AdicionarTokenALista(TokenTipo.Fim);
                         break;
-                    case "bytes":
-                        AdicionarTokenALista(TokenTipo.Bytes);
                         break;
                     case "ou":
                         AdicionarTokenALista(TokenTipo.OperadorOu);
