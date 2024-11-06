@@ -14,7 +14,6 @@ public static class LibraBase
         ProgramaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         ProgramaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
         ProgramaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
-        ProgramaAtual.Funcoes["exibirln"] = new FuncaoEmbutida(exibirln);
         ProgramaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
         ProgramaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
         ProgramaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
@@ -79,22 +78,27 @@ public static class LibraBase
 
     public static object exibir(object[] args)
     {
-        for(int i = 0; i < args.Length; i++)
+        if(args.Length == 0)
         {
-            Console.Write(args[i].ToString());
+            
         }
 
-        return null;
-    }
+        int qtd = args.Length;
 
-    public static object exibirln(object[] args)
-    {
-        for(int i = 0; i < args.Length; i++)
+        switch(qtd)
         {
-            Console.Write(args[i].ToString());
+            case 0:
+                Console.WriteLine();
+                return null;
+            case 1:
+                Console.WriteLine(args[0].ToString());
+                return null;
+            case 2:
+                Console.Write(args[0].ToString());
+                Console.Write(args[1].ToString());
+                return null;
         }
 
-        Console.WriteLine();
         return null;
     }
 

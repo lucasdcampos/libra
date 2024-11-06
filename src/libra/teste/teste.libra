@@ -1,18 +1,18 @@
 var num = aleatorio(100)
 
-exibir("> Digite um número: ")
+exibir("> Digite um número:", " ")
 var escolha = ler_int()
 
 enquanto escolha != num faca
     se escolha > num entao
-        exibirln("Número maior que o aleatório!")
+        exibir("Número maior que o aleatório!")
     fim
 
     se escolha < num entao
-        exibirln("Número menor que o aleatório!")
+        exibir("Número menor que o aleatório!")
     fim
 
-    exibir("> Tente denovo: ")
+    exibir("> Tente denovo:", " ")
     escolha = ler_int()
     exibir("")
 fim
