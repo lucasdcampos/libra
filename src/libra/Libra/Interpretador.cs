@@ -9,27 +9,39 @@ public class Interpretador
 {
     public static int NivelDebug = 0;
     private Programa _programa;
-    private int _enderecoInicialEscopo;
-    private List<int> _enderecosIniciaisEscopos = new List<int>();
-    private int _ultimoRetorno = 0;
-
+    private object _ultimoRetorno = 0;
+    
     public void Interpretar(Programa programa)
     {
         LibraBase.ProgramaAtual = _programa = programa;
         
-        for(int i = 0; i < _programa.Instrucoes.Count; i++)
-            InterpretarInstrucao(_programa.Instrucoes[i]);
+        InterpretarInstrucoes(_programa.Instrucoes);
         
         LibraBase.ProgramaAtual = null; // limpar o programa depois que terminar
     }
 
+    private object InterpretarInstrucoes(Instrucao[] instrucoes)
+    {
+        for(int i = 0; i < instrucoes.Length; i++)
+        {
+            var instrucao = InterpretarInstrucao(instrucoes[i]);
+
+            if(instrucao is InstrucaoRetornar) 
+            {
+                var retorno = (InstrucaoRetornar)instrucao;
+                _ultimoRetorno = InterpretarExpressao(retorno.Expressao);
+                return _ultimoRetorno;
+            }
+        }
+        
+        return 0;
+    }
+
+    // TODO: Muitos Else Ifs, mas não acho ser possível usar Switch Case em Tipos?
     private Instrucao InterpretarInstrucao(Instrucao instrucao)
     {
         if (instrucao is InstrucaoVar)
-        {
-            var var = (InstrucaoVar)instrucao;
-            DeclararVariavel(var.Identificador, var.EhDeclaracao, var.Constante, var.Valor, var.Tipo, var.IndiceVetor);
-        }
+            InterpretarInstrucaoVar((InstrucaoVar)instrucao);
 
         else if(instrucao is InstrucaoSair)
             InterpretarInstrucaoSair((InstrucaoSair)instrucao);
@@ -67,21 +79,21 @@ public class Interpretador
     {
         if(instrucao is InstrucaoSe)
         {
-            var se = (InstrucaoSe)instrucao;
-
-            if((int)InterpretarExpressao(se.Expressao) != 0)
-                InterpretarEscopo(se.Escopo);
+            var instrucaoSe = (InstrucaoSe)instrucao;
+            var instrucoesSe = instrucaoSe.Instrucoes;
+            if((int)InterpretarExpressao(instrucaoSe.Expressao) != 0)
+                InterpretarInstrucoes(instrucoesSe);
             
-            if(se.SenaoEscopo != null)
-                InterpretarEscopo(se.SenaoEscopo);
+            if(instrucaoSe.SenaoInstrucoes != null)
+                InterpretarInstrucoes(instrucaoSe.SenaoInstrucoes);
             
             return;
         }
 
         var enquanto = (InstrucaoEnquanto)instrucao;
-
+    	var instrucoes = enquanto.Instrucoes;
         while((int)InterpretarExpressao(enquanto.Expressao) != 0)
-            InterpretarEscopo(enquanto.Escopo);
+            InterpretarInstrucoes(instrucoes);
         
     }
 
@@ -95,7 +107,7 @@ public class Interpretador
         if(_programa.FuncaoExiste(identificador))
             new ErroFuncaoJaDefinida(identificador).LancarErro();
         
-        var novaFuncao = new Funcao(identificador, funcao.Escopo, funcao.Parametros);
+        var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros);
 
         _programa.Funcoes[identificador] = novaFuncao;
     }
@@ -114,21 +126,27 @@ public class Interpretador
 
         if(!_programa.FuncaoExiste(chamada.Identificador))
             new ErroFuncaoNaoDefinida(chamada.Identificador).LancarErro();
-            
-        var variaveis = new List<Variavel>();
+
+        var argumentos = new List<Variavel>();
         var funcao = _programa.Funcoes[chamada.Identificador];
         var parametros = funcao.Parametros.Count;
 
         if(qtdArgumentos != parametros)
             new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {qtdArgumentos}").LancarErro();
 
+        _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
+
+        // Adicionando os argumentos ao Escopo
         for(int i = 0; i < chamada.Argumentos.Count; i++)
         {
-            string nomeVariavel = funcao.Parametros[i];
-            variaveis.Add(new Variavel(nomeVariavel, new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString())));
+            string ident = funcao.Parametros[i];
+            Token valor = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString()); // TODO: Token não necessariamente é um Numero
+            _programa.PilhaEscopos.DefinirVariavel(ident, new Variavel(ident, valor));
         }
 
-        int retorno = InterpretarEscopo(funcao.Escopo, variaveis);
+        object retorno = InterpretarInstrucoes(funcao.Instrucoes);
+
+        _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
 
         return _ultimoRetorno = retorno; // TODO: melhorar isso
         
@@ -156,44 +174,6 @@ public class Interpretador
         }
 
         return funcaoBase.Invoke(null, argsBase.ToArray());
-    }
-
-    private int InterpretarEscopo(Escopo escopo, List<Variavel> variaveis = null)
-    {
-        _enderecosIniciaisEscopos.Add(_programa.Variaveis.Count -1);
-
-        if(variaveis != null)
-            for(int i = 0; i < variaveis.Count; i++)
-                _programa.Variaveis[variaveis[i].Identificador] = variaveis[i];
-                
-        for(int i = 0; i < escopo.Instrucoes.Count; i++)
-        {
-            var instrucao = InterpretarInstrucao(escopo.Instrucoes[i]);
-            if(instrucao is InstrucaoRetornar)
-            {
-                var retorno = (InstrucaoRetornar)instrucao;
-                var resultado = InterpretarExpressao(retorno.Expressao);
-
-                if(variaveis != null)
-                    for(int j = 0; j < variaveis.Count; j++)
-                        _programa.Variaveis.Remove(variaveis[j].Identificador);
-                    
-                return (int)resultado;
-            }
-        }
-
-        int enderecoInicialUltimoEscopo = _enderecosIniciaisEscopos.Last();
-
-        // limpando a memória depois da finalização do escopo
-        for (int i = _programa.Variaveis.Count - 1; i > enderecoInicialUltimoEscopo; i--)
-        {
-            var variavelAtual = _programa.Variaveis.ElementAt(i).Key;
-            _programa.Variaveis.Remove(variavelAtual);
-        }
-
-        _enderecosIniciaisEscopos.RemoveAt(_enderecosIniciaisEscopos.Count - 1);
-        
-        return 0;
     }
 
     private object InterpretarExpressao(Expressao expressao)
@@ -238,42 +218,40 @@ public class Interpretador
         return 0;
     }
 
-    private object DeclararVariavel(string identificador, bool declaracao, bool constante, object valor, TokenTipo tipo, Expressao expressaoIndiceVetor)
+    // TODO: Refatorar esse método (Desculpa, já era tarde da noite quando eu escrevi isso e deveria estar dormindo)
+    private object InterpretarInstrucaoVar(InstrucaoVar i)
     {
-        if(string.IsNullOrWhiteSpace(identificador))
+        if(string.IsNullOrWhiteSpace(i.Identificador))
             new Erro("Identificador inválido!").LancarErro();
 
-        if(declaracao && _programa.VariavelExiste(identificador))
-            new ErroVariavelJaDeclarada(identificador).LancarErro();
-
-        if(_programa.Variaveis.ContainsKey(identificador))
-            if(_programa.Variaveis[identificador].Constante)
-                new ErroModificacaoConstante(identificador).LancarErro();
-
-        if (valor is Token)
-            new Variavel(identificador, (Token)valor, constante);
-
-        var expressaoValorFinal = (Expressao)valor;
+        var expressaoValorFinal = (Expressao)i.Valor;
         object resultado = InterpretarExpressao(expressaoValorFinal);
 
-        if(expressaoIndiceVetor != null)
-            return AtribuirElementoVetor(identificador, expressaoIndiceVetor, expressaoValorFinal);
+        if(i.IndiceVetor != null)
+            return AtribuirElementoVetor(i.Identificador, i.IndiceVetor, expressaoValorFinal);
         
         // declarando um Vetor (var x = [10])
-        if (tipo == TokenTipo.Vetor)
+        if (i.Tipo == TokenTipo.Vetor)
         {
             Token[] tokens = new Token[(int)resultado];
-            for(int i =0; i < tokens.Length; i++)
-                tokens[i] = new Token(TokenTipo.Nulo, 0);
+            for(int _ =0; _ < tokens.Length; _++)
+                tokens[_] = new Token(TokenTipo.Nulo, 0);
 
-            _programa.Variaveis[identificador] = new Variavel(identificador, new Token(tipo, 0, tokens), constante);
+            if(i.EhDeclaracao)
+                _programa.PilhaEscopos.DefinirVariavel(i.Identificador, new Variavel(i.Identificador, new Token(i.Tipo, 0, tokens), i.Constante));
+            else
+                _programa.PilhaEscopos.AtualizarVariavel(i.Identificador,  new Token(i.Tipo, 0, tokens));
             return null;
         }
 
         // Declarando uma variável normal
-        var token = new Token(TokenTipo.NumeroLiteral, 0, resultado);
-        var variavel = new Variavel(identificador, token, constante);
-        _programa.Variaveis[identificador] = variavel;
+        var token = new Token(i.Tipo, 0, resultado);
+        var variavel = new Variavel(i.Identificador, token, i.Constante);
+
+        if(i.EhDeclaracao)
+            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, variavel);
+        else
+            _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
         return variavel.Valor;
     }
@@ -283,12 +261,12 @@ public class Interpretador
         int indiceVetor = (int)InterpretarExpressao(expressaoIndice);
         object valor = InterpretarExpressao(expressao);
 
-        var vetor = (Token[])_programa.Variaveis[identificador].Valor;
+        var vetor = (Token[])_programa.PilhaEscopos.ObterVariavel(identificador).Valor;
 
         if(indiceVetor > vetor.Length || indiceVetor < 0)
             new ErroIndiceForaVetor().LancarErro();
 
-        vetor[indiceVetor].Valor = valor;
+        vetor[indiceVetor].Valor = valor; // TODO: Isso funciona?
 
         return valor;
     }
@@ -303,7 +281,7 @@ public class Interpretador
 
         if(termo.AcessoVetor != null)
         {
-            var vetor = (Token[])(_programa.Variaveis[termo.AcessoVetor.Identificador].Valor);
+            var vetor = (Token[])(_programa.PilhaEscopos.ObterVariavel(termo.AcessoVetor.Identificador).Valor);
             int indice = (int)InterpretarExpressao(termo.AcessoVetor.Expressao);
 
             return vetor[indice].Valor;
@@ -312,9 +290,9 @@ public class Interpretador
         switch(termo.Token.Tipo)
         {
             case TokenTipo.Identificador:
-                if(!_programa.VariavelExiste((string)termo.Valor))
+                if(_programa.PilhaEscopos.ObterVariavel((string)termo.Valor) == null)
                     new ErroVariavelNaoDeclarada((string)termo.Valor).LancarErro();
-                return int.Parse(_programa.Variaveis[(string)termo.Valor].Valor.ToString());
+                return int.Parse(_programa.PilhaEscopos.ObterVariavel((string)termo.Valor).Valor.ToString());
             case TokenTipo.CaractereLiteral:
                 return (int)termo.Token.Valor.ToString()[0];
         }

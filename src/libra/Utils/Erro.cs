@@ -123,3 +123,9 @@ public class ErroIndiceForaVetor : Erro
     public ErroIndiceForaVetor(string msg = "", int linha = 0, int coluna = 0)
         : base(2008, $"O indice se encontra fora dos limites do Vetor.", linha, coluna) { }
 }
+
+public class ErroTipoIncompativel : Erro
+{
+    public ErroTipoIncompativel(string identificador, int linha = 0, int coluna = 0)
+        : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", linha, coluna) { }
+}

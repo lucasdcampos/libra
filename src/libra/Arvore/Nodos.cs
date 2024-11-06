@@ -2,15 +2,17 @@ namespace Libra.Arvore
 {
     public class Programa
     {
-        public Programa(List<Instrucao> instrucoes)
+        public Programa(Instrucao[] instrucoes)
         {
             Instrucoes = instrucoes;
             Variaveis = new Dictionary<string, Variavel>();
             Funcoes = new Dictionary<string, Funcao>();
+            PilhaEscopos = new PilhaDeEscopos();
         }
 
         public int CodigoSaida { get; private set; }
-        public List<Instrucao> Instrucoes;
+        public PilhaDeEscopos PilhaEscopos { get; private set;}
+        public Instrucao[] Instrucoes;
         public Dictionary<string, Variavel> Variaveis {get; private set; }
         public Dictionary<string, Funcao> Funcoes {get; private set; }
 

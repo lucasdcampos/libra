@@ -5,13 +5,13 @@ namespace Libra
     public class Funcao
     {
             public string Identificador;
-            public Escopo Escopo;
+            public Instrucao[] Instrucoes;
             public List<string> Parametros;
 
-            public Funcao(string ident, Escopo escopo, List<string> parametros)
+            public Funcao(string ident, Instrucao[] instrucoes, List<string> parametros)
             {
                 Identificador = ident;
-                Escopo = escopo;
+                Instrucoes = instrucoes;
                 Parametros = parametros;
             }
 

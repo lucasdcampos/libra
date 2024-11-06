@@ -1,1 +1,6 @@
-funcaoQueNaoExiste()
+var a = 1
+funcao soma(a, b)
+	retornar a+b
+fim
+
+sair(soma(1,2))

@@ -3,21 +3,6 @@ namespace Libra.Arvore
 {
     public abstract class Instrucao { }
 
-    public class Escopo : Instrucao
-    {
-        public Escopo(List<Instrucao> instrucoes = null)
-        {
-            Instrucoes = instrucoes;
-
-            if(instrucoes == null)
-            {
-                Instrucoes = new List<Instrucao>();
-            }
-        }
-        
-        public List<Instrucao> Instrucoes { get; internal set; }
-    }
-
     public class InstrucaoSair : Instrucao
     {
         public InstrucaoSair(Expressao expressao)
@@ -52,14 +37,14 @@ namespace Libra.Arvore
 
     public class InstrucaoFuncao : Instrucao
     {
-        public InstrucaoFuncao(string identificador, Escopo escopo, List<string> parametros = null)
+        public InstrucaoFuncao(string identificador, Instrucao[] instrucoes, List<string> parametros = null)
         {
-            Escopo = escopo;
+            Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
         }
 
-        public Escopo Escopo { get; private set; }
+        public Instrucao[] Instrucoes { get; private set; }
         public string Identificador {get; private set; }
         public List<string> Parametros { get; private set; }
 
@@ -67,29 +52,29 @@ namespace Libra.Arvore
 
     public class InstrucaoSe : Instrucao
     {
-        public InstrucaoSe(Expressao expressao, Escopo escopo, Escopo senaoEscopo = null)
+        public InstrucaoSe(Expressao expressao, Instrucao[] instrucoes, Instrucao[] senaoInstrucoes = null)
         {
             Expressao = expressao;
-            Escopo = escopo;
-            SenaoEscopo = senaoEscopo;
+            Instrucoes = instrucoes;
+            SenaoInstrucoes = senaoInstrucoes;
         }
 
         public Expressao Expressao { get; private set; }
-        public Escopo Escopo {get; private set; }
-        public Escopo SenaoEscopo {get; private set; }
+        public Instrucao[] Instrucoes {get; private set; }
+        public Instrucao[] SenaoInstrucoes {get; private set; }
 
     }
 
     public class InstrucaoEnquanto : Instrucao
     {
-        public InstrucaoEnquanto(Expressao expressao, Escopo escopo)
+        public InstrucaoEnquanto(Expressao expressao, Instrucao[] instrucoes)
         {
             Expressao = expressao;
-            Escopo = escopo;
+            Instrucoes = instrucoes;
         }
 
         public Expressao Expressao { get; private set; }
-        public Escopo Escopo {get; private set; }
+        public Instrucao[] Instrucoes {get; private set; }
 
     }
 

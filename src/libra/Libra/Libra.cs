@@ -5,7 +5,6 @@ using Libra.Arvore;
 
 public static class LibraBase
 {
-
     public static bool DEBUG = true;
 
     public static Programa ProgramaAtual;

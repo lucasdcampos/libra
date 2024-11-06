@@ -12,20 +12,22 @@ public class Parser
     {
         _tokens = tokens;
 
-        foreach(var t in tokens)
-            LibraLogger.Debug(t.ToString(),5);
-        
-        var instrucoes = new List<Instrucao>();
-
-        while(TentarConsumirToken(TokenTipo.FimDoArquivo) == null)
-        {
-            instrucoes.Add(ParseInstrucao("'Programa'"));
-        }
-
-        return new Programa(instrucoes);
+        return new Programa(ParseInstrucoes(TokenTipo.FimDoArquivo));
     }
 
-    private Instrucao? ParseInstrucao(string chamador = "")
+    private Instrucao[] ParseInstrucoes(TokenTipo fim = TokenTipo.Fim)
+    {
+        var instrucoes = new List<Instrucao>();
+
+        while(TentarConsumirToken(fim) == null)
+        {
+            instrucoes.Add(ParseInstrucao());
+        }
+
+        return instrucoes.ToArray();
+    }
+
+    private Instrucao? ParseInstrucao()
     {
         switch(Atual().Tipo)
         {
@@ -44,26 +46,9 @@ public class Parser
                     return ParseInstrucaoVar();
         }
 
-        new Erro($"Instrução inválida: {Atual().Tipo.ToString()}, por {chamador}", _linha).LancarErro();
+        new Erro($"Instrução inválida: {Atual().Tipo.ToString()}", _linha, 1000).LancarErro();
 
         return null;
-    }
-
-    int escopos = 0;
-    private Escopo? ParseEscopo()
-    {
-        var instrucoes = new List<Instrucao>();
-
-        while(TentarConsumirToken(TokenTipo.Fim) == null)
-        {
-            var instrucao = ParseInstrucao("Escopo");
-
-            instrucoes.Add(instrucao);
-        }
-
-        escopos++;
-
-        return new Escopo(instrucoes);
     }
 
     private InstrucaoSair? ParseInstrucaoSair()
@@ -168,9 +153,9 @@ public class Parser
 
         ConsumirToken(TokenTipo.FecharParen);
 
-        var escopo = ParseEscopo();
+        var instrucoes = ParseInstrucoes();
 
-        return new InstrucaoFuncao(identificador, escopo, parametros);
+        return new InstrucaoFuncao(identificador, instrucoes, parametros);
     }
     
     private InstrucaoSe? ParseInstrucaoSe()
@@ -181,13 +166,13 @@ public class Parser
 
         ConsumirToken(TokenTipo.Entao);
 
-        var escopo = ParseEscopo();
+        var instrucoes = ParseInstrucoes().ToArray();
         
-        Escopo escopoSenao = null;
+        var instrucoesSenao = new List<Instrucao>().ToArray();
         if(TentarConsumirToken(TokenTipo.Senao) != null)
-            escopoSenao = ParseEscopo();
+            instrucoesSenao = ParseInstrucoes().ToArray();
 
-        return new InstrucaoSe(expressao, escopo, escopoSenao);
+        return new InstrucaoSe(expressao, instrucoes, instrucoesSenao);
     }
 
     private InstrucaoEnquanto? ParseInstrucaoEnquanto()
@@ -197,9 +182,9 @@ public class Parser
         var expressao = ParseExpressao();
         ConsumirToken(TokenTipo.Faca);
 
-        var escopo = ParseEscopo();
+        var instrucoes = ParseInstrucoes();
 
-        return new InstrucaoEnquanto(expressao, escopo);
+        return new InstrucaoEnquanto(expressao, instrucoes);
     }
 
     private Expressao? ParseExpressao()
@@ -244,7 +229,7 @@ public class Parser
         Token? operador = null;
         Expressao? direita = null;
 
-        if(esquerda != null && Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
+        if(esquerda == null && Atual().Tipo == TokenTipo.NumeroLiteral || Atual().Tipo == TokenTipo.Identificador)
             esquerda = new ExpressaoTermo(ConsumirToken());
 
         if(TokenEhOperador(Atual()))
