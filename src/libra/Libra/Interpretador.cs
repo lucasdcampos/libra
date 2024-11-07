@@ -1,4 +1,5 @@
 using Libra.Arvore;
+using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -39,26 +40,25 @@ public class Interpretador
         return 0;
     }
 
-    // TODO: Muitos Else Ifs, mas não acho ser possível usar Switch Case em Tipos?
     private Instrucao InterpretarInstrucao(Instrucao instrucao)
     {
-        if (instrucao is InstrucaoVar)
-            InterpretarInstrucaoVar((InstrucaoVar)instrucao);
-
-        else if (instrucao is InstrucaoChamadaFuncao)
-            InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
-
-        else if (instrucao is InstrucaoSe || instrucao is InstrucaoEnquanto)
-            InterpretarCondicional(instrucao);
-
-        else if (instrucao is InstrucaoRomper)
-            return instrucao;
-
-        else if (instrucao is InstrucaoRetornar)
-            return instrucao;
-
-        else if (instrucao is InstrucaoFuncao)
-            InterpretarFuncao((InstrucaoFuncao)instrucao);
+        switch(instrucao.TipoInstrucao)
+        {
+            case TokenTipo.Var:
+                InterpretarInstrucaoVar((InstrucaoVar)instrucao);
+                break;
+            case TokenTipo.Se:
+                InterpretarCondicional((InstrucaoSe)instrucao);
+                break;
+            case TokenTipo.Enquanto:
+                InterpretarCondicional((InstrucaoEnquanto)instrucao);
+                break;
+            case TokenTipo.Identificador:
+                InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
+                break;
+            case TokenTipo.Retornar:
+                return instrucao;
+        }
 
         new Erro($"Instrução Inválida: {instrucao.ToString()}");
         return null;
@@ -101,10 +101,17 @@ public class Interpretador
         _programa.Funcoes[identificador] = novaFuncao;
     }
 
+    private object InterpretarChamadaFuncao(ExpressaoChamadaFuncao expressaoChamadaFuncao)
+    {
+        return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(expressaoChamadaFuncao));
+    }
+
     // REFATORAR!
     private HashSet<string> funcoesEmExecucao = new HashSet<string>();
     private object InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
     {
+        _ultimoRetorno = null;
+        
         var chamada = instrucaoChamada.Chamada;
         var argumentos = chamada.Argumentos;
 
@@ -136,7 +143,6 @@ public class Interpretador
 
         try
         {
-        
             var funcao = _programa.Funcoes[chamada.Identificador];
             var parametros = funcao.Parametros.Count;
 
@@ -168,43 +174,154 @@ public class Interpretador
 
     private object InterpretarExpressao(Expressao expressao)
     {
-        if(expressao is ExpressaoUnaria)
-            return ExtrairValorTermo((ExpressaoUnaria)expressao);
-        
-        else if(expressao is ExpressaoBinaria)
+        if(expressao == null)
+            new ErroAcessoNulo(" Expressão nula");
+
+        switch(expressao.Tipo)
         {
-            var binaria = (ExpressaoBinaria)expressao;
-
-            var esq = (ExpressaoUnaria)binaria.Esquerda;
-            var dir = binaria.Direita;
-
-            // TODO: Só aceita Inteiros! Modificar
-            int a, b = 0;
-
-            a = (int)ExtrairValorTermo(esq);
-
-            b = (int)InterpretarExpressao(dir);
-            
-            switch(binaria.Operador.Tipo)
-            {
-                case TokenTipo.OperadorSoma: return a+b;
-                case TokenTipo.OperadorSub: return a-b;
-                case TokenTipo.OperadorMult: return a*b;
-                case TokenTipo.OperadorDiv:
-                    if(b == 0)
-                        new ErroDivisaoPorZero().LancarErro();
-                    return a/b;
-                case TokenTipo.OperadorMaiorQue: return LibraHelper.BoolParaInt(a>b);
-                case TokenTipo.OperadorMaiorIgualQue: return LibraHelper.BoolParaInt(a>=b);
-                case TokenTipo.OperadorMenorQue: return LibraHelper.BoolParaInt(a<b);
-                case TokenTipo.OperadorMenorIgualQue: return LibraHelper.BoolParaInt(a<=b);
-                case TokenTipo.OperadorOu: return LibraHelper.BoolParaInt(a!= 0 || b != 0);
-                case TokenTipo.OperadorE: return LibraHelper.BoolParaInt(a!=0 && b != 0);
-                case TokenTipo.OperadorComparacao: return LibraHelper.BoolParaInt(a==b);
-                case TokenTipo.OperadorDiferente: return LibraHelper.BoolParaInt(a!=b);
-            }
+            case TipoExpressao.ExpressaoLiteral:
+                return ((ExpressaoLiteral)expressao).Token.Valor;
+            case TipoExpressao.ExpressaoVariavel:
+                return _programa.PilhaEscopos.ObterVariavel(((ExpressaoVariavel)expressao).Identificador.Valor.ToString()).Valor;
+            case TipoExpressao.ExpressaoChamadaFuncao:
+                InterpretarChamadaFuncao((ExpressaoChamadaFuncao)expressao);
+                return _ultimoRetorno;
+            case TipoExpressao.ExpressaoUnaria:
+                break;
+            case TipoExpressao.ExpressaoBinaria:
+                var bin = (ExpressaoBinaria)expressao;
+                var a = InterpretarExpressao(bin.Esquerda);
+                var b = InterpretarExpressao(bin.Direita);
+                switch(bin.Operador.Tipo)
+                {
+                    case TokenTipo.OperadorSoma:
+                        return Soma(a, b);
+                    case TokenTipo.OperadorSub:
+                        return Sub(a, b);
+                    case TokenTipo.OperadorMult:
+                        return Mult(a, b);
+                    case TokenTipo.OperadorDiv:
+                        return Div(a, b);
+                    case TokenTipo.OperadorComparacao:
+                        return Igual(a, b);
+                    case TokenTipo.OperadorDiferente:
+                        return Diferente(a, b);
+                    case TokenTipo.OperadorMaiorQue:
+                        return MaiorQue(a, b);
+                    case TokenTipo.OperadorMaiorIgualQue:
+                        return MaiorIgualQue(a, b);
+                    case TokenTipo.OperadorMenorQue:
+                        return MenorQue(a, b);
+                    case TokenTipo.OperadorMenorIgualQue:
+                        return MenorIgualQue(a, b);
+                }
+                return 0;
         }
 
+        new Erro("Expressão não implementada").LancarErro();
+
+        return 0;
+    }
+
+    // TODO: Tem que ter uma forma melhor de fazer isso...
+    // Será difícil manter quando tiver muitos tipos e operadores
+    private object Operar(dynamic a, dynamic b, Func<dynamic, dynamic, dynamic> operacao)
+    {
+        try
+        {
+            return operacao(a, b);
+        }
+        catch (RuntimeBinderException)
+        {
+            return null;
+        }
+        catch (DivideByZeroException)
+        {
+            new ErroDivisaoPorZero();
+            return null;
+        }
+    }
+
+    private object Soma(object a, object b) => Operar(a, b, (x, y) => x + y);
+    private object Sub(object a, object b) => Operar(a, b, (x, y) => x - y);
+    private object Mult(object a, object b) => Operar(a, b, (x, y) => x * y);
+    private object Div(object a, object b) => Operar(a, b, (x, y) => y == 0 ? throw new DivideByZeroException() : x / y);
+
+    private int Igual(object a, object b)
+    {
+        if(a is int)
+            return (int)a > (int)b ? 1 : 0;
+        
+        if(a is double)
+            return (double)a > (double)b ? 1 : 0;
+
+        if(a is string)
+            return (string)a == (string)b ? 1 : 0;
+        
+        new Erro("Operação Inválida");
+        return 0;
+    }
+
+    private int Diferente(object a, object b)
+    {
+        if(a is int)
+            return (int)a != (int)b ? 1 : 0;
+        
+        if(a is double)
+            return (double)a != (double)b ? 1 : 0;
+
+        if(a is string)
+            return (string)a != (string)b ? 1 : 0;
+        
+        new Erro("Operação Inválida");
+        return 0;
+    }
+
+    private int MaiorQue(object a, object b)
+    {
+        if(a is int)
+            return (int)a > (int)b ? 1 : 0;
+        
+        if(a is double)
+            return (double)a > (double)b ? 1 : 0;
+        
+        new Erro("Operação Inválida");
+        return 0;
+    }
+
+    private int MaiorIgualQue(object a, object b)
+    {
+        if(a is int)
+            return (int)a >= (int)b ? 1 : 0;
+        
+        if(a is double)
+            return (double)a >= (double)b ? 1 : 0;
+        
+        new Erro("Operação Inválida");
+        return 0;
+    }
+
+    private int MenorQue(object a, object b)
+    {
+        if(a is int)
+            return (int)a < (int)b ? 1 : 0;
+        
+        if(a is double)
+            return (double)a < (double)b ? 1 : 0;
+        
+        new Erro("Operação Inválida");
+        return 0;
+    }
+
+    private int MenorIgualQue(object a, object b)
+    {
+        if(a is int)
+            return (int)a <= (int)b ? 1 : 0;
+        
+        if(a is double)
+            return (double)a <= (double)b ? 1 : 0;
+        
+        new Erro("Operação Inválida");
         return 0;
     }
 
@@ -259,35 +376,6 @@ public class Interpretador
         vetor[indiceVetor].Valor = valor; // TODO: Isso funciona?
 
         return valor;
-    }
-
-    private object ExtrairValorTermo(ExpressaoUnaria termo)
-    {
-        if(termo.ChamadaFuncao != null)
-        {
-            InterpretarInstrucao(new InstrucaoChamadaFuncao(termo.ChamadaFuncao));
-            return _ultimoRetorno;
-        }
-
-        if(termo.AcessoVetor != null)
-        {
-            var vetor = (Token[])(_programa.PilhaEscopos.ObterVariavel(termo.AcessoVetor.Identificador).Valor);
-            int indice = (int)InterpretarExpressao(termo.AcessoVetor.Expressao);
-
-            return vetor[indice].Valor;
-        }
-
-        switch(termo.Token.Tipo)
-        {
-            case TokenTipo.Identificador:
-                if(_programa.PilhaEscopos.ObterVariavel((string)termo.Valor) == null)
-                    new ErroVariavelNaoDeclarada((string)termo.Valor).LancarErro();
-                return _programa.PilhaEscopos.ObterVariavel((string)termo.Valor).Valor;
-            case TokenTipo.CaractereLiteral:
-                return (int)termo.Token.Valor.ToString()[0];
-        }
-
-        return termo.Valor;
     }
 
 }

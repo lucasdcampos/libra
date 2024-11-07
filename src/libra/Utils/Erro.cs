@@ -115,7 +115,7 @@ public class ErroModificacaoConstante : Erro
 public class ErroAcessoNulo : Erro
 {
     public ErroAcessoNulo(string msg = "", int linha = 0, int coluna = 0)
-        : base(2007, $"Tentando acessar um valor Nulo.", linha, coluna) { }
+        : base(2007, $"Tentando acessar um valor Nulo.{msg}", linha, coluna) { }
 }
 
 public class ErroIndiceForaVetor : Erro

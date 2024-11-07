@@ -24,6 +24,8 @@ public static class LibraBase
         ProgramaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
         ProgramaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
         ProgramaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
+        ProgramaAtual.Funcoes["acessar"] = new FuncaoEmbutida(acessar);
+        ProgramaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
     }
 
     public static object sair(object[] args)
@@ -32,7 +34,8 @@ public static class LibraBase
 
         if(args.Length > 0)
         {
-            codigo = (int)args[0];
+            int.TryParse(args[0].ToString(), out int resultado);
+            codigo = resultado;
         }
 
         if(DEBUG)
@@ -78,11 +81,6 @@ public static class LibraBase
 
     public static object exibir(object[] args)
     {
-        if(args.Length == 0)
-        {
-            
-        }
-
         int qtd = args.Length;
 
         switch(qtd)
@@ -98,6 +96,31 @@ public static class LibraBase
                 Console.Write(args[1].ToString());
                 return null;
         }
+
+        return null;
+    }
+
+    public static object _ref(object[] args)
+    {
+        if(args.Length != 1)
+            new Erro("Esperava 1 argumentos").LancarErro();
+
+        string identificador = args[0].ToString();
+        return ProgramaAtual.PilhaEscopos.ObterVariavel(identificador).Valor;
+    }
+
+    public static object acessar(object[] args)
+    {
+        if(args.Length != 2)
+            new Erro("Esperava 2 argumentos").LancarErro();
+
+        var vetor = args[0];
+        int indice = (int)args[1];
+
+        if(vetor is string)
+            return vetor.ToString()[indice];
+        
+        // TODO: Adicionar Vetores de fato
 
         return null;
     }

@@ -1,17 +1,9 @@
 
 namespace Libra.Arvore
 {
-    public abstract class Instrucao { }
-
-    public class InstrucaoSair : Instrucao
-    {
-        public InstrucaoSair(Expressao expressao)
-        {
-            Expressao = expressao;
-        }
-
-        public Expressao Expressao { get; private set; }
-
+    public abstract class Instrucao 
+    { 
+        public TokenTipo TipoInstrucao { get; protected set; }
     }
 
     public class InstrucaoVar : Instrucao
@@ -24,6 +16,7 @@ namespace Libra.Arvore
             Constante = constante;
             Tipo = tipo;   
             IndiceVetor = indice; 
+            TipoInstrucao = TokenTipo.Var;
         }
 
         public object Valor { get; private set; }
@@ -42,6 +35,7 @@ namespace Libra.Arvore
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
+            TipoInstrucao = TokenTipo.Funcao;
         }
 
         public Instrucao[] Instrucoes { get; private set; }
@@ -57,6 +51,7 @@ namespace Libra.Arvore
             Expressao = expressao;
             Instrucoes = instrucoes;
             SenaoInstrucoes = senaoInstrucoes;
+            TipoInstrucao = TokenTipo.Se;
         }
 
         public Expressao Expressao { get; private set; }
@@ -71,6 +66,7 @@ namespace Libra.Arvore
         {
             Expressao = expressao;
             Instrucoes = instrucoes;
+            TipoInstrucao = TokenTipo.Enquanto;
         }
 
         public Expressao Expressao { get; private set; }
@@ -90,6 +86,7 @@ namespace Libra.Arvore
         public InstrucaoRetornar(Expressao expressao)
         {
             Expressao = expressao;
+            TipoInstrucao = TokenTipo.Retornar;
         }
     }
 
@@ -98,6 +95,7 @@ namespace Libra.Arvore
         public InstrucaoChamadaFuncao(ExpressaoChamadaFuncao chamada)
         {
             Chamada = chamada;
+            TipoInstrucao = TokenTipo.Identificador;
         }
 
         public ExpressaoChamadaFuncao Chamada { get; private set; }
