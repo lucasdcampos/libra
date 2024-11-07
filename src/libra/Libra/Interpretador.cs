@@ -53,6 +53,9 @@ public class Interpretador
             case TokenTipo.Enquanto:
                 InterpretarCondicional((InstrucaoEnquanto)instrucao);
                 break;
+            case TokenTipo.Funcao:
+                InterpretarFuncao((InstrucaoFuncao)instrucao);
+                break;
             case TokenTipo.Identificador:
                 InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
                 break;
