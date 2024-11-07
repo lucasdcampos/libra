@@ -55,7 +55,6 @@ public class Tokenizador
                     case "funcao":
                         AdicionarTokenALista(TokenTipo.Funcao);
                         break;
-                        break;
                     case "se":
                         AdicionarTokenALista(TokenTipo.Se);
                         break;

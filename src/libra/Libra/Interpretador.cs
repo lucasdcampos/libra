@@ -11,7 +11,8 @@ public class Interpretador
     public static int NivelDebug = 0;
     private Programa _programa;
     private object _ultimoRetorno = 0;
-    
+    private int _linha = 0;
+
     public void Interpretar(Programa programa)
     {
         LibraBase.ProgramaAtual = _programa = programa;
@@ -158,7 +159,7 @@ public class Interpretador
             for (int i = 0; i < chamada.Argumentos.Count; i++)
             {
                 string ident = funcao.Parametros[i];
-                Token valor = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]).ToString());
+                Token valor = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]));
                 _programa.PilhaEscopos.DefinirVariavel(ident, new Variavel(ident, valor));
             }
 
@@ -195,6 +196,7 @@ public class Interpretador
                 var bin = (ExpressaoBinaria)expressao;
                 var a = InterpretarExpressao(bin.Esquerda);
                 var b = InterpretarExpressao(bin.Direita);
+
                 switch(bin.Operador.Tipo)
                 {
                     case TokenTipo.OperadorSoma:
@@ -240,7 +242,7 @@ public class Interpretador
         }
         catch (DivideByZeroException)
         {
-            new ErroDivisaoPorZero();
+            new ErroDivisaoPorZero().LancarErro();
             return null;
         }
     }
@@ -334,28 +336,8 @@ public class Interpretador
         if(string.IsNullOrWhiteSpace(i.Identificador))
             new Erro("Identificador inválido!").LancarErro();
 
-        var expressaoValorFinal = (Expressao)i.Valor;
-        object resultado = InterpretarExpressao(expressaoValorFinal);
-
-        if(i.IndiceVetor != null)
-            return AtribuirElementoVetor(i.Identificador, i.IndiceVetor, expressaoValorFinal);
-        
-        // declarando um Vetor (var x = [10])
-        if (i.Tipo == TokenTipo.Vetor)
-        {
-            Token[] tokens = new Token[(int)resultado];
-            for(int _ =0; _ < tokens.Length; _++)
-                tokens[_] = new Token(TokenTipo.Nulo, 0);
-
-            if(i.EhDeclaracao)
-                _programa.PilhaEscopos.DefinirVariavel(i.Identificador, new Variavel(i.Identificador, new Token(i.Tipo, 0, tokens), i.Constante));
-            else
-                _programa.PilhaEscopos.AtualizarVariavel(i.Identificador,  new Token(i.Tipo, 0, tokens));
-            return null;
-        }
-
-        // Declarando uma variável normal
-        var token = new Token(i.Tipo, 0, resultado);
+        object resultado = InterpretarExpressao(i.Expressao);
+        var token = new Token(i.Tipo, _linha, resultado);
         var variavel = new Variavel(i.Identificador, token, i.Constante);
 
         if(i.EhDeclaracao)

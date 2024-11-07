@@ -8,21 +8,19 @@ namespace Libra.Arvore
 
     public class InstrucaoVar : Instrucao
     {
-        public InstrucaoVar(string identificador, object valor, bool constante, bool declaracao, TokenTipo tipo = TokenTipo.TokenInvalido, Expressao indice = null)
+        public InstrucaoVar(string identificador, Expressao expressao, bool constante, bool declaracao, TokenTipo tipo = TokenTipo.TokenInvalido)
         {
-            Valor = valor;
             Identificador = identificador;
             EhDeclaracao = declaracao;
             Constante = constante;
             Tipo = tipo;   
-            IndiceVetor = indice; 
+            Expressao = expressao; 
             TipoInstrucao = TokenTipo.Var;
         }
 
-        public object Valor { get; private set; }
+        public Expressao Expressao { get; private set; }
         public TokenTipo Tipo { get; private set; }
         public string Identificador {get; private set; }
-        public Expressao IndiceVetor { get; private set; }
         internal bool EhDeclaracao; // usada para saber se estamos declarando uma nova variável ou só modificando uma
         public bool Constante { get; private set; }
 
