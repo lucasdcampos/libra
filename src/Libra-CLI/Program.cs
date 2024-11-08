@@ -26,7 +26,7 @@ internal static class Program
 
         if (args.Length == 1)
         {
-            Interpretar(args[0], true);
+            Interpretar(args[0], false);
 
             return;
         }
