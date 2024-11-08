@@ -12,5 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Libra\Libra.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\core\so.libra"/>
+  </ItemGroup>
 </Project>
