@@ -23,7 +23,7 @@ funcao fibonacci(n)
     var b = 1
     var contador = 0
     enquanto contador < n faca
-        escrever(a)
+        exibir(a)
         var temp = a
         a = b
         b = temp + b
