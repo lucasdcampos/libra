@@ -24,7 +24,7 @@ public class Interpretador
         LibraBase.ProgramaAtual = null; // limpar o programa depois que terminar
     }
 
-    private object InterpretarInstrucoes(Instrucao[] instrucoes)
+    private object InterpretarInstrucoes(Instrucao[] instrucoes, bool escopo = false)
     {
         for(int i = 0; i < instrucoes.Length; i++)
         {
@@ -33,12 +33,14 @@ public class Interpretador
             if(instrucao is InstrucaoRetornar) 
             {
                 var retorno = (InstrucaoRetornar)instrucao;
-                _ultimoRetorno = InterpretarExpressao(retorno.Expressao);
-                return _ultimoRetorno;
+                var resultado = _ultimoRetorno = InterpretarExpressao(retorno.Expressao);
+                if(escopo)
+                    _programa.PilhaEscopos.DesempilharEscopo();
+                return resultado;
             }
         }
         
-        return 0;
+        return null;
     }
 
     private Instrucao InterpretarInstrucao(Instrucao instrucao)
@@ -61,7 +63,7 @@ public class Interpretador
                 InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
                 break;
             case TokenTipo.Retornar:
-                return instrucao;
+                return (InstrucaoRetornar)instrucao;
         }
 
         new Erro($"Instrução Inválida: {instrucao.ToString()}");
@@ -110,70 +112,53 @@ public class Interpretador
         return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(expressaoChamadaFuncao));
     }
 
-    // REFATORAR!
-    private HashSet<string> funcoesEmExecucao = new HashSet<string>();
+    private object ExecutarFuncaoEmbutida(FuncaoEmbutida funcao, ExpressaoChamadaFuncao chamada) 
+    {
+        var f = (FuncaoEmbutida)_programa.Funcoes[chamada.Identificador];
+        List<object> valoresArgumentos = new List<object>();
+        for(int i =0; i < chamada.Argumentos.Count; i++)
+        {
+            valoresArgumentos.Add(InterpretarExpressao(chamada.Argumentos[i]));
+        }
+
+        _ultimoRetorno = f.Executar(valoresArgumentos.ToArray());
+        return _ultimoRetorno;
+    }
+
     private object InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
     {
-        _ultimoRetorno = null;
-        
         var chamada = instrucaoChamada.Chamada;
         var argumentos = chamada.Argumentos;
 
         if (!_programa.FuncaoExiste(chamada.Identificador))
                 new ErroFuncaoNaoDefinida(chamada.Identificador).LancarErro();
-                
+        
+        var funcao = _programa.Funcoes[chamada.Identificador];
+
         if(_programa.Funcoes[chamada.Identificador] is FuncaoEmbutida)
-        {
-            var f = (FuncaoEmbutida)_programa.Funcoes[chamada.Identificador];
-            List<object> valoresArgumentos = new List<object>();
-            foreach(var arg in argumentos)
-            {
-                valoresArgumentos.Add(InterpretarExpressao(arg));
-            }
+            return ExecutarFuncaoEmbutida((FuncaoEmbutida)funcao, chamada);
 
-            _ultimoRetorno = f.Executar(valoresArgumentos.ToArray());
-            return _ultimoRetorno;
-        }
-           
-        // Verifica se a função já está em execução (evita recursão infinita)
-        if (funcoesEmExecucao.Contains(chamada.Identificador))
+        var parametros = funcao.Parametros.Count;
+
+        if (argumentos.Count != parametros)
+            new Erro($"Função {funcao.Identificador}() esperava {parametros} argumento(s) e recebeu {argumentos.Count}").LancarErro();
+
+        _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
+
+        // Adicionando os argumentos ao Escopo
+        for (int i = 0; i < chamada.Argumentos.Count; i++)
         {
-            new ErroTransbordoDePilha(chamada.Identificador).LancarErro();
-            return null;
+            string ident = funcao.Parametros[i];
+            Token valor = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]));
+            _programa.PilhaEscopos.DefinirVariavel(ident, new Variavel(ident, valor));
         }
 
-        // Marca a função como em execução
-        funcoesEmExecucao.Add(chamada.Identificador);
+        object retorno = InterpretarInstrucoes(funcao.Instrucoes, true);
+        
+        _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
 
-        try
-        {
-            var funcao = _programa.Funcoes[chamada.Identificador];
-            var parametros = funcao.Parametros.Count;
+        return _ultimoRetorno = retorno;
 
-            if (argumentos.Count != parametros)
-                new Erro($"Função {chamada.Identificador}() esperava {parametros} argumento(s) e recebeu {argumentos.Count}").LancarErro();
-
-            _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
-
-            // Adicionando os argumentos ao Escopo
-            for (int i = 0; i < chamada.Argumentos.Count; i++)
-            {
-                string ident = funcao.Parametros[i];
-                Token valor = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]));
-                _programa.PilhaEscopos.DefinirVariavel(ident, new Variavel(ident, valor));
-            }
-
-            object retorno = InterpretarInstrucoes(funcao.Instrucoes);
-
-            _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
-
-            return _ultimoRetorno = retorno;
-        }
-        finally
-        {
-            // Marca a função como terminada
-            funcoesEmExecucao.Remove(chamada.Identificador);
-        }
     }
 
     private object InterpretarExpressao(Expressao expressao)
@@ -186,10 +171,13 @@ public class Interpretador
             case TipoExpressao.ExpressaoLiteral:
                 return ((ExpressaoLiteral)expressao).Token.Valor;
             case TipoExpressao.ExpressaoVariavel:
-                return _programa.PilhaEscopos.ObterVariavel(((ExpressaoVariavel)expressao).Identificador.Valor.ToString()).Valor;
+            {
+                var exprVariavel = (ExpressaoVariavel)expressao;
+                var variavel = _programa.PilhaEscopos.ObterVariavel(exprVariavel.Identificador.Valor.ToString());
+                return variavel.Valor;
+            }
             case TipoExpressao.ExpressaoChamadaFuncao:
-                InterpretarChamadaFuncao((ExpressaoChamadaFuncao)expressao);
-                return _ultimoRetorno;
+                return InterpretarChamadaFuncao((ExpressaoChamadaFuncao)expressao);
             case TipoExpressao.ExpressaoUnaria:
                 break;
             case TipoExpressao.ExpressaoBinaria:
@@ -220,7 +208,7 @@ public class Interpretador
                     case TokenTipo.OperadorMenorIgualQue:
                         return MenorIgualQue(a, b);
                 }
-                return 0;
+                break;
         }
 
         new Erro("Expressão não implementada").LancarErro();
@@ -255,10 +243,10 @@ public class Interpretador
     private int Igual(object a, object b)
     {
         if(a is int)
-            return (int)a > (int)b ? 1 : 0;
+            return (int)a == (int)b ? 1 : 0;
         
         if(a is double)
-            return (double)a > (double)b ? 1 : 0;
+            return (double)a == (double)b ? 1 : 0;
 
         if(a is string)
             return (string)a == (string)b ? 1 : 0;

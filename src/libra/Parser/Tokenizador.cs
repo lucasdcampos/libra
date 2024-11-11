@@ -23,15 +23,25 @@ public class Tokenizador
         {
             if(char.IsDigit(Atual()))
             {
-                texto += ConsumirChar();
-
+                var ponto = false;
                 while(char.IsDigit(Atual()))
                 {
                     texto += ConsumirChar();
+                    if(Atual() == '.') {
+                        if(ponto)
+                            new Erro("Número inválido!", _linha);
+
+                        texto += ConsumirChar();
+                        ponto = true;
+                    }
                 }
 
-                AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(texto));
+                if(ponto)
+                    AdicionarTokenALista(TokenTipo.NumeroLiteral, double.Parse(texto));
+                else
+                    AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(texto));
                 texto = "";
+                ponto = false;
                 continue;
             }
 
@@ -78,7 +88,6 @@ public class Tokenizador
                         break;
                     case "fim":
                         AdicionarTokenALista(TokenTipo.Fim);
-                        break;
                         break;
                     case "ou":
                         AdicionarTokenALista(TokenTipo.OperadorOu);
@@ -160,7 +169,6 @@ public class Tokenizador
                             Passar();
                             break;
                         }
-
                         AdicionarTokenALista(TokenTipo.OperadorNeg);
                         Passar();
                         break;

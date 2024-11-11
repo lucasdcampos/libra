@@ -71,30 +71,6 @@ public class Parser
         return expr;
     }
 
-    private ExpressaoChamadaFuncao? ParseExpressaoChamadaFuncao()
-    {
-        string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
-
-        ConsumirToken(TokenTipo.AbrirParen);
-
-        var argumentos = new List<Expressao>();
-        while(Atual().Tipo != TokenTipo.FecharParen)
-        {
-            var expr = ParseExpressao();
-
-            argumentos.Add(expr);
-
-            if(expr == null)
-                new ErroEsperado("expressão", _linha).LancarErro();
-
-            TentarConsumirToken(TokenTipo.Virgula);
-        }
-
-        ConsumirToken(TokenTipo.FecharParen);
-
-        return new ExpressaoChamadaFuncao(identificador, argumentos);
-    }
-
     private InstrucaoFuncao? ParseInstrucaoFuncao()
     {
         ConsumirToken(TokenTipo.Funcao);
@@ -154,25 +130,52 @@ public class Parser
 
     private Expressao? ParseExpressao(bool bin = false)
     {
-        if(TokenEhOperador(Proximo(1)) && !bin)
-            return ParseExpressaoBinaria();
-
+        Expressao expr = null;
         switch(Atual().Tipo)
         {
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
-                return new ExpressaoLiteral(ConsumirToken());
+                expr = new ExpressaoLiteral(ConsumirToken());
+                break;
             case TokenTipo.Identificador:
-                    if(Proximo(1).Tipo == TokenTipo.AbrirParen)
-                        return ParseExpressaoChamadaFuncao();
-                    if(Proximo(1).Tipo == TokenTipo.AbrirCol)
-                        return new ExpressaoAcessoVetor(Atual().Valor.ToString(), ParseVetor());
-                return new ExpressaoVariavel(ConsumirToken());
+                if(Proximo(1).Tipo == TokenTipo.AbrirParen)
+                {
+                    expr = ParseExpressaoChamadaFuncao();
+                    break;
+                }
+                expr = new ExpressaoVariavel(ConsumirToken());
+                break;
         }
-        
-        new Erro($"Impossível determinar expressão: {Atual()}", _linha, 1000).LancarErro();
-        return null;
+
+        if(PrioridadeOperador(Atual()) != null && !bin)
+            return ParseExpressaoBinaria(expr);
+
+        if(expr == null)
+            new Erro($"Impossível determinar expressão: {Atual()}", _linha, 1000).LancarErro();
+
+        return expr;
+    }
+
+    private ExpressaoChamadaFuncao? ParseExpressaoChamadaFuncao()
+    {
+        string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
+        ConsumirToken(TokenTipo.AbrirParen);
+
+        var argumentos = new List<Expressao>();
+        while(Atual().Tipo != TokenTipo.FecharParen)
+        {
+            var expr = ParseExpressao();
+            argumentos.Add(expr);
+
+            if(expr == null)
+                ConsumirToken(TokenTipo.FecharParen);
+
+            TentarConsumirToken(TokenTipo.Virgula);
+        }
+
+        ConsumirToken(TokenTipo.FecharParen);
+        return new ExpressaoChamadaFuncao(identificador, argumentos);
     }
 
     private ExpressaoBinaria? ParseExpressaoBinaria(Expressao esquerda = null)
@@ -183,7 +186,7 @@ public class Parser
         if(esquerda == null)
                 esquerda = ParseExpressao(true);
 
-        if(TokenEhOperador(Atual()))
+        if(PrioridadeOperador(Atual()) != null)
         {
             operador = ConsumirToken();
             direita = ParseExpressao();
@@ -194,23 +197,25 @@ public class Parser
         return null;
     }
 
-    private bool TokenEhOperador(Token token)
+    private int? PrioridadeOperador(Token token)
     {
         switch(token.Tipo)
         {
             case TokenTipo.OperadorSoma:
             case TokenTipo.OperadorSub:
+                return 1;
             case TokenTipo.OperadorMult:
             case TokenTipo.OperadorDiv:
+                return 2;
             case TokenTipo.OperadorMaiorQue:
             case TokenTipo.OperadorMaiorIgualQue:
             case TokenTipo.OperadorMenorQue:
             case TokenTipo.OperadorMenorIgualQue:
             case TokenTipo.OperadorComparacao:
-                return true;
+                return 0;
         }
 
-        return false;
+        return null; // Não é um operador binário!
     }
 
     private Token Atual() 
@@ -239,7 +244,7 @@ public class Parser
         
         if(tipo != TokenTipo.TokenInvalido && token.Tipo != tipo)
         {
-            new ErroEsperado(Token.TipoParaString(tipo)).LancarErro();
+            new ErroEsperado(Token.TipoParaString(tipo), _linha).LancarErro();
         }
 
         Passar();

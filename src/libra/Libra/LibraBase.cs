@@ -14,6 +14,7 @@ public static class LibraBase
         ProgramaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         ProgramaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
         ProgramaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
+        ProgramaAtual.Funcoes["tipo"] = new FuncaoEmbutida(tipo);
         ProgramaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
         ProgramaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
         ProgramaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
@@ -21,6 +22,7 @@ public static class LibraBase
         ProgramaAtual.Funcoes["pausar"] = new FuncaoEmbutida(pausar);
         ProgramaAtual.Funcoes["aleatorio"] = new FuncaoEmbutida(aleatorio);
         ProgramaAtual.Funcoes["num"] = new FuncaoEmbutida(num);
+        ProgramaAtual.Funcoes["int"] = new FuncaoEmbutida(_int);
         ProgramaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
         ProgramaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
         ProgramaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
@@ -89,11 +91,11 @@ public static class LibraBase
                 Console.WriteLine();
                 return null;
             case 1:
-                Console.WriteLine(args[0].ToString());
+                Console.WriteLine(args[0]);
                 return null;
             case 2:
-                Console.Write(args[0].ToString());
-                Console.Write(args[1].ToString());
+                Console.Write(args[0]);
+                Console.Write(args[1]);
                 return null;
         }
 
@@ -134,6 +136,15 @@ public static class LibraBase
         }
 
         return final;
+    }
+
+    public static object _int(object[] args)
+    {
+        if(args.Length == 0)
+            new Erro("Esperava 1 argumento");
+
+        double n = (double)args[0];
+        return (int)n;
     }
 
     public static object num(object[] args)
@@ -213,13 +224,13 @@ public static class LibraBase
     public static object aleatorio(object[] args)
     {
         Random random = new Random();
-        int num = 0;
+        double num = 0;
 
         int qtd = args.Length;
         switch(qtd)
         {
             case 0:
-                num = random.Next();
+                num = random.NextDouble();
                 break;
             case 1:
                 num = random.Next((int)args[0]);
@@ -232,18 +243,24 @@ public static class LibraBase
         return num;
     }
 
-    public static void tipo(string identificador)
+    public static object tipo(object[] args)
     {
-        Console.WriteLine(identificador);
+        if(args.Length != 1)
+            new Erro("tipo() esperava 1 argumento").LancarErro();
 
-        var tipo = ProgramaAtual.Variaveis[identificador].Tipo;
-
-        switch (tipo)
+        switch(args[0].GetType().ToString())
         {
-            case TokenTipo.NumeroLiteral: Console.WriteLine("Numero"); break;
-            case TokenTipo.CaractereLiteral: Console.WriteLine("Caractere"); break;
-            case TokenTipo.Vetor: Console.WriteLine("Vetor"); break;
+            case "System.Int32":
+                return "Int";
+            case "System.String":
+                return "Texto";
+            case "System.Char":
+                return "Char";
+            case "System.Double":
+                return "Real";
         }
+
+        return null;
     }
 
     public static object erro(object[] args)

@@ -36,19 +36,22 @@ public class PilhaDeEscopos
     // Busca uma variável, começando pelo escopo mais interno até o global
     public Variavel? ObterVariavel(string identificador)
     {
-        foreach (var escopo in escopos)
+        for(int i = 0; i < escopos.Count; i++)
         {
-            if (escopo.VariavelExiste(identificador))
-                return escopo.ObterVariavel(identificador);
+            if (escopos.ElementAt(i).VariavelExiste(identificador))
+                return escopos.ElementAt(i)?.ObterVariavel(identificador);
         }
+        new ErroVariavelNaoDeclarada(identificador).LancarErro();
         return null; // Variável não encontrada
     }
 
     // Atualiza o valor de uma variável existente
     public void AtualizarVariavel(string identificador, object novoValor)
     {
-        foreach (var escopo in escopos)
+        for(int i = 0; i < escopos.Count; i++)
         {
+            var escopo = escopos.ElementAt(i);
+
             if (escopo.VariavelExiste(identificador))
             {
                 escopo.AtualizarVariavel(identificador, novoValor);
