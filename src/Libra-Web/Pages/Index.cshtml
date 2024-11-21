@@ -1,0 +1,41 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Code Playground";
+}
+
+<div class="container mt-4">
+    <h1 class="text-center">Code Playground</h1>
+    <div class="row mt-4">
+        <!-- Editor de Código -->
+        <div class="col-md-6">
+            <h3>Editor</h3>
+            <textarea id="code-editor" class="form-control" rows="15" placeholder="Escreva seu código aqui..."></textarea>
+        </div>
+
+        <!-- Painel de Saída -->
+        <div class="col-md-6">
+            <h3>Output</h3>
+            <div id="output-panel" class="p-3 border bg-light" style="height: 300px; overflow-y: auto;">
+                <p class="text-muted">A saída aparecerá aqui.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão para Executar o Código -->
+    <div class="text-center mt-4">
+        <button id="run-code" class="btn btn-primary btn-lg">Executar</button>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("run-code").addEventListener("click", function () {
+            const code = document.getElementById("code-editor").value;
+
+            // Simula execução e exibe no painel (substitua por backend se necessário)
+            const output = `Executando o código:\n${code}`;
+            document.getElementById("output-panel").textContent = output;
+        });
+    </script>
+}
