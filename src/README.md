@@ -7,3 +7,6 @@ Projeto principal (DLL), responsável pelo *front-end e backend* da Libra, isto 
 
 ## Libra-CLI/
 Programa de Console (Executável) usado para chamar o Interpretador da Libra para executar um programa.
+
+## Libra-Web/
+Playground Web da Libra (Razor ASP.NET), onde é possível testar a linguagem sem baixá-la em seu computador.
