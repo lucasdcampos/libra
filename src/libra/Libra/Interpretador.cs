@@ -12,19 +12,19 @@ public class Interpretador
     private Programa _programa;
     private object _ultimoRetorno = 0;
     private int _linha = 0;
+    private bool _falha => _programa._falha;
     public string Interpretar(string codigo)
     {
         var tokenizador = new Tokenizador();
         var tokens = tokenizador.Tokenizar(codigo);
         var parser = new Parser();
         var programa = parser.Parse(tokens);
-
+    
         return Interpretar(programa);
     }
 
     public string Interpretar(Programa programa)
     {
-        
         LibraBase.ProgramaAtual = _programa = programa;
 
         LibraBase.RegistrarFuncoesEmbutidas();
@@ -59,6 +59,9 @@ public class Interpretador
 
     private Instrucao InterpretarInstrucao(Instrucao instrucao)
     {
+        if(_falha)
+            return null;
+
         switch(instrucao.TipoInstrucao)
         {
             case TokenTipo.Var:
@@ -363,6 +366,12 @@ public class Interpretador
         vetor[indiceVetor].Valor = valor; // TODO: Isso funciona?
 
         return valor;
+    }
+
+    private int Encerrar(int codigo)
+    {
+        //_programa.CodigoSaida = codigo;
+        return codigo;
     }
 
 }

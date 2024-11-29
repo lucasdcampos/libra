@@ -1,9 +1,1 @@
-var x = 0
-var y = 0
-funcao a()
-    var w = 0
-    var z = 0
-    exibir(ptr("z"))
-fim
-exibir(ptr("x"))
-a()
+exibir(1/0)

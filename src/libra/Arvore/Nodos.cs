@@ -16,6 +16,7 @@ namespace Libra.Arvore
         public Instrucao[] Instrucoes;
         public Dictionary<string, Variavel> Variaveis {get; private set; }
         public Dictionary<string, Funcao> Funcoes {get; private set; }
+        internal bool _falha = false;
 
         public bool VariavelExiste(string ident)
         {
@@ -24,6 +25,11 @@ namespace Libra.Arvore
         public bool FuncaoExiste(string ident)
         {
             return Funcoes.ContainsKey(ident);
+        }
+        public void Sair(int codigo)
+        {
+            _falha = true;
+            CodigoSaida = codigo;
         }
     }
 }

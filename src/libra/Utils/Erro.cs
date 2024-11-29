@@ -29,7 +29,7 @@ public class Erro
 
         Console.ResetColor();
 
-        Environment.Exit(this.Codigo);
+        LibraBase.ProgramaAtual.Sair(this.Codigo);
     }
 
     // TODO: Arrumar essa feiura
