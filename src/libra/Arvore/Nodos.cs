@@ -10,6 +10,7 @@ namespace Libra.Arvore
             PilhaEscopos = new PilhaDeEscopos();
         }
 
+        public string Saida { get; internal set; }
         public int CodigoSaida { get; private set; }
         public PilhaDeEscopos PilhaEscopos { get; private set;}
         public Instrucao[] Instrucoes;

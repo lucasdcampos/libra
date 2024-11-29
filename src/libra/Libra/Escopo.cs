@@ -17,6 +17,13 @@ public class Escopo
         return _variaveis.TryGetValue(identificador, out var variavel) ? variavel : null;
     }
 
+    public int? ObterIndiceVariavel(string identificador)
+    {
+        if(!VariavelExiste(identificador)) return -1;
+
+        return _variaveis.Keys.ToList().IndexOf(identificador);
+    }
+
     public bool VariavelExiste(string identificador)
     {
         return _variaveis.ContainsKey(identificador);

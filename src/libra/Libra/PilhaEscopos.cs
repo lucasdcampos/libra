@@ -45,6 +45,22 @@ public class PilhaDeEscopos
         return null; // Variável não encontrada
     }
 
+    // TODO: Encontrar forma melhor
+    public Endereco? ObterIndiceVariavel(string identificador)
+    {
+        for(int i = 0; i < escopos.Count; i++)
+        {
+            if (escopos.ElementAt(i).VariavelExiste(identificador))
+            {
+                int? idcVariavel = escopos.ElementAt(i)?.ObterIndiceVariavel(identificador);
+                return new Endereco {IndiceEscopo = i, IndiceVariavel = (int)idcVariavel};
+            }
+                
+        }
+        new ErroVariavelNaoDeclarada(identificador).LancarErro();
+        return null; // Variável não encontrada
+    }
+
     // Atualiza o valor de uma variável existente
     public void AtualizarVariavel(string identificador, object novoValor)
     {

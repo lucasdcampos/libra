@@ -28,6 +28,7 @@ public static class LibraBase
         ProgramaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
         ProgramaAtual.Funcoes["acessar"] = new FuncaoEmbutida(acessar);
         ProgramaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
+        ProgramaAtual.Funcoes["ptr"] = new FuncaoEmbutida(ptr);
     }
 
     public static object sair(object[] args)
@@ -88,12 +89,15 @@ public static class LibraBase
         switch(qtd)
         {
             case 0:
+                ProgramaAtual.Saida += "\n";
                 Console.WriteLine();
                 return null;
             case 1:
+                ProgramaAtual.Saida += $"{args[0]}\n";
                 Console.WriteLine(args[0]);
                 return null;
             case 2:
+                ProgramaAtual.Saida += $"{args[0]}{args[1]}";
                 Console.Write(args[0]);
                 Console.Write(args[1]);
                 return null;
@@ -241,6 +245,17 @@ public static class LibraBase
         }
         
         return num;
+    }
+
+    public static object ptr(object[] args)
+    {
+        if(args.Length != 1)
+            new Erro("tipo() esperava 1 argumento").LancarErro();
+
+        if(args[0].GetType().ToString() != "System.String")
+            new Erro("esperava <texto>").LancarErro();
+
+        return ProgramaAtual.PilhaEscopos.ObterIndiceVariavel(args[0].ToString());
     }
 
     public static object tipo(object[] args)

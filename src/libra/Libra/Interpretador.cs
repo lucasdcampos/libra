@@ -12,16 +12,30 @@ public class Interpretador
     private Programa _programa;
     private object _ultimoRetorno = 0;
     private int _linha = 0;
-
-    public void Interpretar(Programa programa)
+    public string Interpretar(string codigo)
     {
+        var tokenizador = new Tokenizador();
+        var tokens = tokenizador.Tokenizar(codigo);
+        var parser = new Parser();
+        var programa = parser.Parse(tokens);
+
+        return Interpretar(programa);
+    }
+
+    public string Interpretar(Programa programa)
+    {
+        
         LibraBase.ProgramaAtual = _programa = programa;
 
         LibraBase.RegistrarFuncoesEmbutidas();
 
         InterpretarInstrucoes(_programa.Instrucoes);
-        
+
+        string saida = LibraBase.ProgramaAtual.Saida;
+
         LibraBase.ProgramaAtual = null; // limpar o programa depois que terminar
+
+        return saida;
     }
 
     private object InterpretarInstrucoes(Instrucao[] instrucoes, bool escopo = false)
