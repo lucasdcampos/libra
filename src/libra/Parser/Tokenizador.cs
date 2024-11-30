@@ -237,7 +237,7 @@ public class Tokenizador
                         texto = "";
                         if(Atual() != '\'')
                         {
-                            throw new ErroEsperado("`'`", _linha);
+                            throw new Erro("Esperado `'`", _linha);
                         }
                         Passar();
                         break;

@@ -212,6 +212,7 @@ public class Parser
             case TokenTipo.OperadorMenorQue:
             case TokenTipo.OperadorMenorIgualQue:
             case TokenTipo.OperadorComparacao:
+            case TokenTipo.OperadorDiferente:
                 return 0;
         }
 
@@ -244,7 +245,7 @@ public class Parser
         
         if(tipo != TokenTipo.TokenInvalido && token.Tipo != tipo)
         {
-            throw new ErroEsperado(Token.TipoParaString(tipo), _linha);
+            throw new ErroEsperado(tipo, Atual().Tipo, _linha);
         }
 
         Passar();

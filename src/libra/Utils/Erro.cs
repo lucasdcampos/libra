@@ -95,8 +95,8 @@ public class ErroTokenInvalido : Erro
 
 public class ErroEsperado : Erro
 {
-    public ErroEsperado(string token, int linha = 0, int coluna = 0) 
-        : base(1002, $"Esperado Token {token}", linha, coluna) { }
+    public ErroEsperado(TokenTipo esperado, TokenTipo recebido, int linha = 0, int coluna = 0) 
+        : base(1002, $"Esperado Token {Token.TipoParaString(esperado)}, recebido {Token.TipoParaString(recebido)}", linha, coluna) { }
 }
 
 public class ErroDivisaoPorZero : Erro
