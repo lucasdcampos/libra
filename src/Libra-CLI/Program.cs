@@ -5,10 +5,6 @@ using Libra.Arvore;
 
 internal static class Program
 {
-    private static Tokenizador _tokenizador;
-    private static Parser _parser;
-    private static Interpretador _interpretador;
-
     private const string _ver = "1.0-PREVIEW";
 
     private static readonly string[] _bibliotecaPadrao = 
@@ -20,10 +16,6 @@ internal static class Program
 
     internal static void Main(string[] args)
     {
-        _tokenizador = new Tokenizador();
-        _parser = new Parser();
-        _interpretador = new Interpretador();
-
         if (args.Length == 1)
         {
             Interpretar(args[0], false);
@@ -54,7 +46,7 @@ internal static class Program
                     MostrarAjuda();
                     break;
                 default:
-                    _interpretador.Interpretar(_parser.Parse(_tokenizador.Tokenizar(linha)));
+                    new Interpretador().Interpretar(linha);
                     break;
             }
         }
@@ -98,22 +90,19 @@ internal static class Program
     }
 
     
-    private static Programa Interpretar(string arquivoInicial, bool incluirPadrao = false)
+    private static void Interpretar(string arquivoInicial, bool incluirPadrao = false)
     {
         if (!File.Exists(arquivoInicial))
         {
             Console.WriteLine($"Não foi possível localizar `{arquivoInicial}`");
-            return null;
+            return;
         }
 
         string codigoFonte = incluirPadrao ? LerBibliotecaPadrao() : string.Empty; // carregando a biblioteca padrão no arquivo
         codigoFonte += File.ReadAllText(arquivoInicial).ReplaceLineEndings(Environment.NewLine); // Sem isso, o Tokenizador buga
 
-        var tokens = _tokenizador.Tokenizar(codigoFonte);
-        var programa = _parser.Parse(tokens);
-        _interpretador.Interpretar(programa);
+        new Interpretador().Interpretar(codigoFonte);
 
-        return programa;
     }
 
 }
