@@ -8,38 +8,47 @@ namespace Libra;
 
 public class Interpretador
 {
+
     public static int NivelDebug = 0;
-    private Programa _programa;
+    private Programa _programa => Ambiente.ProgramaAtual;
     private object _ultimoRetorno = 0;
     private int _linha = 0;
-    private bool _falha => _programa._falha;
-    public string Interpretar(string codigo)
+    private bool _deveEncerrar => Ambiente.DeveEncerrar;
+
+    public void Interpretar(string codigo, ILogger logger = null)
     {
-        var tokenizador = new Tokenizador();
-        var tokens = tokenizador.Tokenizar(codigo);
-        var parser = new Parser();
-        var programa = parser.Parse(tokens);
-    
-        return Interpretar(programa);
+        Ambiente.ConfigurarAmbiente(logger);
+        try
+        {
+            
+            var tokenizador = new Tokenizador();
+            var tokens = tokenizador.Tokenizar(codigo);
+            var parser = new Parser();
+            var programa = parser.Parse(tokens);
+            Interpretar(programa);
+        }
+        catch
+        {
+        }
     }
 
-    public string Interpretar(Programa programa)
+    public void Interpretar(Programa programa)
     {
-        LibraBase.ProgramaAtual = _programa = programa;
-
-        LibraBase.RegistrarFuncoesEmbutidas();
-
-        InterpretarInstrucoes(_programa.Instrucoes);
-
-        string saida = LibraBase.ProgramaAtual.Saida;
-
-        LibraBase.ProgramaAtual = null; // limpar o programa depois que terminar
-
-        return saida;
+        try
+        {
+            Ambiente.SetarPrograma(programa);
+            InterpretarInstrucoes(programa.Instrucoes);
+        }
+        catch
+        {
+        }
     }
 
     private object InterpretarInstrucoes(Instrucao[] instrucoes, bool escopo = false)
     {
+        if(_deveEncerrar)
+            return null;
+
         for(int i = 0; i < instrucoes.Length; i++)
         {
             var instrucao = InterpretarInstrucao(instrucoes[i]);
@@ -59,12 +68,15 @@ public class Interpretador
 
     private Instrucao InterpretarInstrucao(Instrucao instrucao)
     {
-        if(_falha)
+        if(_deveEncerrar)
             return null;
 
         switch(instrucao.TipoInstrucao)
         {
             case TokenTipo.Var:
+                InterpretarInstrucaoVar((InstrucaoVar)instrucao);
+                break;
+            case TokenTipo.Const:
                 InterpretarInstrucaoVar((InstrucaoVar)instrucao);
                 break;
             case TokenTipo.Se:
@@ -83,7 +95,6 @@ public class Interpretador
                 return (InstrucaoRetornar)instrucao;
         }
 
-        new Erro($"Instrução Inválida: {instrucao.ToString()}");
         return null;
     }
 
@@ -104,9 +115,8 @@ public class Interpretador
 
         var enquanto = (InstrucaoEnquanto)instrucao;
     	var instrucoes = enquanto.Instrucoes;
-        while((int)InterpretarExpressao(enquanto.Expressao) != 0)
+        while((int)InterpretarExpressao(enquanto.Expressao) != 0 && !_deveEncerrar)
             InterpretarInstrucoes(instrucoes);
-        
     }
 
     private void InterpretarFuncao(InstrucaoFuncao funcao)
@@ -114,10 +124,10 @@ public class Interpretador
         string identificador = funcao.Identificador;
 
         if(string.IsNullOrWhiteSpace(identificador))
-            new Erro("Identificador inválido!").LancarErro();
+            throw new Erro("Identificador inválido!", _linha);
         
         if(_programa.FuncaoExiste(identificador))
-            new ErroFuncaoJaDefinida(identificador).LancarErro();
+            throw new ErroFuncaoJaDefinida(identificador, _linha);
         
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros);
 
@@ -148,8 +158,8 @@ public class Interpretador
         var argumentos = chamada.Argumentos;
 
         if (!_programa.FuncaoExiste(chamada.Identificador))
-                new ErroFuncaoNaoDefinida(chamada.Identificador).LancarErro();
-        
+            throw new ErroFuncaoNaoDefinida(chamada.Identificador, _linha);
+
         var funcao = _programa.Funcoes[chamada.Identificador];
 
         if(_programa.Funcoes[chamada.Identificador] is FuncaoEmbutida)
@@ -158,7 +168,7 @@ public class Interpretador
         var parametros = funcao.Parametros.Count;
 
         if (argumentos.Count != parametros)
-            new Erro($"Função {funcao.Identificador}() esperava {parametros} argumento(s) e recebeu {argumentos.Count}").LancarErro();
+            throw new ErroEsperadoNArgumentos(funcao.Identificador, parametros, argumentos.Count, _linha);
 
         _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
 
@@ -181,7 +191,7 @@ public class Interpretador
     private object InterpretarExpressao(Expressao expressao)
     {
         if(expressao == null)
-            new ErroAcessoNulo(" Expressão nula");
+            throw new ErroAcessoNulo(" Expressão nula", _linha);
 
         switch(expressao.Tipo)
         {
@@ -228,7 +238,7 @@ public class Interpretador
                 break;
         }
 
-        new Erro("Expressão não implementada").LancarErro();
+        throw new Erro("Expressão não implementada", _linha);
 
         return 0;
     }
@@ -245,17 +255,14 @@ public class Interpretador
         {
             return null;
         }
-        catch (DivideByZeroException)
-        {
-            new ErroDivisaoPorZero().LancarErro();
-            return null;
-        }
+
+        return null;
     }
 
     private object Soma(object a, object b) => Operar(a, b, (x, y) => x + y);
     private object Sub(object a, object b) => Operar(a, b, (x, y) => x - y);
     private object Mult(object a, object b) => Operar(a, b, (x, y) => x * y);
-    private object Div(object a, object b) => Operar(a, b, (x, y) => y == 0 ? throw new DivideByZeroException() : x / y);
+    private object Div(object a, object b) => Operar(a, b, (x, y) => y == 0 ? throw new ErroDivisaoPorZero(_linha) : x / y);
 
     private int Igual(object a, object b)
     {
@@ -268,7 +275,7 @@ public class Interpretador
         if(a is string)
             return (string)a == (string)b ? 1 : 0;
         
-        new Erro("Operação Inválida");
+        throw new Erro("Operação Inválida", _linha);
         return 0;
     }
 
@@ -283,7 +290,7 @@ public class Interpretador
         if(a is string)
             return (string)a != (string)b ? 1 : 0;
         
-        new Erro("Operação Inválida");
+        throw new Erro("Operação Inválida", _linha);
         return 0;
     }
 
@@ -295,7 +302,7 @@ public class Interpretador
         if(a is double)
             return (double)a > (double)b ? 1 : 0;
         
-        new Erro("Operação Inválida");
+        throw new Erro("Operação Inválida", _linha);
         return 0;
     }
 
@@ -307,7 +314,7 @@ public class Interpretador
         if(a is double)
             return (double)a >= (double)b ? 1 : 0;
         
-        new Erro("Operação Inválida");
+        throw new Erro("Operação Inválida", _linha);
         return 0;
     }
 
@@ -319,7 +326,7 @@ public class Interpretador
         if(a is double)
             return (double)a < (double)b ? 1 : 0;
         
-        new Erro("Operação Inválida");
+        throw new Erro("Operação Inválida", _linha);
         return 0;
     }
 
@@ -331,15 +338,14 @@ public class Interpretador
         if(a is double)
             return (double)a <= (double)b ? 1 : 0;
         
-        new Erro("Operação Inválida");
+        throw new Erro("Operação Inválida", _linha);
         return 0;
     }
 
-    // TODO: Refatorar esse método (Desculpa, já era tarde da noite quando eu escrevi isso e deveria estar dormindo)
     private object InterpretarInstrucaoVar(InstrucaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
-            new Erro("Identificador inválido!").LancarErro();
+            throw new Erro("Identificador inválido!", _linha);
 
         object resultado = InterpretarExpressao(i.Expressao);
         var token = new Token(i.Tipo, _linha, resultado);
@@ -361,17 +367,11 @@ public class Interpretador
         var vetor = (Token[])_programa.PilhaEscopos.ObterVariavel(identificador).Valor;
 
         if(indiceVetor > vetor.Length || indiceVetor < 0)
-            new ErroIndiceForaVetor().LancarErro();
+            throw new ErroIndiceForaVetor("", _linha);
 
         vetor[indiceVetor].Valor = valor; // TODO: Isso funciona?
 
         return valor;
-    }
-
-    private int Encerrar(int codigo)
-    {
-        //_programa.CodigoSaida = codigo;
-        return codigo;
     }
 
 }

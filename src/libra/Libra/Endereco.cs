@@ -1,3 +1,4 @@
+// TODO: Péssima forma de endereçar variáveis!
 public struct Endereco
 {
     public int IndiceEscopo { get; internal set; }

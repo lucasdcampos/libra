@@ -20,10 +20,10 @@ namespace Libra
         public void AtualizarValor(object novoValor)
         {
             if (Constante)
-                new ErroModificacaoConstante(Identificador).LancarErro();
+                throw new ErroModificacaoConstante(Identificador);
 
             if (novoValor.GetType() != Valor.GetType())
-                new ErroTipoIncompativel(Identificador).LancarErro();
+                throw new ErroTipoIncompativel(Identificador);
 
             Token = new Token(Token.Tipo, Token.Linha, novoValor);
         }

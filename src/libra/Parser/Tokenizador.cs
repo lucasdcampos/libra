@@ -10,6 +10,7 @@ public class Tokenizador
     private string? _fonte;
     private List<Token>? _tokens;
     private int _linha;
+    private bool _falha;
 
     public List<Token> Tokenizar(string source) 
     {
@@ -19,7 +20,7 @@ public class Tokenizador
 
         var texto = "";
 
-        while (Atual() != '\0')
+        while (Atual() != '\0' && !_falha)
         {
             if(char.IsDigit(Atual()))
             {
@@ -29,7 +30,7 @@ public class Tokenizador
                     texto += ConsumirChar();
                     if(Atual() == '.') {
                         if(ponto)
-                            new Erro("Número inválido!", _linha);
+                            throw new Erro("Número inválido!", _linha);
 
                         texto += ConsumirChar();
                         ponto = true;
@@ -236,7 +237,7 @@ public class Tokenizador
                         texto = "";
                         if(Atual() != '\'')
                         {
-                            new ErroEsperado("`'`").LancarErro();
+                            throw new ErroEsperado("`'`", _linha);
                         }
                         Passar();
                         break;
@@ -245,7 +246,7 @@ public class Tokenizador
                         Passar();
                         break;
                     default:
-                        new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})").LancarErro();
+                        throw new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})", _linha);
                         break;
                 }
                 
@@ -254,6 +255,9 @@ public class Tokenizador
         }
         
         AdicionarTokenALista(TokenTipo.FimDoArquivo);
+
+        if (_falha)
+            return new List<Token>();
 
         return _tokens;
     }

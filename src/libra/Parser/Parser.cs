@@ -45,7 +45,7 @@ public class Parser
                     return ParseInstrucaoVar();
         }
 
-        new Erro($"Instrução inválida: {Atual().Tipo.ToString()}", _linha, 1000).LancarErro();
+        throw new Erro($"Instrução inválida: {Atual().Tipo.ToString()}", _linha, 1000);
 
         return null;
     }
@@ -58,7 +58,7 @@ public class Parser
         ConsumirToken(TokenTipo.OperadorDefinir);
         var expressao = ParseExpressao();
 
-        return new InstrucaoVar(identificador, expressao, constante, declaracao);
+        return new InstrucaoVar(identificador, expressao, constante, declaracao || constante);
     }
 
     private Expressao? ParseVetor()
@@ -152,7 +152,7 @@ public class Parser
             return ParseExpressaoBinaria(expr);
 
         if(expr == null)
-            new Erro($"Impossível determinar expressão: {Atual()}", _linha, 1000).LancarErro();
+            throw new Erro($"Impossível determinar expressão: {Atual()}", _linha, 1000);
 
         return expr;
     }
@@ -244,7 +244,7 @@ public class Parser
         
         if(tipo != TokenTipo.TokenInvalido && token.Tipo != tipo)
         {
-            new ErroEsperado(Token.TipoParaString(tipo), _linha).LancarErro();
+            throw new ErroEsperado(Token.TipoParaString(tipo), _linha);
         }
 
         Passar();

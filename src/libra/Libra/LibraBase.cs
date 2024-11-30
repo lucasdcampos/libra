@@ -1,34 +1,34 @@
 // Classe usada para ser chamada internamente pelo interpretador da Libra
 // Contém a lista de funções embutidas
+using System.Reflection;
 using Libra;
 using Libra.Arvore;
 
 public static class LibraBase
 {
     public static bool DEBUG = true;
-
-    public static Programa ProgramaAtual;
+    private static Programa _programaAtual => Ambiente.ProgramaAtual;
 
     public static void RegistrarFuncoesEmbutidas()
     {
-        ProgramaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
-        ProgramaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
-        ProgramaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
-        ProgramaAtual.Funcoes["tipo"] = new FuncaoEmbutida(tipo);
-        ProgramaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
-        ProgramaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
-        ProgramaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
-        ProgramaAtual.Funcoes["concat"] = new FuncaoEmbutida(concat);
-        ProgramaAtual.Funcoes["pausar"] = new FuncaoEmbutida(pausar);
-        ProgramaAtual.Funcoes["aleatorio"] = new FuncaoEmbutida(aleatorio);
-        ProgramaAtual.Funcoes["num"] = new FuncaoEmbutida(num);
-        ProgramaAtual.Funcoes["int"] = new FuncaoEmbutida(_int);
-        ProgramaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
-        ProgramaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
-        ProgramaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
-        ProgramaAtual.Funcoes["acessar"] = new FuncaoEmbutida(acessar);
-        ProgramaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
-        ProgramaAtual.Funcoes["ptr"] = new FuncaoEmbutida(ptr);
+        _programaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
+        _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
+        _programaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
+        _programaAtual.Funcoes["tipo"] = new FuncaoEmbutida(tipo);
+        _programaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
+        _programaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
+        _programaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
+        _programaAtual.Funcoes["concat"] = new FuncaoEmbutida(concat);
+        _programaAtual.Funcoes["pausar"] = new FuncaoEmbutida(pausar);
+        _programaAtual.Funcoes["aleatorio"] = new FuncaoEmbutida(aleatorio);
+        _programaAtual.Funcoes["num"] = new FuncaoEmbutida(num);
+        _programaAtual.Funcoes["int"] = new FuncaoEmbutida(_int);
+        _programaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
+        _programaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
+        _programaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
+        _programaAtual.Funcoes["acessar"] = new FuncaoEmbutida(acessar);
+        _programaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
+        _programaAtual.Funcoes["ptr"] = new FuncaoEmbutida(ptr);
     }
 
     public static object sair(object[] args)
@@ -45,7 +45,8 @@ public static class LibraBase
         {
             Console.WriteLine($"Código de Saída: {codigo}");
         }
-        Environment.Exit(codigo);
+
+        Ambiente.Encerrar(codigo);
 
         return null;
     }
@@ -71,13 +72,13 @@ public static class LibraBase
     // Apenas para testar
     public static object[] ping(object[] args)
     {
-        Console.WriteLine("Pong! Função executada pelo C#.");
+        Ambiente.Msg("Pong! Função executada pelo C#.");
 
         if(args.Length > 0)
         {
-            Console.Write("Seus argumentos: ");
+            Ambiente.Msg("Seus argumentos: ");
             foreach(var arg in args)
-                Console.Write(arg.ToString());
+                Ambiente.Msg(arg.ToString(), "");
         }
         return null;
     }
@@ -85,21 +86,16 @@ public static class LibraBase
     public static object exibir(object[] args)
     {
         int qtd = args.Length;
-
         switch(qtd)
         {
             case 0:
-                ProgramaAtual.Saida += "\n";
-                Console.WriteLine();
+                Ambiente.Msg("");
                 return null;
             case 1:
-                ProgramaAtual.Saida += $"{args[0]}\n";
-                Console.WriteLine(args[0]);
+                Ambiente.Msg($"{args[0]}");
                 return null;
             case 2:
-                ProgramaAtual.Saida += $"{args[0]}{args[1]}";
-                Console.Write(args[0]);
-                Console.Write(args[1]);
+                Ambiente.Msg(args[0].ToString(), args[1].ToString());
                 return null;
         }
 
@@ -108,17 +104,15 @@ public static class LibraBase
 
     public static object _ref(object[] args)
     {
-        if(args.Length != 1)
-            new Erro("Esperava 1 argumentos").LancarErro();
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         string identificador = args[0].ToString();
-        return ProgramaAtual.PilhaEscopos.ObterVariavel(identificador).Valor;
+        return _programaAtual.PilhaEscopos.ObterVariavel(identificador).Valor;
     }
 
     public static object acessar(object[] args)
     {
-        if(args.Length != 2)
-            new Erro("Esperava 2 argumentos").LancarErro();
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
 
         var vetor = args[0];
         int indice = (int)args[1];
@@ -161,8 +155,7 @@ public static class LibraBase
 
     public static object bytes(object[] args)
     {
-        if(args.Length == 0)
-            new Erro("Esperava 1 argumento");
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         var objeto = args[0];
 
@@ -177,8 +170,7 @@ public static class LibraBase
 
     public static object caractere(object[] args)
     {
-        if(args.Length == 0)
-            new Erro("Esperava 1 argumento");
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         return (char)args[0];
     }
@@ -195,11 +187,7 @@ public static class LibraBase
 
     public static object tamanho(object[] args)
     {
-        if(args.Length == 0)
-            return null;
-
-        if (args.Length != 1)
-                throw new ArgumentException("length espera 1 argumento.");
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         if (args[0] is string str)
             return str.Length;
@@ -215,8 +203,7 @@ public static class LibraBase
 
     public static object pausar(object[] args)
     {
-        if(args.Length == 0)
-            new Erro("Argumentos insuficientes");
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         int i = (int)args[0];
 
@@ -249,19 +236,17 @@ public static class LibraBase
 
     public static object ptr(object[] args)
     {
-        if(args.Length != 1)
-            new Erro("tipo() esperava 1 argumento").LancarErro();
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         if(args[0].GetType().ToString() != "System.String")
             new Erro("esperava <texto>").LancarErro();
 
-        return ProgramaAtual.PilhaEscopos.ObterIndiceVariavel(args[0].ToString());
+        return _programaAtual.PilhaEscopos.ObterIndiceVariavel(args[0].ToString());
     }
 
     public static object tipo(object[] args)
     {
-        if(args.Length != 1)
-            new Erro("tipo() esperava 1 argumento").LancarErro();
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         switch(args[0].GetType().ToString())
         {
@@ -282,27 +267,19 @@ public static class LibraBase
     {
         if(args.Length == 0)
         {
-            new Erro("Erro!").LancarErro();
+            throw new Erro("Erro!");
         }
             
-        new Erro(args[0].ToString()).LancarErro();
+        throw new Erro(args[0].ToString());
 
         return null;
     }
 
-    // TODO: Só uma estimativa por enquanto, o programa pega muito mais memória que isso
-    // fora que, salvar variáveis como strings não é uma boa opção.
-    public static void AnaliseMem()
+
+    private static void ChecarArgumentos(string ident, int esperado, int recebido)
     {
-        int mem = 0;
-        foreach(var v in ProgramaAtual.Variaveis.Keys)
-        {
-            object valor = ProgramaAtual.Variaveis[v].Valor;
-
-            mem += sizeof(int);
-        }
-
-        LibraLogger.Log($"Memória:\nQuantidade de variáveis: {ProgramaAtual.Variaveis.Keys.Count}\nMemória Ocupada: {mem} bytes");
+        if(esperado != recebido)
+            throw new ErroEsperadoNArgumentos(ident, esperado, recebido);
     }
 
 }

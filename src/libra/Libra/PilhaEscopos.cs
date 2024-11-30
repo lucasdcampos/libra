@@ -15,7 +15,11 @@ public class PilhaDeEscopos
     // Adiciona um novo escopo à pilha (usado para blocos locais, funções, etc.)
     public void EmpilharEscopo()
     {
-        escopos.Push(new Escopo());
+        if(escopos.Count < 1000)
+            escopos.Push(new Escopo());
+        else
+            throw new ErroTransbordoDePilha();
+        
     }
 
     // Remove o escopo atual da pilha, caso não seja o global
@@ -24,7 +28,7 @@ public class PilhaDeEscopos
         if (escopos.Count > 1)
             escopos.Pop();
         else
-            new Erro("A pilha de escopos está vazia para remover.", 0, -1);
+            throw new Erro("A pilha de escopos está vazia para remover.", 0, -1);
     }
 
     // Define uma variável no escopo atual
@@ -41,8 +45,10 @@ public class PilhaDeEscopos
             if (escopos.ElementAt(i).VariavelExiste(identificador))
                 return escopos.ElementAt(i)?.ObterVariavel(identificador);
         }
-        new ErroVariavelNaoDeclarada(identificador).LancarErro();
-        return null; // Variável não encontrada
+
+        throw new ErroVariavelNaoDeclarada(identificador);
+        
+        return null;
     }
 
     // TODO: Encontrar forma melhor
@@ -57,7 +63,7 @@ public class PilhaDeEscopos
             }
                 
         }
-        new ErroVariavelNaoDeclarada(identificador).LancarErro();
+        throw new ErroVariavelNaoDeclarada(identificador);
         return null; // Variável não encontrada
     }
 
@@ -74,6 +80,6 @@ public class PilhaDeEscopos
                 return;
             }
         }
-        new ErroVariavelNaoDeclarada(identificador).LancarErro();
+        throw new ErroVariavelNaoDeclarada(identificador);
     }
 }
