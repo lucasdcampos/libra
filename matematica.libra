@@ -1,0 +1,53 @@
+funcao potencia(base, expoente)
+    var resultado = 1
+    var contador = 0
+    enquanto contador < expoente faca
+        resultado = resultado * base
+        contador = contador + 1
+    fim
+
+    retornar resultado
+fim
+
+funcao fatorial(n)
+    var resultado = 1
+    var contador = n
+    enquanto contador > 0 faca
+        resultado = resultado * contador
+        contador = contador - 1
+    fim
+    
+    retornar resultado
+fim
+
+funcao abs(n)
+    se n > 0 entao
+        retornar n
+    fim
+
+    retornar  0 - n
+
+fim
+
+funcao topo(a, b)
+    se a > b entao
+        retornar a
+    fim
+
+    retornar b
+fim
+
+funcao chao(a, b)
+    se a < b entao
+        retornar a
+    fim
+    
+    retornar b
+fim
+
+funcao raizq(n)
+    se n < 0 entao
+        erro("Não há raíz real para números negativos")
+    fim
+    retornar potencia(n, 1/2)
+fim

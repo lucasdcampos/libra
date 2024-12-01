@@ -44,32 +44,27 @@ public class Interpretador
         }
     }
 
-    private object InterpretarInstrucoes(Instrucao[] instrucoes, bool escopo = false)
+    private void InterpretarInstrucoes(Instrucao[] instrucoes)
     {
         if(_deveEncerrar)
-            return null;
+            return;
 
         for(int i = 0; i < instrucoes.Length; i++)
         {
-            var instrucao = InterpretarInstrucao(instrucoes[i]);
-
-            if(instrucao is InstrucaoRetornar) 
+            if(instrucoes[i].TipoInstrucao == TokenTipo.Retornar)
             {
-                var retorno = (InstrucaoRetornar)instrucao;
-                var resultado = _ultimoRetorno = InterpretarExpressao(retorno.Expressao);
-                if(escopo)
-                    _programa.PilhaEscopos.DesempilharEscopo();
-                return resultado;
+                Retornar((InstrucaoRetornar)instrucoes[i]);
+                break;
             }
+                
+            InterpretarInstrucao(instrucoes[i]);
         }
-        
-        return null;
     }
 
-    private Instrucao InterpretarInstrucao(Instrucao instrucao)
+    private void InterpretarInstrucao(Instrucao instrucao)
     {
         if(_deveEncerrar)
-            return null;
+            return;
 
         switch(instrucao.TipoInstrucao)
         {
@@ -92,12 +87,16 @@ public class Interpretador
                 InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
                 break;
             case TokenTipo.Retornar:
-                return (InstrucaoRetornar)instrucao;
+                Retornar((InstrucaoRetornar)instrucao);
+                break;
         }
 
-        return null;
     }
 
+    private void Retornar(InstrucaoRetornar instrucao)
+    {
+        _ultimoRetorno = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
+    }
     private void InterpretarCondicional(Instrucao instrucao)
     {
         if(instrucao is InstrucaoSe)
@@ -180,11 +179,11 @@ public class Interpretador
             _programa.PilhaEscopos.DefinirVariavel(ident, new Variavel(ident, valor));
         }
 
-        object retorno = InterpretarInstrucoes(funcao.Instrucoes, true);
+        InterpretarInstrucoes(funcao.Instrucoes);
         
         _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
 
-        return _ultimoRetorno = retorno;
+        return _ultimoRetorno;
 
     }
 

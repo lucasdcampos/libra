@@ -42,7 +42,7 @@ public class Ambiente
 
     public static void Encerrar(int codigo)
     {
-        throw new NotImplementedException();
+        //throw new NotImplementedException();
     }
 
 }

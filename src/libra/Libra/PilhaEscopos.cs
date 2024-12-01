@@ -9,7 +9,7 @@ public class PilhaDeEscopos
     public PilhaDeEscopos()
     {
         // Adiciona o escopo global ao iniciar
-        escopos.Push(new Escopo());
+        EmpilharEscopo();
     }
 
     // Adiciona um novo escopo à pilha (usado para blocos locais, funções, etc.)
@@ -27,8 +27,6 @@ public class PilhaDeEscopos
     {
         if (escopos.Count > 1)
             escopos.Pop();
-        else
-            throw new Erro("A pilha de escopos está vazia para remover.", 0, -1);
     }
 
     // Define uma variável no escopo atual

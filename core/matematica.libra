@@ -27,7 +27,7 @@ const SEN_60 = 0.86602540378          // Seno de 60 graus
 const COS_60 = 0.5                    // Cosseno de 60 graus
 
 const MAX_INT = 2147483647            // Valor máximo para inteiros de 32 bits
-const MIN_INT = -2147483648           // Valor mínimo para inteiros de 32 bits
+const MIN_INT = 0 - 2147483648           // Valor mínimo para inteiros de 32 bits
 
 const BYTE = 8                        // Número de bits em um byte
 const KB = 1024                       // Número de bytes em um kilobyte
@@ -36,26 +36,11 @@ const GB = 1024 * 1024 * 1024         // Número de bytes em um gigabyte
 
 // Funções matemáticas
 funcao pot(base, expoente)
-    se expoente == 0 entao
-        retornar 1
-    fim
-    retornar base * pot(base, expoente - 1)
+    
 fim
 
 funcao raiz(numero)
-    se numero < 0 entao
-        erro("Raíz de número negativo")
-    fim
     
-    // Definindo a estimativa inicial e o nível de precisão desejado
-    var = estimativa = numero / 2
-    const = precisao = 0.00001
-
-    enquanto abs(estimativa * estimativa - numero) > precisao faca
-        estimativa = (estimativa + numero / estimativa) / 2
-    fim
-
-    retornar estimativa
 fim
 
 funcao exp(valor)
@@ -83,75 +68,33 @@ funcao tang(angulo)
 fim
 
 funcao fat(n)
-    se n == 0 entao
-        retornar 1
-    senao
-        retornar n * fat(n - 1)
-    fim
+    
 fim
 
 funcao abs(valor)
-    se valor < 0 entao
-        retornar valor * -1
-    fim
-    retornar valor
+    
 fim
 
 funcao max(a, b)
-    se a > b entao
-        retornar a
-    senao
-        retornar b
-    fim
+    
 fim
 
 funcao min(a, b)
-    se a < b entao
-        retornar a
-    senao
-        retornar b
-    fim
+    
 fim
 
 funcao maior(lista)
-    var maior = 0
-    var i = 0
-    enquanto(i < tamanho(lista))
-        se acessar(lista, i) > maior entao
-            maior = acessar(lista, i)
-        fim
-    fim
-    retornar maior
+    
 fim
 
 funcao menor(lista)
-    var menor = 0
-    var i = 0
-    enquanto(i < tamanho(lista))
-        se acessar(lista, i) < menor entao
-            menor = acessar(lista, i)
-        fim
-    fim
-    retornar menor
+    
 fim
 
 funcao media(lista)
-    var soma = 0
-    var i = 0
-
-    enquanto i < tamanho(lista)
-        soma = soma + acessar(lista, i)
-    fim
-
-    retornar soma / tamanho(lista)
+   
 fim
 
 funcao mediana(lista)
-    var listaOrdenada = ordenar(lista)
-    var meio = tamanho(lista) / 2
-    se tamanho(lista) % 2 == 0 entao
-        retornar (acessar(listaOrdenada, meio) + acessar(listaOrdenada, meio)) / 2
-    senao
-        retornar acessar(listaOrdenada, meio)
-    fim
+   
 fim
