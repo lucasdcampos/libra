@@ -22,16 +22,16 @@ funcao fibonacci(n)
     var a = 0
     var b = 1
     var contador = 0
+    var temp = 0
     enquanto contador < n faca
         exibir(a)
-        var temp = a
+        temp = a
         a = b
         b = temp + b
         contador = contador+1
     fim
 fim
-
-// Escreve os primeiros 10 números de Fibonacci
+// Exibir os 10 primeiros números de Fibonacci
 fibonacci(10)
 ```
 
