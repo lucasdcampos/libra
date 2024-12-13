@@ -8,6 +8,20 @@ public class Parser
     private int _posicao;
     private int _linha;
 
+    private static readonly Dictionary<TokenTipo, int> _precedenciaOperadores = new()
+    {
+        { TokenTipo.OperadorSoma, 1 },
+        { TokenTipo.OperadorSub, 1 },
+        { TokenTipo.OperadorMult, 2 },
+        { TokenTipo.OperadorDiv, 2 },
+        { TokenTipo.OperadorMaiorQue, 0 },
+        { TokenTipo.OperadorMaiorIgualQue, 0 },
+        { TokenTipo.OperadorMenorQue, 0 },
+        { TokenTipo.OperadorMenorIgualQue, 0 },
+        { TokenTipo.OperadorComparacao, 0 },
+        { TokenTipo.OperadorDiferente, 0 }
+    };
+
     public Programa Parse(List<Token> tokens)
     {
         _tokens = tokens;
@@ -128,33 +142,54 @@ public class Parser
         return new InstrucaoEnquanto(expressao, instrucoes);
     }
 
-    private Expressao? ParseExpressao(bool bin = false)
+    private Expressao ParseExpressao(int precedenciaMinima = 0)
     {
-        Expressao expr = null;
-        switch(Atual().Tipo)
+        var expr_esq = ParseExpressaoTermo();
+
+        while (true)
+        {
+            if (Atual() == null || PrioridadeOperador(Atual()) == null ||
+                PrioridadeOperador(Atual()) < precedenciaMinima)
+                break;
+
+            var opr = ConsumirToken();
+            int proxPrecedenciaMinima = precedenciaMinima + 1; // ESQ -> DIR
+            var expr_dir = ParseExpressao(proxPrecedenciaMinima);
+
+            expr_esq = new ExpressaoBinaria(expr_esq, opr, expr_dir);
+        }
+
+        return expr_esq;
+    }
+
+    private Expressao ParseExpressaoTermo()
+    {
+        switch (Atual().Tipo)
         {
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
-                expr = new ExpressaoLiteral(ConsumirToken());
-                break;
+                return new ExpressaoLiteral(ConsumirToken());
+
             case TokenTipo.Identificador:
-                if(Proximo(1).Tipo == TokenTipo.AbrirParen)
+                if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                 {
-                    expr = ParseExpressaoChamadaFuncao();
-                    break;
+                    return ParseExpressaoChamadaFuncao();
                 }
-                expr = new ExpressaoVariavel(ConsumirToken());
-                break;
+                return new ExpressaoVariavel(ConsumirToken());
+
+            case TokenTipo.AbrirParen:
+                ConsumirToken();
+                var exprDentroParenteses = ParseExpressao();
+                if (Atual().Tipo != TokenTipo.FecharParen)
+                {
+                    throw new ErroEsperado(TokenTipo.FecharParen, Atual().Tipo);
+                }
+                ConsumirToken();
+                return exprDentroParenteses;
         }
 
-        if(PrioridadeOperador(Atual()) != null && !bin)
-            return ParseExpressaoBinaria(expr);
-
-        if(expr == null)
-            throw new Erro($"Impossível determinar expressão: {Atual()}", _linha, 1000);
-
-        return expr;
+        return null;
     }
 
     private ExpressaoChamadaFuncao? ParseExpressaoChamadaFuncao()
@@ -178,45 +213,10 @@ public class Parser
         return new ExpressaoChamadaFuncao(identificador, argumentos);
     }
 
-    private ExpressaoBinaria? ParseExpressaoBinaria(Expressao esquerda = null)
-    {
-        Token? operador = null;
-        Expressao? direita = null;
-
-        if(esquerda == null)
-                esquerda = ParseExpressao(true);
-
-        if(PrioridadeOperador(Atual()) != null)
-        {
-            operador = ConsumirToken();
-            direita = ParseExpressao();
-        }
-        
-        return new ExpressaoBinaria(esquerda, operador, direita);
-
-        return null;
-    }
-
     private int? PrioridadeOperador(Token token)
     {
-        switch(token.Tipo)
-        {
-            case TokenTipo.OperadorSoma:
-            case TokenTipo.OperadorSub:
-                return 1;
-            case TokenTipo.OperadorMult:
-            case TokenTipo.OperadorDiv:
-                return 2;
-            case TokenTipo.OperadorMaiorQue:
-            case TokenTipo.OperadorMaiorIgualQue:
-            case TokenTipo.OperadorMenorQue:
-            case TokenTipo.OperadorMenorIgualQue:
-            case TokenTipo.OperadorComparacao:
-            case TokenTipo.OperadorDiferente:
-                return 0;
-        }
-
-        return null; // Não é um operador binário!
+        // Retorna NULL se não for um operador
+        return _precedenciaOperadores.TryGetValue(token.Tipo, out var prioridade) ? prioridade : null;
     }
 
     private Token Atual() 
