@@ -15,7 +15,7 @@ public class Interpretador
     private int _linha = 0;
     private bool _deveEncerrar => Ambiente.DeveEncerrar;
 
-    public void Interpretar(string codigo, ILogger logger = null)
+    public int Interpretar(string codigo, ILogger logger = null)
     {
         Ambiente.ConfigurarAmbiente(logger);
         try
@@ -25,22 +25,25 @@ public class Interpretador
             var tokens = tokenizador.Tokenizar(codigo);
             var parser = new Parser();
             var programa = parser.Parse(tokens);
-            Interpretar(programa);
+            return Interpretar(programa);
         }
         catch
         {
+            return 1;
         }
     }
 
-    public void Interpretar(Programa programa)
+    public int Interpretar(Programa programa)
     {
         try
         {
             Ambiente.SetarPrograma(programa);
             InterpretarInstrucoes(programa.Instrucoes);
+            return Ambiente.ProgramaAtual.CodigoSaida;
         }
         catch
         {
+            return 1;
         }
     }
 
@@ -221,6 +224,8 @@ public class Interpretador
                         return Mult(a, b);
                     case TokenTipo.OperadorDiv:
                         return Div(a, b);
+                    case TokenTipo.OperadorPot:
+                        return Pot(a,b);
                     case TokenTipo.OperadorComparacao:
                         return Igual(a, b);
                     case TokenTipo.OperadorDiferente:
@@ -262,7 +267,15 @@ public class Interpretador
     private object Sub(object a, object b) => Operar(a, b, (x, y) => x - y);
     private object Mult(object a, object b) => Operar(a, b, (x, y) => x * y);
     private object Div(object a, object b) => Operar(a, b, (x, y) => y == 0 ? throw new ErroDivisaoPorZero(_linha) : x / y);
-
+    private object Pot(object a, object b)
+    {
+        if(a is int && b is int)
+            return Math.Pow((int)a,(int)b);
+        if(a is double && b is double)
+            return Math.Pow((double)a,(double)b);
+        
+        throw new Erro($"Não é possível calcular {a.ToString()}^{b.ToString()}");
+    }
     private int Igual(object a, object b)
     {
         if(a is int)

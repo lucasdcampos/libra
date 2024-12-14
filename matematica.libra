@@ -1,14 +1,50 @@
-funcao potencia(base, expoente)
-    var resultado = 1
-    var contador = 0
-    enquanto contador < expoente faca
-        resultado = resultado * base
-        contador = contador + 1
-    fim
+// Biblioteca padrão da Libra
+// Arquivo: matematica.libra
+// Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
-    retornar resultado
+// Constantes matemáticas
+const PI = 3.14159                    // Valor de Pi (π)
+const E = 2.718281                    // Base do logaritmo natural (e)
+const RAZAO_AUREA = 1.61803           // Razão Áurea (φ)
+const RAIZ2 = 1.41421                 // Raiz quadrada de 2
+const RAIZ3 = 1.73205                 // Raiz quadrada de 3
+const LN2 = 0.69314                   // Logaritmo natural de 2
+const LN10 = 2.30258                  // Logaritmo natural de 10
+
+const GRAUS_PARA_RAD = PI / 180       // Conversão de graus para radianos
+const RAD_PARA_GRAUS = 180 / PI       // Conversão de radianos para graus
+
+const VERDADEIRO = 1                  // Valor lógico para Verdadeiro
+const FALSO = 0                       // Valor lógico para FALSO
+
+const SEN_45 = 0.70710                // Seno de 45 graus
+const COS_45 = 0.70710                // Cosseno de 45 graus
+const SEN_90 = 1.0                    // Seno de 90 graus
+const COS_90 = 0.0                    // Cosseno de 90 graus
+const SEN_30 = 0.5                    // Seno de 30 graus
+const COS_30 = 0.86602                // Cosseno de 30 graus
+const SEN_60 = 0.86602                // Seno de 60 graus
+const COS_60 = 0.5                    // Cosseno de 60 graus
+
+const MAX_INT = 2147483646            // Valor máximo para inteiros de 32 bits
+const MIN_INT = 0 - 2147483647        // Valor mínimo para inteiros de 32 bits
+
+const BYTE = 8                        // Número de bits em um byte
+const KB = 1024                       // Número de bytes em um kilobyte
+const MB = 1024 * 1024                // Número de bytes em um megabyte
+const GB = 1024 * 1024 * 1024         // Número de bytes em um gigabyte
+
+// Calcula e retorna a raiz enésima de um número
+funcao raiz_n(numero, indice)
+    retornar numero^(1 / indice)
 fim
 
+// Calcula e retorna a raiz quadrada de um número
+funcao raiz(n)
+    retornar raiz_n(n, 2)
+fim
+
+// Calcula e retorna a o fatorial de um número
 funcao fatorial(n)
     var resultado = 1
     var contador = n
@@ -20,6 +56,7 @@ funcao fatorial(n)
     retornar resultado
 fim
 
+// Retorna o valor absoluto (módulo) de um número
 funcao abs(n)
     se n > 0 entao
         retornar n
@@ -29,6 +66,7 @@ funcao abs(n)
 
 fim
 
+// Retorna o maior valor dentro de um intervalo
 funcao topo(a, b)
     se a > b entao
         retornar a
@@ -37,17 +75,11 @@ funcao topo(a, b)
     retornar b
 fim
 
+// Retorna o menor valor dentro de um intervalo
 funcao chao(a, b)
     se a < b entao
         retornar a
     fim
     
     retornar b
-fim
-
-funcao raizq(n)
-    se n < 0 entao
-        erro("Não há raíz real para números negativos")
-    fim
-    retornar potencia(n, 1/2)
 fim

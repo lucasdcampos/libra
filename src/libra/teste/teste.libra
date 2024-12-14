@@ -1,3 +1,7 @@
-importar "matematica.libra"
+funcao calcular(expressao)
+    var codigoLibra = "sair(" + expressao + ")"
+    retornar libra(codigoLibra)
+fim
 
-exibir(raizq(0-1))
+var x = calcular("1+2*3+1")
+exibir(x)

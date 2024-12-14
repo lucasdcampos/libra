@@ -1,16 +1,24 @@
 // Classe usada para ser chamada internamente pelo interpretador da Libra
 // Contém a lista de funções embutidas
-using System.Reflection;
 using Libra;
 using Libra.Arvore;
+using System;
+using System.Reflection;
+using System.Collections.Generic;
+using System.IO;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 
 public static class LibraBase
 {
-    public static bool DEBUG = true;
+    public static bool DEBUG = false;
     private static Programa _programaAtual => Ambiente.ProgramaAtual;
 
     public static void RegistrarFuncoesEmbutidas()
     {
+        // Temporário
+        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", new Variavel("AmbienteSeguro", new Token(TokenTipo.NumeroLiteral, 0, 1)));
+
         _programaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
         _programaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
@@ -29,8 +37,22 @@ public static class LibraBase
         _programaAtual.Funcoes["acessar"] = new FuncaoEmbutida(acessar);
         _programaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
         _programaAtual.Funcoes["ptr"] = new FuncaoEmbutida(ptr);
+        _programaAtual.Funcoes["registrarCSharp"] = new FuncaoEmbutida(registrarCSharp);
+        _programaAtual.Funcoes["registrardll"] = new FuncaoEmbutida(registrardll);
+        _programaAtual.Funcoes["libra"] = new FuncaoEmbutida(libra);
     }
 
+    public static object libra(object[] args)
+    {
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+
+        if(args[0] is not string)
+            throw new Erro("Esperado um texto");
+
+        return new Interpretador().Interpretar(args[0].ToString());
+
+    }
+    
     public static object sair(object[] args)
     {
         int codigo = 0;
@@ -39,6 +61,7 @@ public static class LibraBase
         {
             int.TryParse(args[0].ToString(), out int resultado);
             codigo = resultado;
+            _programaAtual.Sair(codigo);
         }
 
         if(DEBUG)
@@ -47,6 +70,54 @@ public static class LibraBase
         }
 
         Ambiente.Encerrar(codigo);
+
+        return null;
+    }
+
+    public static object registrardll(object[] args)
+    {
+        int seguro = (int)_programaAtual.PilhaEscopos.ObterVariavel("AmbienteSeguro").Valor;
+        if(seguro != 0)
+        {
+            throw new Erro("Não é possível carregar DLLs externas em um ambiente marcado como seguro.");
+        }
+
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        Assembly assembly = null;
+        if(args[0] is string)
+        {
+            string caminhoDll = args[0].ToString();
+            assembly = Assembly.LoadFrom(caminhoDll);
+        }
+        else if(args[0] is Assembly)
+            assembly = (Assembly)args[0];
+        else
+            throw new Erro("Esperado um caminho para DLL");
+            
+        foreach (var tipo in assembly.GetTypes())
+        {
+            foreach (var metodo in tipo.GetMethods(BindingFlags.Public | BindingFlags.Static))
+            {
+                string nomeFuncao = $"{tipo.Name}_{metodo.Name}";
+                Func<object[], object> funcao = args => metodo.Invoke(null, args);
+                _programaAtual.Funcoes[nomeFuncao] = new FuncaoEmbutida(funcao);
+            }
+        }
+        return null;
+    }
+
+    public static object registrarCSharp(object[] args)
+    {
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 3, args.Length);
+
+        string classe = args[0].ToString();
+        string nome = args[1].ToString();
+        string codigo = args[2].ToString();
+
+        // Compilar o código do usuário
+        var assembly = CompilarCodigo(codigo);
+        if (assembly == null) throw new Erro("Erro ao compilar o código.");
+        registrardll(new object[] {assembly});
 
         return null;
     }
@@ -275,6 +346,33 @@ public static class LibraBase
         return null;
     }
 
+    private static Assembly CompilarCodigo(string codigo)
+    {
+        var tree = CSharpSyntaxTree.ParseText(codigo);
+        var compilation = CSharpCompilation.Create(
+            "LibraExterna.dll",
+            new[] { tree },
+            new[]
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location)
+            },
+            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        using var ms = new MemoryStream();
+        var result = compilation.Emit(ms);
+
+        if (!result.Success)
+        {
+            foreach (var diagnostic in result.Diagnostics)
+                Ambiente.Msg(diagnostic.ToString());
+            return null;
+        }
+
+        ms.Seek(0, SeekOrigin.Begin);
+        return Assembly.Load(ms.ToArray());
+    }
 
     private static void ChecarArgumentos(string ident, int esperado, int recebido)
     {

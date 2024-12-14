@@ -224,7 +224,10 @@ public class Tokenizador
                                 AdicionarTokenALista(TokenTipo.OperadorDiv);
                             }
                             break;
-
+                        case '^':
+                            AdicionarTokenALista(TokenTipo.OperadorPot);
+                            Passar();
+                            break;
                         case ')':
                             AdicionarTokenALista(TokenTipo.FecharParen);
                             Passar();
@@ -247,6 +250,10 @@ public class Tokenizador
 
                             while(Atual() != '"')
                             {
+                                if(Atual() == '\\' && Proximo(1) == '"')
+                                {
+                                    Passar();
+                                }
                                 texto += ConsumirChar();
                             }
 
@@ -291,19 +298,6 @@ public class Tokenizador
         }
 
         return null;
-    }
-
-    private string ImportarHeaderExterno(string source)
-    {
-        while(Atual() != '\0' && !_falha)
-        {
-            if(char.IsLetter(Atual()))
-            {
-                //while(char.IsDigit())
-            }
-        }
-
-        return "";
     }
 
     private void ConsumirComentarioLinha()

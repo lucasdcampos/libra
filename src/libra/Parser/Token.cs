@@ -17,6 +17,7 @@ public enum TokenTipo
     OperadorSub,
     OperadorMult, 
     OperadorDiv,
+    OperadorPot,
     OperadorComparacao,
     OperadorDefinir,
     OperadorMaiorQue,
@@ -98,6 +99,8 @@ public class Token
                 return "'*'";
             case TokenTipo.OperadorDiv:
                 return "'/'";
+            case TokenTipo.OperadorPot:
+                return "'^'";
             case TokenTipo.TextoLiteral:
                 return "Texto";
             case TokenTipo.NumeroLiteral:

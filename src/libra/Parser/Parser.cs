@@ -14,6 +14,7 @@ public class Parser
         { TokenTipo.OperadorSub, 1 },
         { TokenTipo.OperadorMult, 2 },
         { TokenTipo.OperadorDiv, 2 },
+        { TokenTipo.OperadorPot, 3 },
         { TokenTipo.OperadorMaiorQue, 0 },
         { TokenTipo.OperadorMaiorIgualQue, 0 },
         { TokenTipo.OperadorMenorQue, 0 },
@@ -37,7 +38,7 @@ public class Parser
         {
             instrucoes.Add(ParseInstrucao());
         }
-
+        
         return instrucoes.ToArray();
     }
 
