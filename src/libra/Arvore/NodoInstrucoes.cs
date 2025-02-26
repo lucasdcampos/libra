@@ -10,12 +10,11 @@ namespace Libra.Arvore
 
     public class InstrucaoVar : Instrucao
     {
-        public InstrucaoVar(string identificador, Expressao expressao, bool constante, bool declaracao, TokenTipo tipo = TokenTipo.TokenInvalido)
+        public InstrucaoVar(string identificador, Expressao expressao, bool constante, bool declaracao)
         {
             Identificador = identificador;
             EhDeclaracao = declaracao;
             Constante = constante;
-            Tipo = tipo;   
             Expressao = expressao; 
             TipoInstrucao = TokenTipo.Var;
         }
@@ -25,7 +24,6 @@ namespace Libra.Arvore
         public string Identificador {get; private set; }
         internal bool EhDeclaracao;
         public bool Constante { get; private set; }
-
     }
 
     public class InstrucaoFuncao : Instrucao

@@ -10,20 +10,21 @@ public class Parser
 
     private static readonly Dictionary<TokenTipo, int> _precedenciaOperadores = new()
     {
-        { TokenTipo.OperadorSoma, 1 },
-        { TokenTipo.OperadorSub, 1 },
-        { TokenTipo.OperadorMult, 2 },
-        { TokenTipo.OperadorDiv, 2 },
-        { TokenTipo.OperadorPot, 3 },
-        { TokenTipo.OperadorMaiorQue, 0 },
-        { TokenTipo.OperadorMaiorIgualQue, 0 },
-        { TokenTipo.OperadorMenorQue, 0 },
-        { TokenTipo.OperadorMenorIgualQue, 0 },
-        { TokenTipo.OperadorComparacao, 0 },
-        { TokenTipo.OperadorDiferente, 0 },
+        { TokenTipo.OperadorPot, 4 },
+        { TokenTipo.OperadorMult, 3 },
+        { TokenTipo.OperadorDiv, 3 },
+        { TokenTipo.OperadorSoma, 2 },
+        { TokenTipo.OperadorSub, 2 },
+        { TokenTipo.OperadorMaiorQue, 1 },
+        { TokenTipo.OperadorMaiorIgualQue, 1 },
+        { TokenTipo.OperadorMenorQue, 1 },
+        { TokenTipo.OperadorMenorIgualQue, 1 },
+        { TokenTipo.OperadorComparacao, 1 },
+        { TokenTipo.OperadorDiferente, 1 },
         { TokenTipo.OperadorE, 0 },
         { TokenTipo.OperadorOu, 0 }
     };
+
 
     public Programa Parse(List<Token> tokens)
     {
@@ -94,12 +95,12 @@ public class Parser
         return new InstrucaoVar(identificador, expressao, constante, declaracao || constante);
     }
 
-    private ExpressaoVetor? ParseVetor()
+    private ExpressaoDeclaracaoVetor? ParseVetor()
     {
         ConsumirToken(TokenTipo.AbrirCol);
         Expressao expr = ParseExpressao();
         ConsumirToken(TokenTipo.FecharCol);
-        return new ExpressaoVetor(expr);
+        return new ExpressaoDeclaracaoVetor(expr);
     }
 
     private InstrucaoFuncao? ParseInstrucaoFuncao()

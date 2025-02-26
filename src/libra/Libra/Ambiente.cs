@@ -8,14 +8,9 @@ public class Ambiente
     private ILogger _logger;
     public static ILogger Logger => _ambienteAtual._logger;
     private Programa _programaAtual;
-    private bool _deveEncerrar;
     public static Programa ProgramaAtual => _ambienteAtual._programaAtual;
-    public static bool DeveEncerrar => _ambienteAtual._deveEncerrar;
 
-    private Ambiente()
-    {
-
-    }
+    private Ambiente() { }
 
     public static void ConfigurarAmbiente(ILogger logger)
     {
@@ -25,7 +20,6 @@ public class Ambiente
             _ambienteAtual._logger = new ConsoleLogger();
         else
             _ambienteAtual._logger = logger;
-
     }
 
     public static void SetarPrograma(Programa programa)
@@ -42,7 +36,6 @@ public class Ambiente
 
     public static void Encerrar(int codigo)
     {
-        //throw new NotImplementedException();
+        throw new ExcecaoSaida(codigo);
     }
-
 }

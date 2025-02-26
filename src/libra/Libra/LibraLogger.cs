@@ -15,10 +15,10 @@ public class LibraLogger
         Msg(msg);
     }
 
-    private static void Msg(string msg, string prefix = "LOG", ConsoleColor cor = ConsoleColor.White)
+    private static void Msg(object msg, string prefix = "LOG", ConsoleColor cor = ConsoleColor.White)
     {
         Console.ForegroundColor = cor;
-        msg = msg.Replace("\n", $"{Environment.NewLine}[{prefix}] ");
+        msg = msg.ToString().Replace("\n", $"{Environment.NewLine}[{prefix}] ");
         Console.WriteLine($"[{prefix}] {msg}");
         Console.ResetColor();
     }

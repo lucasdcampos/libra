@@ -17,13 +17,15 @@ public static class LibraBase
     public static void RegistrarFuncoesEmbutidas()
     {
         // Temporário
-        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", new Variavel("AmbienteSeguro", new Token(TokenTipo.NumeroLiteral, 0, 1)));
+        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", 1);
 
         _programaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
         _programaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
         _programaAtual.Funcoes["tipo"] = new FuncaoEmbutida(tipo);
         _programaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
+        _programaAtual.Funcoes["nao"] = new FuncaoEmbutida(nao);
+        _programaAtual.Funcoes["neg"] = new FuncaoEmbutida(nao);
         _programaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
         _programaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
         _programaAtual.Funcoes["concat"] = new FuncaoEmbutida(concat);
@@ -34,11 +36,6 @@ public static class LibraBase
         _programaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
         _programaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
         _programaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
-        _programaAtual.Funcoes["acessar_vetor"] = new FuncaoEmbutida(acessar_vetor);
-        _programaAtual.Funcoes["definir_vetor"] = new FuncaoEmbutida(definir_vetor);
-        _programaAtual.Funcoes["setar_vetor"] = new FuncaoEmbutida(setar_vetor);
-        _programaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
-        _programaAtual.Funcoes["ptr"] = new FuncaoEmbutida(ptr);
         _programaAtual.Funcoes["registrarCSharp"] = new FuncaoEmbutida(registrarCSharp);
         _programaAtual.Funcoes["registrardll"] = new FuncaoEmbutida(registrardll);
         _programaAtual.Funcoes["libra"] = new FuncaoEmbutida(libra);
@@ -74,6 +71,18 @@ public static class LibraBase
         Ambiente.Encerrar(codigo);
 
         return null;
+    }
+
+    public static object nao(object[] args)
+    {
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+
+        if(args[0] is not int)
+            throw new Erro("Esperado número inteiro na função nao()");
+
+        int valor = (int)args[0];
+
+        return valor == 0 ? 1 : 0;
     }
 
     public static object registrardll(object[] args)
@@ -173,60 +182,6 @@ public static class LibraBase
                 return null;
         }
 
-        return null;
-    }
-
-    public static object _ref(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
-
-        string identificador = args[0].ToString();
-        return _programaAtual.PilhaEscopos.ObterVariavel(identificador).Valor;
-    }
-
-    public static object acessar_vetor(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
-
-        var identificador = args[0];
-        int indice = (int)args[1];
-
-        var variavel = _programaAtual.PilhaEscopos.ObterVariavel(identificador.ToString());
-        object[] vetor = (object[])variavel.Valor;
-
-        if(indice > vetor.Length || indice < 0)
-            throw new ErroIndiceForaVetor();
-
-        return vetor[indice];
-    }
-
-    public static object setar_vetor(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 3, args.Length);
-
-        var identificador = args[0];
-        int indice = (int)args[1];
-        object valor = args[2];
-
-        var variavel = _programaAtual.PilhaEscopos.ObterVariavel(identificador.ToString());
-        object[] vetor = (object[])variavel.Valor;
-
-        if(indice > vetor.Length || indice < 0)
-            throw new ErroIndiceForaVetor();
-
-        vetor[indice] = valor;
-
-        return null;
-    }
-
-    public static object definir_vetor(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
-
-        var identificador = args[0];
-        int qtd = (int)args[1];
-
-        _programaAtual.PilhaEscopos.DefinirVariavel(identificador.ToString(), new Variavel(identificador.ToString(), new Token(TokenTipo.Vetor, 0, new object[qtd])));
         return null;
     }
 
@@ -336,16 +291,6 @@ public static class LibraBase
                 break;
         }
         return num;
-    }
-
-    public static object ptr(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
-
-        if(args[0].GetType().ToString() != "System.String")
-            new Erro("esperava <texto>").LancarErro();
-
-        return _programaAtual.PilhaEscopos.ObterIndiceVariavel(args[0].ToString());
     }
 
     public static object tipo(object[] args)

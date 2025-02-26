@@ -10,10 +10,7 @@ public class Interpretador
 {
     public static int NivelDebug = 0;
     private Programa _programa => Ambiente.ProgramaAtual;
-    private object _ultimoRetorno = 0;
     private int _linha = 0;
-    private bool _deveEncerrar => Ambiente.DeveEncerrar;
-    public event EventHandler Retornou;
 
     public int Interpretar(string codigo, ILogger logger = null)
     {
@@ -48,9 +45,6 @@ public class Interpretador
 
     private void InterpretarInstrucoes(Instrucao[] instrucoes)
     {
-        if(_deveEncerrar)
-            return;
-
         for(int i = 0; i < instrucoes.Length; i++)
         {
             InterpretarInstrucao(instrucoes[i]);
@@ -59,9 +53,6 @@ public class Interpretador
 
     private void InterpretarInstrucao(Instrucao instrucao)
     {
-        if(_deveEncerrar || _programa._falha)
-            return;
-
         switch(instrucao.TipoInstrucao)
         {
             case TokenTipo.Var:
@@ -86,7 +77,7 @@ public class Interpretador
                 InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao);
                 break;
             case TokenTipo.Retornar:
-                Retornar((InstrucaoRetornar)instrucao);
+                InterpretarRetorno((InstrucaoRetornar)instrucao);
                 break;
         }
 
@@ -95,7 +86,6 @@ public class Interpretador
             var instrucaoExpr = (InstrucaoExibirExpressao)instrucao;
             Ambiente.Msg(InterpretarExpressao(instrucaoExpr.Expressao).ToString());
         }
-
     }
 
     private void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
@@ -107,14 +97,10 @@ public class Interpretador
         _programa.PilhaEscopos.ModificarVetor(identificador, indice, expressao);
     }
 
-    // TODO: Ao invés de fazer isso, eu deveria ter um Evento de Retornar, e adicionar
-    // um listener
-    private void Retornar(InstrucaoRetornar instrucao)
+    private void InterpretarRetorno(InstrucaoRetornar instrucao)
     {
-        // Pensando se uso esse sistema, vou dar uma olhada na outra parte do código primeiro
-        //Retornou.Invoke(this, EventArgs e instrucao);
-        _ultimoRetorno = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
-        Console.WriteLine($"ultimo retorno: {_ultimoRetorno}");
+        object resultadoExpressao = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
+        throw new ExcecaoRetorno(resultadoExpressao);
     }
 
     private void InterpretarCondicional(Instrucao instrucao)
@@ -137,7 +123,7 @@ public class Interpretador
 
         var enquanto = (InstrucaoEnquanto)instrucao;
     	var instrucoes = enquanto.Instrucoes;
-        while((int)InterpretarExpressao(enquanto.Expressao) != 0 && !_deveEncerrar)
+        while((int)InterpretarExpressao(enquanto.Expressao) != 0)
             InterpretarInstrucoes(instrucoes);
     }
 
@@ -170,8 +156,7 @@ public class Interpretador
             valoresArgumentos.Add(InterpretarExpressao(chamada.Argumentos[i]));
         }
 
-        _ultimoRetorno = f.Executar(valoresArgumentos.ToArray());
-        return _ultimoRetorno;
+        return f.Executar(valoresArgumentos.ToArray());
     }
 
     private object InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
@@ -187,69 +172,68 @@ public class Interpretador
         if(_programa.Funcoes[chamada.Identificador] is FuncaoEmbutida)
             return ExecutarFuncaoEmbutida((FuncaoEmbutida)funcao, chamada);
 
-        var parametros = funcao.Parametros.Count;
+        var qtdParametros = funcao.Parametros.Count;
 
-        if (argumentos.Count != parametros)
-            throw new ErroEsperadoNArgumentos(funcao.Identificador, parametros, argumentos.Count, _linha);
+        if (argumentos.Count != qtdParametros)
+            throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Count, _linha);
 
         _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
 
-        // Adicionando os argumentos ao Escopo
-        for (int i = 0; i < chamada.Argumentos.Count; i++)
+        try 
         {
-            string ident = funcao.Parametros[i];
-            Token valor = new Token(TokenTipo.NumeroLiteral, 0, InterpretarExpressao(chamada.Argumentos[i]));
-            _programa.PilhaEscopos.DefinirVariavel(ident, new Variavel(ident, valor));
+            // Adicionando os argumentos ao Escopo
+            for (int i = 0; i < chamada.Argumentos.Count; i++)
+            {
+                string ident = funcao.Parametros[i];
+                _programa.PilhaEscopos.DefinirVariavel(ident, InterpretarExpressao(chamada.Argumentos[i]));
+            }
+
+            InterpretarInstrucoes(funcao.Instrucoes);
+        }
+        catch(ExcecaoRetorno retorno)
+        {
+            return retorno.Valor;
+        }
+        finally
+        {
+            _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
         }
 
-        InterpretarInstrucoes(funcao.Instrucoes);
-        
-        _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
-
-        return _ultimoRetorno;
+        // Caso a função não tenha um retorno explicito
+        return null;
     }
 
     private object InterpretarAcessoVetor(ExpressaoAcessoVetor expressao)
     {
-        try
-        {
-            string ident = expressao.Identificador;
-            var expressaoIndice = InterpretarExpressao(expressao.Expressao);
-            int indice = (int)expressaoIndice; // TODO: suscetível a falhas
+        string ident = expressao.Identificador;
+        var expressaoIndice = InterpretarExpressao(expressao.Expressao);
 
-            var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
-            if (variavel == null)
-                throw new Exception($"Variável '{ident}' não encontrada.");
+        if(expressaoIndice is not int indice)
+            throw new ErroEsperado(TokenTipo.NumeroLiteral, TokenTipo.TokenInvalido);
 
-            if (variavel.Valor is not object[] vetor)
-                throw new Exception($"A variável '{ident}' não é um vetor ou está nula.");
+        var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
 
-            if (indice < 0 || indice >= vetor.Length)
-                throw new IndexOutOfRangeException($"Índice {indice} está fora dos limites do vetor.");
+        if (variavel.Valor is not object[] vetor)
+            throw new ErroAcessoNulo();
 
-            return vetor[indice];
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Erro ao interpretar acesso ao vetor: {ex.Message}");
-            throw;
-        }
+        if (indice < 0 || indice >= vetor.Length)
+            throw new ErroIndiceForaVetor();
+
+        return vetor[indice];
     }
 
-
-    private object[] InterpretarVetor(ExpressaoVetor expressao)
+    private object[] InterpretarVetor(ExpressaoDeclaracaoVetor expressao)
     {
         var expressaoIndice = InterpretarExpressao(expressao.Expressao);
-        int tamanho = (int)expressaoIndice; // TODO: suscetível a falhas
+        
+        if(expressaoIndice is not int tamanho)
+            throw new Erro("Declaração de Vetor deve conter um Número Inteiro");
 
         return new object[tamanho];
     }
 
     private object InterpretarExpressao(Expressao expressao)
     {
-        if(expressao == null)
-            throw new ErroAcessoNulo(" Expressão nula", _linha);
-        
         switch(expressao.Tipo)
         {
             case TipoExpressao.ExpressaoLiteral:
@@ -266,8 +250,8 @@ public class Interpretador
                 return InterpretarAcessoVetor((ExpressaoAcessoVetor)expressao);
             case TipoExpressao.ExpressaoUnaria:
                 break;
-            case TipoExpressao.ExpressaoVetor:
-                return InterpretarVetor((ExpressaoVetor)expressao);
+            case TipoExpressao.ExpressaoDeclaracaoVetor:
+                return InterpretarVetor((ExpressaoDeclaracaoVetor)expressao);
             case TipoExpressao.ExpressaoBinaria:
                 var bin = (ExpressaoBinaria)expressao;
                 var a = InterpretarExpressao(bin.Esquerda);
@@ -307,11 +291,9 @@ public class Interpretador
 
         throw new Erro("Expressão não implementada", _linha);
 
-        return 0;
+        return null;
     }
 
-    // TODO: Tem que ter uma forma melhor de fazer isso...
-    // Será difícil manter quando tiver muitos tipos e operadores
     private object Operar(dynamic a, dynamic b, Func<dynamic, dynamic, dynamic> operacao)
     {
         try
@@ -342,7 +324,7 @@ public class Interpretador
 
     private int E(object a, object b)
     {
-        if(a is not int)
+        if(a is not int || b is not int)
             throw new Erro("Esperado valor inteiro");
 
         return ((int)a != 0 && (int)b != 0) ? 1 : 0;
@@ -352,7 +334,7 @@ public class Interpretador
 
     private int Ou(object a, object b)
     {
-        if(a is not int)
+        if(a is not int || b is not int)
             throw new Erro("Esperado valor inteiro");
 
         return ((int)a != 0 || (int)b != 0) ? 1 : 0;
@@ -444,30 +426,12 @@ public class Interpretador
             throw new Erro("Identificador inválido!", _linha);
 
         object resultado = InterpretarExpressao(i.Expressao);
-        var token = new Token(i.Tipo, _linha, resultado);
-        var variavel = new Variavel(i.Identificador, token, i.Constante);
-
+  
         if(i.EhDeclaracao)
-            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, variavel);
+            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante);
         else
             _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
-        return variavel.Valor;
+        return resultado;
     }
-
-    private object AtribuirElementoVetor(string identificador, Expressao expressaoIndice, Expressao expressao)
-    {
-        int indiceVetor = (int)InterpretarExpressao(expressaoIndice);
-        object valor = InterpretarExpressao(expressao);
-
-        var vetor = (Token[])_programa.PilhaEscopos.ObterVariavel(identificador).Valor;
-
-        if(indiceVetor > vetor.Length || indiceVetor < 0)
-            throw new ErroIndiceForaVetor("", _linha);
-
-        vetor[indiceVetor].Valor = valor; // TODO: Isso funciona?
-
-        return valor;
-    }
-
 }

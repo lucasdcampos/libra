@@ -4,12 +4,12 @@ public class Escopo
 {
     private Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
 
-    public void DefinirVariavel(string identificador, Variavel variavel)
+    public void DefinirVariavel(string identificador, object valor, bool constante = false)
     {
         if(VariavelExiste(identificador))
             new ErroVariavelJaDeclarada(identificador).LancarErro();
 
-        _variaveis[identificador] = variavel;
+        _variaveis[identificador] = new Variavel(identificador, valor, constante);
     }
 
     public Variavel? ObterVariavel(string identificador)

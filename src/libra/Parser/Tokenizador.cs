@@ -367,7 +367,6 @@ public class Tokenizador
     private void Passar(int quantidade = 1) 
     {
         _posicao += quantidade;
-        
     }
 
     private char ConsumirChar()

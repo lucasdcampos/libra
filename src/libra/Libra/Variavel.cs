@@ -5,15 +5,13 @@ namespace Libra
     public class Variavel
     {
         public string Identificador { get; }
-        public Token Token { get; private set; }
-        public TokenTipo Tipo => Token.Tipo;
-        public object Valor => Token.Valor;
+        public object Valor {get; private set; }
         public bool Constante { get; }
 
-        public Variavel(string ident, Token token, bool constante = false)
+        public Variavel(string ident, object valor, bool constante = false)
         {
             Identificador = ident;
-            Token = token;
+            Valor = valor;
             Constante = constante;
         }
 
@@ -22,16 +20,12 @@ namespace Libra
             if (Constante)
                 throw new ErroModificacaoConstante(Identificador);
 
-            //if (novoValor.GetType() != Valor.GetType())
-            //    throw new ErroTipoIncompativel(Identificador);
-
-            Token = new Token(Token.Tipo, Token.Linha, novoValor);
+            Valor = novoValor;
         }
 
         public override string ToString()
         {
-            return $"{Identificador} (Tipo: {Tipo}, Valor: {Valor}, Constante: {Constante})";
+            return $"{Identificador} (Valor: {Valor}, Constante: {Constante})";
         }
     }
-
 }

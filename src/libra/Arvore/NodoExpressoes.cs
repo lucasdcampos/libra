@@ -5,7 +5,7 @@ namespace Libra.Arvore
         ExpressaoLiteral,
         ExpressaoVariavel,
         ExpressaoChamadaFuncao,
-        ExpressaoVetor,
+        ExpressaoDeclaracaoVetor,
         ExpressaoAcessoVetor,
         ExpressaoUnaria,
         ExpressaoBinaria
@@ -28,9 +28,7 @@ namespace Libra.Arvore
 
             Tipo = TipoExpressao.ExpressaoUnaria;
         }
-
     }
-
 
     public class ExpressaoLiteral : Expressao
     {
@@ -42,7 +40,6 @@ namespace Libra.Arvore
 
         public Token Token { get; private set; }
         public object Valor => Token.Valor;
-
     }
 
     public class ExpressaoVariavel : Expressao
@@ -88,12 +85,12 @@ namespace Libra.Arvore
         public Expressao Expressao { get; private set; }
     }
 
-    public class ExpressaoVetor : Expressao
+    public class ExpressaoDeclaracaoVetor : Expressao
     {
-        public ExpressaoVetor(Expressao expr)
+        public ExpressaoDeclaracaoVetor(Expressao expr)
         {
             Expressao = expr;
-            Tipo = TipoExpressao.ExpressaoVetor;
+            Tipo = TipoExpressao.ExpressaoDeclaracaoVetor;
         }
 
         public Expressao Expressao { get; private set; }
@@ -118,7 +115,5 @@ namespace Libra.Arvore
         {
             return $"{Esquerda.ToString()} {Token.TipoParaString(Operador.Tipo)} {Direita.ToString()}";
         }
-
     }
-    
 }

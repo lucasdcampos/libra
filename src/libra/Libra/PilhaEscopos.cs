@@ -35,9 +35,9 @@ public class PilhaDeEscopos
     }
 
     // Define uma variável no escopo atual
-    public void DefinirVariavel(string identificador, Variavel variavel)
+    public void DefinirVariavel(string identificador, object valor, bool constante = false)
     {
-        escopos.Peek().DefinirVariavel(identificador, variavel);
+        escopos.Peek().DefinirVariavel(identificador, valor, constante);
     }
 
     // Busca uma variável, começando pelo escopo mais interno até o global
@@ -52,22 +52,6 @@ public class PilhaDeEscopos
         throw new ErroVariavelNaoDeclarada(identificador);
         
         return null;
-    }
-
-    // TODO: Encontrar forma melhor
-    public Endereco? ObterIndiceVariavel(string identificador)
-    {
-        for(int i = 0; i < escopos.Count; i++)
-        {
-            if (escopos.ElementAt(i).VariavelExiste(identificador))
-            {
-                int? idcVariavel = escopos.ElementAt(i)?.ObterIndiceVariavel(identificador);
-                return new Endereco {IndiceEscopo = i, IndiceVariavel = (int)idcVariavel};
-            }
-                
-        }
-        throw new ErroVariavelNaoDeclarada(identificador);
-        return null; // Variável não encontrada
     }
 
     // Atualiza o valor de uma variável existente
