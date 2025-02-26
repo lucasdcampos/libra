@@ -1,0 +1,3 @@
+importar "so.libra"
+
+exibir(diretorioAtual())

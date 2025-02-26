@@ -1,3 +1,51 @@
-importar "so.libra"
+// Testando diversas funcionalidades para ver se nada foi quebrado
 
-exibir(diretorioAtual())
+exibir("Iniciando teste de funcionalidades da Libra:")
+
+exibir("Testando Variáveis")
+var x = 1
+var texto = "Olá, Mundo!"
+var y = 2
+x = y
+x = x+1
+
+exibir("Testando Constantes")
+const QIDoLucas = 9999
+
+exibir("Testando Vetores")
+var vetor = { 1, 2, 3}
+var vetor2 = [10]
+vetor2[0] = 1
+
+
+exibir("Testando Condicionais")
+se 1 > 0 entao fim
+senao fim
+
+se 1 < 0 entao fim
+senao fim
+
+exibir("Testando Loops")
+var n = 0
+enquanto n < 3 faca
+    n = n + 1
+fim
+n = 0
+
+
+exibir("Testando Funções")
+funcao foo(bar)
+    retornar bar
+fim
+foo(69)
+
+exibir("Testando recursividade")
+funcao testarPot(b, n)
+    se n == 0 entao
+        retornar 1
+    fim
+    retornar b * testarPot(b, n-1)
+fim
+testarPot(2,3)
+
+exibir("Fim do Teste, nenhum problema fatal encontrado.")
