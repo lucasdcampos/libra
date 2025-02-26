@@ -7,9 +7,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>libra</AssemblyName>
+    <OutputPath>../../bin/Libra-CLI/</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\libra\Libra.csproj" />
   </ItemGroup>
+
 </Project>

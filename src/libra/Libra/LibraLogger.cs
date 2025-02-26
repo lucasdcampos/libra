@@ -17,6 +17,9 @@ public class LibraLogger
 
     private static void Msg(object msg, string prefix = "LOG", ConsoleColor cor = ConsoleColor.White)
     {
+        if(string.IsNullOrEmpty(msg.ToString()))
+            msg = "Nulo";
+            
         Console.ForegroundColor = cor;
         msg = msg.ToString().Replace("\n", $"{Environment.NewLine}[{prefix}] ");
         Console.WriteLine($"[{prefix}] {msg}");

@@ -211,6 +211,7 @@ public class Parser
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
+            case TokenTipo.Nulo:
                 return new ExpressaoLiteral(ConsumirToken());
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)

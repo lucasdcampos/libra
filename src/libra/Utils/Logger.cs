@@ -15,6 +15,9 @@ namespace Libra
     {
         public void Msg(string mensagem, string final = "\n")
         {
+            if(string.IsNullOrEmpty(mensagem))
+                mensagem = "Nulo";
+                
             Console.Write(mensagem + final);
             Console.ResetColor();
         }

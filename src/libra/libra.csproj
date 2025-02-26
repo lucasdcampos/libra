@@ -8,6 +8,7 @@
     <WarningLevel>0</WarningLevel>
     <AssemblyName>libra-interpretador</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>../../bin/Libra/</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

@@ -23,12 +23,12 @@ public class Tokenizador
         { "retornar", TokenTipo.Retornar },
         { "entao", TokenTipo.Entao },
         { "fim", TokenTipo.Fim },
+        { "nulo", TokenTipo.Nulo },
         { "ou", TokenTipo.OperadorOu },
         { "e", TokenTipo.OperadorE },
         { "neg", TokenTipo.OperadorNeg },
         { "nao", TokenTipo.OperadorNeg }
     };
-
 
     public List<Token> Tokenizar(string source) 
     {
@@ -117,7 +117,7 @@ public class Tokenizador
 
             buffer += ConsumirAte('"');
 
-            string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, buffer);
+            string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/biblioteca", buffer);
             string caminhoUsuario = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), buffer);
 
             if (!File.Exists(caminhoExecutavel) && !File.Exists(caminhoUsuario))

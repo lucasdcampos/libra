@@ -17,7 +17,7 @@ public static class LibraBase
     public static void RegistrarFuncoesEmbutidas()
     {
         // Temporário
-        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", 1);
+        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", 0, true);
 
         _programaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
@@ -114,6 +114,7 @@ public static class LibraBase
                 _programaAtual.Funcoes[nomeFuncao] = new FuncaoEmbutida(funcao);
             }
         }
+
         return null;
     }
 
@@ -169,15 +170,17 @@ public static class LibraBase
     public static object exibir(object[] args)
     {
         int qtd = args.Length;
+        
         switch(qtd)
         {
             case 0:
-                Ambiente.Msg("");
                 return null;
             case 1:
+                args[0] = args[0] == null ? "Nulo" : args[0];
                 Ambiente.Msg($"{args[0]}");
                 return null;
             case 2:
+                args[0] = args[0] == null ? "Nulo" : args[0];
                 Ambiente.Msg(args[0].ToString(), args[1].ToString());
                 return null;
         }

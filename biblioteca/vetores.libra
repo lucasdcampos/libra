@@ -1,0 +1,99 @@
+// Biblioteca padrão da Libra
+// Arquivo: vetores.libra
+// Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
+
+// Exibe todos os elementos de um Vetor
+funcao mostrarVetor(vetor)
+    var n = 0
+    exibir("{ ", "")
+
+    enquanto n < tamanho(vetor) faca
+        exibir(vetor[n], " ")
+        n = n + 1
+    fim
+
+    exibir("}")
+fim
+
+// Retorna um novo Vetor com o elemento adicionado ao final
+funcao incluir(vetor, elemento)
+    var temp = [tamanho(vetor)+1]
+    var n = 0
+
+    enquanto n < tamanho(vetor) faca
+        temp[n] = vetor[n]
+        n = n+1
+    fim
+    temp[n] = elemento
+
+    retornar temp
+fim
+
+// Retorna um novo Vetor com o elemento do indice removido
+funcao remover(vetor, indice)
+    var temp = [tamanho(vetor) - 1]
+    var n = 0
+    var m = 0
+
+    enquanto n < tamanho(vetor) faca
+        se n != indice entao
+            temp[m] = vetor[n]
+            m = m + 1
+        fim
+        n = n + 1
+    fim
+
+    retornar temp
+fim
+
+// Retorna se o Vetor está vazio
+funcao estaVazio(vetor)
+    retornar tamanho(vetor) == 0
+fim
+
+// Retorna um novo Vetor com o elemento adicionado ao inicio
+funcao adicionarInicio(vetor, elemento)
+    var temp = [tamanho(vetor) + 1]
+    temp[0] = elemento
+    var n = 0
+
+    enquanto n < tamanho(vetor) faca
+        temp[n + 1] = vetor[n]
+        n = n + 1
+    fim
+
+    retornar temp
+fim
+
+// Retorna o reverso de um Vetor
+funcao reverter(vetor)
+    var temp = [tamanho(vetor)]
+    var n = 0
+    
+    enquanto n < tamanho(vetor) faca
+        temp[n] = vetor[(tamanho(vetor) - 1) - n]
+        n = n + 1
+    fim
+
+    retornar temp
+fim
+
+
+// Retorna o maior elemento de um Vetor
+funcao maiorElemento(vetor)
+    se tamanho(vetor) == 0 entao
+        retornar nulo
+    fim
+
+    var maior = vetor[0]
+    var n = 1
+
+    enquanto n < tamanho(vetor) faca
+        se vetor[n] > maior entao
+            maior = vetor[n]
+        fim
+        n = n + 1
+    fim
+
+    retornar maior
+fim

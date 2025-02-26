@@ -1,0 +1,85 @@
+importar "so.cs.libra"
+
+registrarCSharp("LibraSO", "Ler", SOCSharp)
+registrarCSharp("LibraSO", "Escrever", SOCSharp)
+registrarCSharp("LibraSO", "Acrescentar", SOCSharp)
+registrarCSharp("LibraSO", "DeletarArquivo", SOCSharp)
+registrarCSharp("LibraSO", "ListarArquivos", SOCSharp)
+registrarCSharp("LibraSO", "DiretorioAtual", SOCSharp)
+registrarCSharp("LibraSO", "ExecutarComando", SOCSharp)
+registrarCSharp("LibraSO", "CriarDiretorio", SOCSharp)
+registrarCSharp("LibraSO", "DeletarDiretorio", SOCSharp)
+
+funcao ler(caminho)
+    se tipo(caminho) != "Texto" entao
+        erro("caminho deve ser Texto ao invés de " + tipo(caminho))
+    fim
+    retornar LibraSO_Ler(caminho)
+fim
+
+funcao escrever(caminho, conteudo)
+    se tipo(caminho) != "Texto" ou tipo(conteudo) != "Texto" entao
+        erro("caminho e conteudo devem ser Texto")
+    fim
+    LibraSO_Escrever(caminho, conteudo)
+fim
+
+funcao acrescentar(caminho, conteudo)
+    se tipo(caminho) != "Texto" ou tipo(conteudo) != "Texto" entao
+        erro("caminho e conteudo devem ser Texto")
+    fim
+    LibraSO_Acrescentar(caminho, conteudo)
+fim
+
+funcao deletarArquivo(caminho)
+    se tipo(caminho) != "Texto" entao
+        erro("caminho deve ser Texto ao invés de " + tipo(caminho))
+    fim
+    LibraSO_DeletarArquivo(caminho)
+fim
+
+funcao listarArquivos(diretorio)
+    se tipo(diretorio) != "Texto" entao
+        erro("diretorio deve ser Texto ao invés de " + tipo(diretorio))
+    fim
+    retornar LibraSO_ListarArquivos(diretorio)
+fim
+
+funcao diretorioAtual()
+    retornar LibraSO_DiretorioAtual()
+fim
+
+funcao executarComando(comando, argumentos)
+    se tipo(comando) != "Texto" ou (argumentos != nulo e tipo(argumentos) != "Texto") entao
+        erro("comando e argumentos devem ser Texto")
+    fim
+    retornar LibraSO_ExecutarComando(comando, argumentos)
+fim
+
+funcao criarDiretorio(caminho)
+    se tipo(caminho) != "Texto" entao
+        erro("caminho deve ser Texto ao invés de " + tipo(caminho))
+    fim
+    LibraSO_CriarDiretorio(caminho)
+fim
+
+funcao deletarDiretorio(caminho, recursivo)
+    se tipo(caminho) != "Texto" ou tipo(recursivo) != "Booleano" entao
+        erro("caminho deve ser Texto e recursivo deve ser Booleano")
+    fim
+    LibraSO_DeletarDiretorio(caminho, recursivo)
+fim
+
+funcao obterVariavelAmbiente(nome)
+    se tipo(nome) != "Texto" entao
+        erro("nome deve ser Texto ao invés de " + tipo(nome))
+    fim
+    retornar LibraSO_ObterVariavelAmbiente(nome)
+fim
+
+funcao definirVariavelAmbiente(nome, valor)
+    se tipo(nome) != "Texto" ou tipo(valor) != "Texto" entao
+        erro("nome e valor devem ser Texto")
+    fim
+    LibraSO_DefinirVariavelAmbiente(nome, valor)
+fim
