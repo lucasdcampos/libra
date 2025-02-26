@@ -20,7 +20,9 @@ public class Parser
         { TokenTipo.OperadorMenorQue, 0 },
         { TokenTipo.OperadorMenorIgualQue, 0 },
         { TokenTipo.OperadorComparacao, 0 },
-        { TokenTipo.OperadorDiferente, 0 }
+        { TokenTipo.OperadorDiferente, 0 },
+        { TokenTipo.OperadorE, 0 },
+        { TokenTipo.OperadorOu, 0 }
     };
 
     public Programa Parse(List<Token> tokens)
@@ -60,30 +62,44 @@ public class Parser
                     return ParseInstrucaoVar();
         }
 
-        throw new Erro($"Instrução inválida: {Atual().Tipo.ToString()}", _linha, 1000);
-
-        return null;
+        return new InstrucaoExibirExpressao(ParseExpressao());
     }
 
-    private InstrucaoVar? ParseInstrucaoVar()
+    private Instrucao? ParseInstrucaoVar()
     {
         bool constante = TentarConsumirToken(TokenTipo.Const) != null;
         bool declaracao = TentarConsumirToken(TokenTipo.Var) != null;
-        string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
-        ConsumirToken(TokenTipo.OperadorDefinir);
+        var tokenIdentificador = ConsumirToken(TokenTipo.Identificador);
+        string identificador = (string)tokenIdentificador.Valor;
+
+        bool modificacaoVetor = false;
+        Expressao indiceExpr = null;
+        
+        if(TentarConsumirToken(TokenTipo.AbrirCol) != null)
+        {
+            indiceExpr = ParseExpressao();
+            ConsumirToken(TokenTipo.FecharCol);
+            modificacaoVetor = true;
+        }
+
+        if(TentarConsumirToken(TokenTipo.OperadorDefinir) == null)
+        {
+            return new InstrucaoExibirExpressao(new ExpressaoVariavel(tokenIdentificador));
+        }
+
         var expressao = ParseExpressao();
+        
+        if(modificacaoVetor) return new InstrucaoModificacaoVetor(identificador, indiceExpr, expressao);
 
         return new InstrucaoVar(identificador, expressao, constante, declaracao || constante);
     }
 
-    private Expressao? ParseVetor()
+    private ExpressaoVetor? ParseVetor()
     {
-        if(TentarConsumirToken(TokenTipo.AbrirCol) == null)
-            return null;
+        ConsumirToken(TokenTipo.AbrirCol);
         Expressao expr = ParseExpressao();
-        TentarConsumirToken(TokenTipo.FecharCol);
-
-        return expr;
+        ConsumirToken(TokenTipo.FecharCol);
+        return new ExpressaoVetor(expr);
     }
 
     private InstrucaoFuncao? ParseInstrucaoFuncao()
@@ -167,15 +183,20 @@ public class Parser
     {
         switch (Atual().Tipo)
         {
+            case TokenTipo.AbrirCol:
+                return ParseVetor();
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
                 return new ExpressaoLiteral(ConsumirToken());
-
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                 {
                     return ParseExpressaoChamadaFuncao();
+                }
+                else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
+                {
+                    return ParseExpressaoAcessoVetor();
                 }
                 return new ExpressaoVariavel(ConsumirToken());
 
@@ -191,6 +212,16 @@ public class Parser
         }
 
         return null;
+    }
+
+    private Expressao? ParseExpressaoAcessoVetor()
+    {
+        string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
+        ConsumirToken(TokenTipo.AbrirCol);
+        var indice = ParseExpressao();
+        ConsumirToken(TokenTipo.FecharCol);
+
+        return new ExpressaoAcessoVetor(identificador, indice);
     }
 
     private ExpressaoChamadaFuncao? ParseExpressaoChamadaFuncao()

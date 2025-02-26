@@ -37,7 +37,21 @@ public class Escopo
         }
         else
         {
-            new ErroVariavelNaoDeclarada(identificador).LancarErro();
+            throw new ErroVariavelNaoDeclarada(identificador);
+        }
+    }
+
+    public void ModificarVetor(string identificador, int indice, object novoValor)
+    {
+        if (_variaveis.TryGetValue(identificador, out var variavel))
+        {
+            object[] vetor = (object[])variavel.Valor;
+            vetor[indice] = novoValor;
+            variavel.AtualizarValor(vetor);
+        }
+        else
+        {
+            throw new ErroVariavelNaoDeclarada(identificador);
         }
     }
 }

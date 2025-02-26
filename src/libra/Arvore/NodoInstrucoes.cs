@@ -1,4 +1,6 @@
 
+using System;
+
 namespace Libra.Arvore
 {
     public abstract class Instrucao 
@@ -21,7 +23,7 @@ namespace Libra.Arvore
         public Expressao Expressao { get; private set; }
         public TokenTipo Tipo { get; private set; }
         public string Identificador {get; private set; }
-        internal bool EhDeclaracao; // usada para saber se estamos declarando uma nova variável ou só modificando uma
+        internal bool EhDeclaracao;
         public bool Constante { get; private set; }
 
     }
@@ -74,7 +76,7 @@ namespace Libra.Arvore
 
     public class InstrucaoRomper : Instrucao
     {
-        // Nada de interessante...
+        // TODO: Implementar
     }
 
     public class InstrucaoRetornar : Instrucao
@@ -97,5 +99,34 @@ namespace Libra.Arvore
         }
 
         public ExpressaoChamadaFuncao Chamada { get; private set; }
+    }
+
+    // Usada na CLI da Libra. Ex:
+    // >>> 1+1
+    // Saída: 2
+    public class InstrucaoExibirExpressao : Instrucao
+    {
+        public InstrucaoExibirExpressao(Expressao expressao)
+        {
+            Expressao = expressao;
+            TipoInstrucao = TokenTipo.TokenInvalido;
+        }
+
+        public Expressao Expressao { get; private set; }
+    }
+
+    public class InstrucaoModificacaoVetor : Instrucao
+    {
+        public InstrucaoModificacaoVetor(string identificador, Expressao indiceExpr, Expressao expressao)
+        {
+            Expressao = expressao;
+            Identificador = identificador;
+            ExpressaoIndice = indiceExpr;
+            TipoInstrucao = TokenTipo.Vetor;
+        }
+
+        public string Identificador { get; private set; }
+        public Expressao ExpressaoIndice { get; private set; }
+        public Expressao Expressao { get; private set; }
     }
 }

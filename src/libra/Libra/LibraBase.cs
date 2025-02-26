@@ -34,7 +34,9 @@ public static class LibraBase
         _programaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
         _programaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
         _programaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
-        _programaAtual.Funcoes["acessar"] = new FuncaoEmbutida(acessar);
+        _programaAtual.Funcoes["acessar_vetor"] = new FuncaoEmbutida(acessar_vetor);
+        _programaAtual.Funcoes["definir_vetor"] = new FuncaoEmbutida(definir_vetor);
+        _programaAtual.Funcoes["setar_vetor"] = new FuncaoEmbutida(setar_vetor);
         _programaAtual.Funcoes["ref"] = new FuncaoEmbutida(_ref);
         _programaAtual.Funcoes["ptr"] = new FuncaoEmbutida(ptr);
         _programaAtual.Funcoes["registrarCSharp"] = new FuncaoEmbutida(registrarCSharp);
@@ -122,6 +124,7 @@ public static class LibraBase
         return null;
     }
 
+    // Usado para executar comandos de shell
     public static string Executar(string comando, string argumentos)
     {
         System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
@@ -181,18 +184,49 @@ public static class LibraBase
         return _programaAtual.PilhaEscopos.ObterVariavel(identificador).Valor;
     }
 
-    public static object acessar(object[] args)
+    public static object acessar_vetor(object[] args)
     {
         ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
 
-        var vetor = args[0];
+        var identificador = args[0];
         int indice = (int)args[1];
 
-        if(vetor is string)
-            return vetor.ToString()[indice];
-        
-        // TODO: Adicionar Vetores de fato
+        var variavel = _programaAtual.PilhaEscopos.ObterVariavel(identificador.ToString());
+        object[] vetor = (object[])variavel.Valor;
 
+        if(indice > vetor.Length || indice < 0)
+            throw new ErroIndiceForaVetor();
+
+        return vetor[indice];
+    }
+
+    public static object setar_vetor(object[] args)
+    {
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 3, args.Length);
+
+        var identificador = args[0];
+        int indice = (int)args[1];
+        object valor = args[2];
+
+        var variavel = _programaAtual.PilhaEscopos.ObterVariavel(identificador.ToString());
+        object[] vetor = (object[])variavel.Valor;
+
+        if(indice > vetor.Length || indice < 0)
+            throw new ErroIndiceForaVetor();
+
+        vetor[indice] = valor;
+
+        return null;
+    }
+
+    public static object definir_vetor(object[] args)
+    {
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
+
+        var identificador = args[0];
+        int qtd = (int)args[1];
+
+        _programaAtual.PilhaEscopos.DefinirVariavel(identificador.ToString(), new Variavel(identificador.ToString(), new Token(TokenTipo.Vetor, 0, new object[qtd])));
         return null;
     }
 
@@ -265,7 +299,7 @@ public static class LibraBase
 
         if (args[0] is Array array)
             return array.Length;
-
+            
         throw new ArgumentException("Argumento inválido para length.");
 
         return null;
@@ -301,7 +335,6 @@ public static class LibraBase
                 num = random.Next((int)args[0], (int)args[1]);
                 break;
         }
-        
         return num;
     }
 

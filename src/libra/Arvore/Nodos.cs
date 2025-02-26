@@ -28,6 +28,7 @@ namespace Libra.Arvore
         }
         public void Sair(int codigo)
         {
+            // TODO: Deveria renomear isso, não necessariamente é uma falha
             _falha = true;
             CodigoSaida = codigo;
         }

@@ -8,19 +8,18 @@ namespace Libra;
 
 public class Interpretador
 {
-
     public static int NivelDebug = 0;
     private Programa _programa => Ambiente.ProgramaAtual;
     private object _ultimoRetorno = 0;
     private int _linha = 0;
     private bool _deveEncerrar => Ambiente.DeveEncerrar;
+    public event EventHandler Retornou;
 
     public int Interpretar(string codigo, ILogger logger = null)
     {
         Ambiente.ConfigurarAmbiente(logger);
         try
         {
-            
             var tokenizador = new Tokenizador();
             var tokens = tokenizador.Tokenizar(codigo);
             var parser = new Parser();
@@ -54,19 +53,13 @@ public class Interpretador
 
         for(int i = 0; i < instrucoes.Length; i++)
         {
-            if(instrucoes[i].TipoInstrucao == TokenTipo.Retornar)
-            {
-                Retornar((InstrucaoRetornar)instrucoes[i]);
-                break;
-            }
-                
             InterpretarInstrucao(instrucoes[i]);
         }
     }
 
     private void InterpretarInstrucao(Instrucao instrucao)
     {
-        if(_deveEncerrar)
+        if(_deveEncerrar || _programa._falha)
             return;
 
         switch(instrucao.TipoInstrucao)
@@ -89,25 +82,52 @@ public class Interpretador
             case TokenTipo.Identificador:
                 InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
                 break;
+            case TokenTipo.Vetor:
+                InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao);
+                break;
             case TokenTipo.Retornar:
                 Retornar((InstrucaoRetornar)instrucao);
                 break;
         }
 
+        if(instrucao is InstrucaoExibirExpressao)
+        {
+            var instrucaoExpr = (InstrucaoExibirExpressao)instrucao;
+            Ambiente.Msg(InterpretarExpressao(instrucaoExpr.Expressao).ToString());
+        }
+
     }
 
+    private void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
+    {
+        string identificador = instrucao.Identificador;
+        int indice = (int)InterpretarExpressao(instrucao.ExpressaoIndice);
+        object expressao = InterpretarExpressao(instrucao.Expressao);
+
+        _programa.PilhaEscopos.ModificarVetor(identificador, indice, expressao);
+    }
+
+    // TODO: Ao invés de fazer isso, eu deveria ter um Evento de Retornar, e adicionar
+    // um listener
     private void Retornar(InstrucaoRetornar instrucao)
     {
+        // Pensando se uso esse sistema, vou dar uma olhada na outra parte do código primeiro
+        //Retornou.Invoke(this, EventArgs e instrucao);
         _ultimoRetorno = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
+        Console.WriteLine($"ultimo retorno: {_ultimoRetorno}");
     }
+
     private void InterpretarCondicional(Instrucao instrucao)
     {
         if(instrucao is InstrucaoSe)
         {
             var instrucaoSe = (InstrucaoSe)instrucao;
             var instrucoesSe = instrucaoSe.Instrucoes;
-            if((int)InterpretarExpressao(instrucaoSe.Expressao) != 0)
+            if ((int)InterpretarExpressao(instrucaoSe.Expressao) != 0)
+            {
                 InterpretarInstrucoes(instrucoesSe);
+                return;
+            }
             
             if(instrucaoSe.SenaoInstrucoes != null)
                 InterpretarInstrucoes(instrucaoSe.SenaoInstrucoes);
@@ -187,14 +207,49 @@ public class Interpretador
         _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
 
         return _ultimoRetorno;
+    }
 
+    private object InterpretarAcessoVetor(ExpressaoAcessoVetor expressao)
+    {
+        try
+        {
+            string ident = expressao.Identificador;
+            var expressaoIndice = InterpretarExpressao(expressao.Expressao);
+            int indice = (int)expressaoIndice; // TODO: suscetível a falhas
+
+            var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
+            if (variavel == null)
+                throw new Exception($"Variável '{ident}' não encontrada.");
+
+            if (variavel.Valor is not object[] vetor)
+                throw new Exception($"A variável '{ident}' não é um vetor ou está nula.");
+
+            if (indice < 0 || indice >= vetor.Length)
+                throw new IndexOutOfRangeException($"Índice {indice} está fora dos limites do vetor.");
+
+            return vetor[indice];
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao interpretar acesso ao vetor: {ex.Message}");
+            throw;
+        }
+    }
+
+
+    private object[] InterpretarVetor(ExpressaoVetor expressao)
+    {
+        var expressaoIndice = InterpretarExpressao(expressao.Expressao);
+        int tamanho = (int)expressaoIndice; // TODO: suscetível a falhas
+
+        return new object[tamanho];
     }
 
     private object InterpretarExpressao(Expressao expressao)
     {
         if(expressao == null)
             throw new ErroAcessoNulo(" Expressão nula", _linha);
-
+        
         switch(expressao.Tipo)
         {
             case TipoExpressao.ExpressaoLiteral:
@@ -207,8 +262,12 @@ public class Interpretador
             }
             case TipoExpressao.ExpressaoChamadaFuncao:
                 return InterpretarChamadaFuncao((ExpressaoChamadaFuncao)expressao);
+            case TipoExpressao.ExpressaoAcessoVetor:
+                return InterpretarAcessoVetor((ExpressaoAcessoVetor)expressao);
             case TipoExpressao.ExpressaoUnaria:
                 break;
+            case TipoExpressao.ExpressaoVetor:
+                return InterpretarVetor((ExpressaoVetor)expressao);
             case TipoExpressao.ExpressaoBinaria:
                 var bin = (ExpressaoBinaria)expressao;
                 var a = InterpretarExpressao(bin.Esquerda);
@@ -238,6 +297,10 @@ public class Interpretador
                         return MenorQue(a, b);
                     case TokenTipo.OperadorMenorIgualQue:
                         return MenorIgualQue(a, b);
+                    case TokenTipo.OperadorE:
+                        return E(a,b);
+                    case TokenTipo.OperadorOu:
+                        return Ou(a,b);
                 }
                 break;
         }
@@ -276,6 +339,27 @@ public class Interpretador
         
         throw new Erro($"Não é possível calcular {a.ToString()}^{b.ToString()}");
     }
+
+    private int E(object a, object b)
+    {
+        if(a is not int)
+            throw new Erro("Esperado valor inteiro");
+
+        return ((int)a != 0 && (int)b != 0) ? 1 : 0;
+
+        return 0;
+    }
+
+    private int Ou(object a, object b)
+    {
+        if(a is not int)
+            throw new Erro("Esperado valor inteiro");
+
+        return ((int)a != 0 || (int)b != 0) ? 1 : 0;
+
+        return 0;
+    }
+
     private int Igual(object a, object b)
     {
         if(a is int)

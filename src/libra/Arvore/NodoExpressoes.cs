@@ -5,6 +5,7 @@ namespace Libra.Arvore
         ExpressaoLiteral,
         ExpressaoVariavel,
         ExpressaoChamadaFuncao,
+        ExpressaoVetor,
         ExpressaoAcessoVetor,
         ExpressaoUnaria,
         ExpressaoBinaria
@@ -81,8 +82,20 @@ namespace Libra.Arvore
         {
             Identificador = ident;
             Expressao = expr;
+            Tipo = TipoExpressao.ExpressaoAcessoVetor;
         }
         public string Identificador {  get; private set; }
+        public Expressao Expressao { get; private set; }
+    }
+
+    public class ExpressaoVetor : Expressao
+    {
+        public ExpressaoVetor(Expressao expr)
+        {
+            Expressao = expr;
+            Tipo = TipoExpressao.ExpressaoVetor;
+        }
+
         public Expressao Expressao { get; private set; }
     }
 

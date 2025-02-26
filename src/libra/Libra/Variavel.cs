@@ -22,8 +22,8 @@ namespace Libra
             if (Constante)
                 throw new ErroModificacaoConstante(Identificador);
 
-            if (novoValor.GetType() != Valor.GetType())
-                throw new ErroTipoIncompativel(Identificador);
+            //if (novoValor.GetType() != Valor.GetType())
+            //    throw new ErroTipoIncompativel(Identificador);
 
             Token = new Token(Token.Tipo, Token.Linha, novoValor);
         }

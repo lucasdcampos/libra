@@ -10,6 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(SolutionDir)src\Libra\Libra.csproj" />
+    <ProjectReference Include="..\libra\Libra.csproj" />
   </ItemGroup>
 </Project>
