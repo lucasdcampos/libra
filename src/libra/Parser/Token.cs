@@ -29,12 +29,15 @@ public enum TokenTipo
     OperadorOuExclusivo,
     OperadorDiferente,
     OperadorNeg,
+    OperadorResto,
 
     // Simbolos
     AbrirParen, 
     FecharParen,
     AbrirCol,
     FecharCol,
+    AbrirChave,
+    FecharChave,
     PontoEVirgula,
     Virgula,
     NovaLinha,

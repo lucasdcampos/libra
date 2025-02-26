@@ -232,6 +232,19 @@ public class Interpretador
         return new object[tamanho];
     }
 
+    private object[] InterpretarInicializacaoVetor(ExpressaoInicializacaoVetor expressao)
+    {
+        int tamanho = expressao.Expressoes.Count;
+        var vetor = new object[tamanho];
+
+        for(int i = 0; i < tamanho; i++)
+        {
+            vetor[i] = InterpretarExpressao(expressao.Expressoes[i]);
+        }
+
+        return vetor;
+    }
+
     private object InterpretarExpressao(Expressao expressao)
     {
         switch(expressao.Tipo)
@@ -249,9 +262,17 @@ public class Interpretador
             case TipoExpressao.ExpressaoAcessoVetor:
                 return InterpretarAcessoVetor((ExpressaoAcessoVetor)expressao);
             case TipoExpressao.ExpressaoUnaria:
+                var unaria = (ExpressaoUnaria)expressao;
+                switch(unaria.Operador.Tipo)
+                {
+                    case TokenTipo.OperadorNeg:
+                        return Negar(unaria.Operando);
+                }
                 break;
             case TipoExpressao.ExpressaoDeclaracaoVetor:
                 return InterpretarVetor((ExpressaoDeclaracaoVetor)expressao);
+            case TipoExpressao.ExpressaoInicializacaoVetor:
+                return InterpretarInicializacaoVetor((ExpressaoInicializacaoVetor)expressao);
             case TipoExpressao.ExpressaoBinaria:
                 var bin = (ExpressaoBinaria)expressao;
                 var a = InterpretarExpressao(bin.Esquerda);
@@ -279,6 +300,8 @@ public class Interpretador
                         return MaiorIgualQue(a, b);
                     case TokenTipo.OperadorMenorQue:
                         return MenorQue(a, b);
+                    case TokenTipo.OperadorResto:
+                        return Resto(a, b);
                     case TokenTipo.OperadorMenorIgualQue:
                         return MenorIgualQue(a, b);
                     case TokenTipo.OperadorE:
@@ -292,6 +315,13 @@ public class Interpretador
         throw new Erro("Expressão não implementada", _linha);
 
         return null;
+    }
+
+    private int Negar(Expressao expressao)
+    {
+        int valor = (int)InterpretarExpressao(expressao);
+        
+        return valor == 0 ? 1 : 0;
     }
 
     private object Operar(dynamic a, dynamic b, Func<dynamic, dynamic, dynamic> operacao)
@@ -318,6 +348,14 @@ public class Interpretador
             return Math.Pow((int)a,(int)b);
         if(a is double && b is double)
             return Math.Pow((double)a,(double)b);
+        
+        throw new Erro($"Não é possível calcular {a.ToString()}^{b.ToString()}");
+    }
+
+    private object Resto(object a, object b)
+    {
+        if(a is int && b is int)
+            return (int)a % (int)b;
         
         throw new Erro($"Não é possível calcular {a.ToString()}^{b.ToString()}");
     }

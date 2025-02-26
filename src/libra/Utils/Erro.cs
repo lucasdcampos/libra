@@ -47,7 +47,6 @@ public class Erro : Exception
         Ambiente.Encerrar(this.Codigo);
     }
 
-    // TODO: Não está sendo chamado!
     internal void Dica(string msg)
     {
         Ambiente.Msg($"Dica: {msg}");

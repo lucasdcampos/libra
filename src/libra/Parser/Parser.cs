@@ -21,6 +21,7 @@ public class Parser
         { TokenTipo.OperadorMenorIgualQue, 1 },
         { TokenTipo.OperadorComparacao, 1 },
         { TokenTipo.OperadorDiferente, 1 },
+        { TokenTipo.OperadorResto, 1},
         { TokenTipo.OperadorE, 0 },
         { TokenTipo.OperadorOu, 0 }
     };
@@ -180,12 +181,33 @@ public class Parser
         return expr_esq;
     }
 
+    private ExpressaoInicializacaoVetor ParseInicializacaoVetor()
+    {
+        ConsumirToken(TokenTipo.AbrirChave);
+        var expressoes = new List<Expressao>();
+        while(true)
+        {
+            expressoes.Add(ParseExpressao());
+
+            TentarConsumirToken(TokenTipo.Virgula);
+
+            if(TentarConsumirToken(TokenTipo.FecharChave) != null)
+                break;
+        }
+
+        return new ExpressaoInicializacaoVetor(expressoes);
+    }
+
     private Expressao ParseExpressaoTermo()
     {
         switch (Atual().Tipo)
         {
+            case TokenTipo.OperadorNeg:
+                return new ExpressaoUnaria(ConsumirToken(), ParseExpressao());
             case TokenTipo.AbrirCol:
                 return ParseVetor();
+            case TokenTipo.AbrirChave:
+                return ParseInicializacaoVetor();
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:

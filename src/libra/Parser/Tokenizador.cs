@@ -10,7 +10,6 @@ public class Tokenizador
     private string? _fonte;
     private List<Token>? _tokens;
     private int _linha;
-    private bool _falha;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
         { "var", TokenTipo.Var },
@@ -25,7 +24,9 @@ public class Tokenizador
         { "entao", TokenTipo.Entao },
         { "fim", TokenTipo.Fim },
         { "ou", TokenTipo.OperadorOu },
-        { "e", TokenTipo.OperadorE }
+        { "e", TokenTipo.OperadorE },
+        { "neg", TokenTipo.OperadorNeg },
+        { "nao", TokenTipo.OperadorNeg }
     };
 
 
@@ -38,7 +39,7 @@ public class Tokenizador
         var texto = "";
         try
         {
-            while (Atual() != '\0' && !_falha)
+            while (Atual() != '\0')
             {
                 if(char.IsDigit(Atual()))
                 {
@@ -57,14 +58,11 @@ public class Tokenizador
         
             AdicionarTokenALista(TokenTipo.FimDoArquivo);
 
-            if (_falha)
-                return new List<Token>();
-
             return _tokens;
-            }
+        }
         catch (Exception e)
         {
-            new Erro($"{e}");
+            
         }
 
         return null;
@@ -174,6 +172,14 @@ public class Tokenizador
                 AdicionarTokenALista(TokenTipo.FecharCol);
                 Passar();
                 break;
+            case '{':
+                ConsumirChar();
+                AdicionarTokenALista(TokenTipo.AbrirChave);
+                break;
+            case '}':
+                AdicionarTokenALista(TokenTipo.FecharChave);
+                Passar();
+                break;
             case '>':
                 if (Proximo(1) == '=')
                 {
@@ -238,6 +244,10 @@ public class Tokenizador
                 break;
             case '^':
                 AdicionarTokenALista(TokenTipo.OperadorPot);
+                Passar();
+                break;
+            case '%':
+                AdicionarTokenALista(TokenTipo.OperadorResto);
                 Passar();
                 break;
             case ')':
