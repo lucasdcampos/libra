@@ -267,6 +267,8 @@ public class Interpretador
                 {
                     case TokenTipo.OperadorNeg:
                         return Negar(unaria.Operando);
+                    case TokenTipo.OperadorSub:
+                        return Mult(-1, unaria.Operando);
                 }
                 break;
             case TipoExpressao.ExpressaoDeclaracaoVetor:

@@ -203,6 +203,7 @@ public class Parser
         switch (Atual().Tipo)
         {
             case TokenTipo.OperadorNeg:
+            case TokenTipo.OperadorSub:
                 return new ExpressaoUnaria(ConsumirToken(), ParseExpressao());
             case TokenTipo.AbrirCol:
                 return ParseVetor();
