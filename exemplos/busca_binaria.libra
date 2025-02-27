@@ -1,0 +1,20 @@
+funcao buscaBinaria(vetor, alvo)
+    var inicio = 0
+    var fim = tamanho(vetor) - 1
+    enquanto inicio <= fim faca
+        var meio = int((inicio + fim))
+        se vetor[meio] == alvo entao
+            exibir(concat("Elemento encontrado na posição: ", meio))
+            retornar
+        fim
+        se vetor[meio] < alvo entao
+            inicio = meio + 1
+        senao
+            fim = meio - 1
+        fim
+    fim
+    exibir("Elemento não encontrado.")
+fim
+
+var lista = { 1, 3, 5, 7, 9, 11, 13, 15 }
+buscaBinaria(lista, 7)
