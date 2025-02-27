@@ -1,0 +1,19 @@
+funcao bubbleSort(vetor)
+    var i = 0
+    enquanto i < tamanho(vetor) faca
+        var j = 0
+        enquanto j < tamanho(vetor) - 1 faca
+            se vetor[j] > vetor[j + 1] entao
+                var temp = vetor[j]
+                vetor[j] = vetor[j + 1]
+                vetor[j + 1] = temp
+            fim
+            j = j + 1
+        fim
+        i = i + 1
+    fim
+    exibir("Vetor ordenado: ", vetor)
+fim
+
+var numeros = { 64, 34, 25, 12, 22, 11, 90 }
+bubbleSort(numeros)
