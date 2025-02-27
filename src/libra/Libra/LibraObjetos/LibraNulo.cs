@@ -6,4 +6,14 @@ public class LibraNulo : LibraObjeto
     {
         return "Nulo";
     }
+
+    public override object ObterValor()
+    {
+        return null;
+    }
+
+    public override LibraInt ObterTamanhoEmBytes()
+    {
+        return new LibraInt(0);
+    }
 }

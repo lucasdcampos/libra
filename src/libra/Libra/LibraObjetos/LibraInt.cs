@@ -16,7 +16,17 @@ public class LibraInt : LibraObjeto
 
     public override string ToString()
     {
-        return Valor.ToString();
+        return "Int";
+    }
+
+    public override object ObterValor()
+    {
+        return Valor;
+    }
+
+    public override LibraInt ObterTamanhoEmBytes()
+    {
+        return new LibraInt(4);
     }
 
     public override LibraObjeto Soma(LibraObjeto outro)
@@ -55,7 +65,9 @@ public class LibraInt : LibraObjeto
         {
             (LibraInt libraInt) when libraInt.Valor != 0 => new LibraInt(Valor / libraInt.Valor),
             (LibraReal libraReal) when libraReal.Valor != 0 => new LibraReal(Valor / libraReal.Valor),
-            _ => throw new Erro($"Não é possível calcular {this.ToString()}/{outro.ToString()} ou divisão por zero.")
+            (LibraInt libraInt) => throw new ErroDivisaoPorZero(),
+            (LibraReal libraReal) => throw new ErroDivisaoPorZero(),
+            _ => throw new Erro($"Não é possível calcular {this.ToString()}/{outro.ToString()}")
         };
     }
 
@@ -125,6 +137,26 @@ public class LibraInt : LibraObjeto
         {
             (LibraInt libraInt) => new LibraInt(Valor == libraInt.Valor),
             (LibraReal libraReal) => new LibraInt(Valor == libraReal.Valor),
+            _ => throw new Erro($"Não é possível calcular {this.ToString()}%{outro.ToString()}")
+        };
+    }
+
+    public override LibraInt E(LibraObjeto outro)
+    {
+        return (outro) switch
+        {
+            (LibraInt libraInt) => new LibraInt(Valor != 0 && libraInt.Valor != 0),
+            (LibraReal libraReal) => new LibraInt(Valor != 0 && libraReal.Valor != 0),
+            _ => throw new Erro($"Não é possível calcular {this.ToString()}%{outro.ToString()}")
+        };
+    }
+
+    public override LibraInt Ou(LibraObjeto outro)
+    {
+        return (outro) switch
+        {
+            (LibraInt libraInt) => new LibraInt(Valor != 0 || libraInt.Valor != 0),
+            (LibraReal libraReal) => new LibraInt(Valor != 0 || libraReal.Valor != 0),
             _ => throw new Erro($"Não é possível calcular {this.ToString()}%{outro.ToString()}")
         };
     }

@@ -111,7 +111,7 @@ public class Tokenizador
                 Passar();
 
             if (Atual() != '"')
-                throw new Erro("Esperado `\"`");
+                throw new Erro("Esperado `\"`", _linha);
 
             ConsumirChar();
 
@@ -121,7 +121,7 @@ public class Tokenizador
             string caminhoUsuario = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), buffer);
 
             if (!File.Exists(caminhoExecutavel) && !File.Exists(caminhoUsuario))
-                throw new ErroAcessoNulo(caminhoExecutavel);
+                throw new ErroAcessoNulo(" " + caminhoExecutavel);
 
             string caminhoArquivo = File.Exists(caminhoExecutavel) ? caminhoExecutavel : caminhoUsuario;
 
@@ -299,7 +299,7 @@ public class Tokenizador
                 Passar();
                 break;
             default:
-                throw new ErroTokenInvalido($"{Atual()} (ASCII = {(int)Atual()})", _linha);
+                throw new ErroTokenInvalido($"{Atual()} - ASCII = {(int)Atual()}", _linha);
                 break;
         }
     }
@@ -312,7 +312,7 @@ public class Tokenizador
             buffer += ConsumirChar();
 
             if (Atual() == '\0')
-                throw new Erro($"Esperado `{caractere}`");
+                throw new Erro($"Esperado `{caractere}`", _linha);
         }
 
         Passar();

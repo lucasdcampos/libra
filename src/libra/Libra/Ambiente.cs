@@ -7,12 +7,14 @@ public class Ambiente
     private static Ambiente _ambienteAtual;
     private ILogger _logger;
     public static ILogger Logger => _ambienteAtual._logger;
+    public static bool AmbienteSeguro => _ambienteAtual._ambienteSeguro;
+    public bool _ambienteSeguro; 
     private Programa _programaAtual;
     public static Programa ProgramaAtual => _ambienteAtual._programaAtual;
 
     private Ambiente() { }
 
-    public static void ConfigurarAmbiente(ILogger logger)
+    public static void ConfigurarAmbiente(ILogger logger, bool seguro)
     {
         _ambienteAtual = new Ambiente();
 
@@ -20,6 +22,8 @@ public class Ambiente
             _ambienteAtual._logger = new ConsoleLogger();
         else
             _ambienteAtual._logger = logger;
+        
+        _ambienteAtual._ambienteSeguro = seguro;
     }
 
     public static void SetarPrograma(Programa programa)

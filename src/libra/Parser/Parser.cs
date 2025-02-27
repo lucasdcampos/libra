@@ -56,15 +56,15 @@ public class Parser
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
             case TokenTipo.Romper: return new InstrucaoRomper();
-            case TokenTipo.Retornar: ConsumirToken(); return new InstrucaoRetornar(ParseExpressao());
+            case TokenTipo.Retornar: ConsumirToken(); return new InstrucaoRetornar(_linha, ParseExpressao());
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
-                    return new InstrucaoChamadaFuncao(ParseExpressaoChamadaFuncao());
+                    return new InstrucaoChamadaFuncao(_linha, ParseExpressaoChamadaFuncao());
                 else
                     return ParseInstrucaoVar();
         }
 
-        return new InstrucaoExibirExpressao(ParseExpressao());
+        return new InstrucaoExibirExpressao(_linha, ParseExpressao());
     }
 
     private Instrucao? ParseInstrucaoVar()
@@ -72,7 +72,7 @@ public class Parser
         bool constante = TentarConsumirToken(TokenTipo.Const) != null;
         bool declaracao = TentarConsumirToken(TokenTipo.Var) != null;
         var tokenIdentificador = ConsumirToken(TokenTipo.Identificador);
-        string identificador = (string)tokenIdentificador.Valor;
+        string identificador = tokenIdentificador.Valor.ToString();
 
         bool modificacaoVetor = false;
         Expressao indiceExpr = null;
@@ -86,14 +86,14 @@ public class Parser
 
         if(TentarConsumirToken(TokenTipo.OperadorDefinir) == null)
         {
-            return new InstrucaoExibirExpressao(new ExpressaoVariavel(tokenIdentificador));
+            return new InstrucaoExibirExpressao(_linha, new ExpressaoVariavel(tokenIdentificador));
         }
 
         var expressao = ParseExpressao();
         
-        if(modificacaoVetor) return new InstrucaoModificacaoVetor(identificador, indiceExpr, expressao);
+        if(modificacaoVetor) return new InstrucaoModificacaoVetor(_linha, identificador, indiceExpr, expressao);
 
-        return new InstrucaoVar(identificador, expressao, constante, declaracao || constante);
+        return new InstrucaoVar(_linha, identificador, expressao, constante, declaracao || constante);
     }
 
     private ExpressaoDeclaracaoVetor? ParseVetor()
@@ -125,11 +125,15 @@ public class Parser
             TentarConsumirToken(TokenTipo.Virgula);
         }
 
+        // Chamem um psiquiatra pra esse cidadão
+        if(parametros.Count > 255)
+            throw new Erro($"Função {identificador} passou de 255 parâmetros", _linha);
+            
         ConsumirToken(TokenTipo.FecharParen);
 
         var instrucoes = ParseInstrucoes();
 
-        return new InstrucaoFuncao(identificador, instrucoes, parametros);
+        return new InstrucaoFuncao(_linha, identificador, instrucoes, parametros);
     }
     
     private InstrucaoSe? ParseInstrucaoSe()
@@ -146,7 +150,7 @@ public class Parser
         if(TentarConsumirToken(TokenTipo.Senao) != null)
             instrucoesSenao = ParseInstrucoes().ToArray();
 
-        return new InstrucaoSe(expressao, instrucoes, instrucoesSenao);
+        return new InstrucaoSe(_linha, expressao, instrucoes, instrucoesSenao);
     }
 
     private InstrucaoEnquanto? ParseInstrucaoEnquanto()
@@ -158,7 +162,7 @@ public class Parser
 
         var instrucoes = ParseInstrucoes();
 
-        return new InstrucaoEnquanto(expressao, instrucoes);
+        return new InstrucaoEnquanto(_linha, expressao, instrucoes);
     }
 
     private Expressao ParseExpressao(int precedenciaMinima = 0)
@@ -175,6 +179,13 @@ public class Parser
             int proxPrecedenciaMinima = precedenciaMinima + 1; // ESQ -> DIR
             var expr_dir = ParseExpressao(proxPrecedenciaMinima);
 
+            // Detectando problemas em tempo de compilação
+            if(opr.Tipo == TokenTipo.OperadorDiv && expr_dir is ExpressaoLiteral exprLit)
+            {
+                if((int)exprLit.Valor == 0 || (double)exprLit.Valor == 0)
+                    throw new ErroDivisaoPorZero();
+            }
+            
             expr_esq = new ExpressaoBinaria(expr_esq, opr, expr_dir);
         }
 
@@ -228,11 +239,7 @@ public class Parser
             case TokenTipo.AbrirParen:
                 ConsumirToken();
                 var exprDentroParenteses = ParseExpressao();
-                if (Atual().Tipo != TokenTipo.FecharParen)
-                {
-                    throw new ErroEsperado(TokenTipo.FecharParen, Atual().Tipo);
-                }
-                ConsumirToken();
+                ConsumirToken(TokenTipo.FecharParen);
                 return exprDentroParenteses;
         }
 

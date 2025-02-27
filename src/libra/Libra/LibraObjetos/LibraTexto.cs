@@ -11,6 +11,21 @@ public class LibraTexto : LibraObjeto
 
     public override string ToString()
     {
+        return "Texto";
+    }
+
+    public override object ObterValor()
+    {
         return Valor;
+    }
+
+    public override LibraInt ObterTamanhoEmBytes()
+    {
+        return new LibraInt(Valor.Length);
+    }
+
+    public override LibraObjeto Soma(LibraObjeto outro)
+    {
+        return new LibraTexto(Valor + outro.ObterValor().ToString());
     }
 }

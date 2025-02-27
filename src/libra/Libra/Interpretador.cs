@@ -9,30 +9,45 @@ namespace Libra;
 public class Interpretador
 {
     public static int NivelDebug = 0;
+    public static int LinhaAtual => ObterLinhaAtual();
     private Programa _programa => Ambiente.ProgramaAtual;
     private int _linha = 0;
 
     private VisitorExpressoes _visitorExpressoes;
 
+    private static Interpretador _instancia;
+
     public Interpretador()
     {
+        _instancia = this;
         _visitorExpressoes = new VisitorExpressoes(this);
     }
 
-    public int Interpretar(string codigo, ILogger logger = null)
+    private static int ObterLinhaAtual()
     {
-        Ambiente.ConfigurarAmbiente(logger);
+        if(_instancia == null)
+            return 0;
+        return _instancia._linha;
+    }
+
+    public int Interpretar(string codigo, bool ambienteSeguro = true, ILogger logger = null)
+    {
+        Ambiente.ConfigurarAmbiente(logger, ambienteSeguro);
         try
         {
             var tokenizador = new Tokenizador();
             var tokens = tokenizador.Tokenizar(codigo);
             var parser = new Parser();
             var programa = parser.Parse(tokens);
+
+            programa.PilhaEscopos.DefinirVariavel("__ambienteSeguro__", new LibraInt(ambienteSeguro), true);
+
             return Interpretar(programa);
         }
         catch(Exception e)
         {
-            Ambiente.Msg(e.ToString());
+            if(e is not ExcecaoSaida)
+                Ambiente.Msg(e.ToString());
             return 1;
         }
     }
@@ -47,7 +62,8 @@ public class Interpretador
         }
         catch(Exception e)
         {
-            Ambiente.Msg(e.ToString());
+            if(e is not ExcecaoSaida)
+                Ambiente.Msg(e.ToString());
             return 1;
         }
     }
@@ -62,6 +78,8 @@ public class Interpretador
 
     public void InterpretarInstrucao(Instrucao instrucao)
     {
+        _linha++;
+
         switch(instrucao.TipoInstrucao)
         {
             case TokenTipo.Var:
@@ -153,7 +171,7 @@ public class Interpretador
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao expressaoChamadaFuncao)
     {
-        return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(expressaoChamadaFuncao));
+        return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(_linha, expressaoChamadaFuncao));
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoEmbutida funcao, ExpressaoChamadaFuncao chamada) 
@@ -163,7 +181,7 @@ public class Interpretador
 
         for(int i = 0; i < chamada.Argumentos.Count; i++)
         {
-            valoresArgumentos.Add(InterpretarExpressao(chamada.Argumentos[i]));
+            valoresArgumentos.Add(InterpretarExpressao(chamada.Argumentos[i]).ObterValor());
         }
 
         var resultadoFuncao = f.Executar(valoresArgumentos.ToArray());
@@ -238,10 +256,10 @@ public class Interpretador
         var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
 
         if (variavel.Valor is not LibraVetor vetor)
-            throw new ErroAcessoNulo();
+            throw new ErroAcessoNulo(variavel.Identificador, _linha);
 
         if (indice < 0 || indice >= vetor.Valor.Length)
-            throw new ErroIndiceForaVetor();
+            throw new ErroIndiceForaVetor(indice.ToString(), _linha);
 
         return vetor.Valor[indice];
     }
@@ -276,6 +294,7 @@ public class Interpretador
 
         if (resultado is T t) return t;
 
-        throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado");
+        throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado", _linha);
     }
+
 }

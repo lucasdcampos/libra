@@ -64,6 +64,9 @@ public class Erro : Exception
 
     public override string ToString()
     {
+        if(Linha == 0)
+            Linha = Interpretador.LinhaAtual;
+
         string msg = "";
         string categoria = $"{Categoria}: ";
 
@@ -72,7 +75,7 @@ public class Erro : Exception
         if(Linha == 0)
             msg += $"{Mensagem}";
         else
-            msg +=$"{Mensagem} na linha {Linha}";
+            msg +=$"{Mensagem}, linha {Linha}";
         
         string arrows = "";
 

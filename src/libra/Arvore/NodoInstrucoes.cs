@@ -6,17 +6,20 @@ namespace Libra.Arvore
     public abstract class Instrucao 
     { 
         public TokenTipo TipoInstrucao { get; protected set; }
+
+        public int Linha {get; protected set; }
     }
 
     public class InstrucaoVar : Instrucao
     {
-        public InstrucaoVar(string identificador, Expressao expressao, bool constante, bool declaracao)
+        public InstrucaoVar(int linha, string identificador, Expressao expressao, bool constante, bool declaracao)
         {
             Identificador = identificador;
             EhDeclaracao = declaracao;
             Constante = constante;
             Expressao = expressao; 
             TipoInstrucao = TokenTipo.Var;
+            Linha = linha;
         }
 
         public Expressao Expressao { get; private set; }
@@ -28,12 +31,13 @@ namespace Libra.Arvore
 
     public class InstrucaoFuncao : Instrucao
     {
-        public InstrucaoFuncao(string identificador, Instrucao[] instrucoes, List<string> parametros = null)
+        public InstrucaoFuncao(int linha, string identificador, Instrucao[] instrucoes, List<string> parametros = null)
         {
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
             TipoInstrucao = TokenTipo.Funcao;
+            Linha = linha;
         }
 
         public Instrucao[] Instrucoes { get; private set; }
@@ -44,12 +48,13 @@ namespace Libra.Arvore
 
     public class InstrucaoSe : Instrucao
     {
-        public InstrucaoSe(Expressao expressao, Instrucao[] instrucoes, Instrucao[] senaoInstrucoes = null)
+        public InstrucaoSe(int linha, Expressao expressao, Instrucao[] instrucoes, Instrucao[] senaoInstrucoes = null)
         {
             Expressao = expressao;
             Instrucoes = instrucoes;
             SenaoInstrucoes = senaoInstrucoes;
             TipoInstrucao = TokenTipo.Se;
+            Linha = linha;
         }
 
         public Expressao Expressao { get; private set; }
@@ -60,11 +65,12 @@ namespace Libra.Arvore
 
     public class InstrucaoEnquanto : Instrucao
     {
-        public InstrucaoEnquanto(Expressao expressao, Instrucao[] instrucoes)
+        public InstrucaoEnquanto(int linha, Expressao expressao, Instrucao[] instrucoes)
         {
             Expressao = expressao;
             Instrucoes = instrucoes;
             TipoInstrucao = TokenTipo.Enquanto;
+            Linha = linha;
         }
 
         public Expressao Expressao { get; private set; }
@@ -81,19 +87,21 @@ namespace Libra.Arvore
     {
         public Expressao Expressao { get; private set; }
 
-        public InstrucaoRetornar(Expressao expressao)
+        public InstrucaoRetornar(int linha, Expressao expressao)
         {
             Expressao = expressao;
             TipoInstrucao = TokenTipo.Retornar;
+            Linha = linha;
         }
     }
 
     public class InstrucaoChamadaFuncao : Instrucao
     {
-        public InstrucaoChamadaFuncao(ExpressaoChamadaFuncao chamada)
+        public InstrucaoChamadaFuncao(int linha, ExpressaoChamadaFuncao chamada)
         {
             Chamada = chamada;
             TipoInstrucao = TokenTipo.Identificador;
+            Linha = linha;
         }
 
         public ExpressaoChamadaFuncao Chamada { get; private set; }
@@ -104,8 +112,9 @@ namespace Libra.Arvore
     // Saída: 2
     public class InstrucaoExibirExpressao : Instrucao
     {
-        public InstrucaoExibirExpressao(Expressao expressao)
+        public InstrucaoExibirExpressao(int linha, Expressao expressao)
         {
+            Linha = linha;
             Expressao = expressao;
             TipoInstrucao = TokenTipo.TokenInvalido;
         }
@@ -115,8 +124,9 @@ namespace Libra.Arvore
 
     public class InstrucaoModificacaoVetor : Instrucao
     {
-        public InstrucaoModificacaoVetor(string identificador, Expressao indiceExpr, Expressao expressao)
+        public InstrucaoModificacaoVetor(int linha, string identificador, Expressao indiceExpr, Expressao expressao)
         {
+            Linha = linha;
             Expressao = expressao;
             Identificador = identificador;
             ExpressaoIndice = indiceExpr;

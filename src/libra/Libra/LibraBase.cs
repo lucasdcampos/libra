@@ -13,29 +13,32 @@ public static class LibraBase
 {
     public static bool DEBUG = false;
     private static Programa _programaAtual => Ambiente.ProgramaAtual;
-
     public static void RegistrarFuncoesEmbutidas()
     {
-        // Temporário
-        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", new LibraInt(0), true);
+        // Usados em bytes(tipo) para obter a quantidade de memória em bytes usada por esses tipos
+        _programaAtual.PilhaEscopos.DefinirVariavel("int", new LibraInt(4), true);
+        _programaAtual.PilhaEscopos.DefinirVariavel("real", new LibraReal(8), true);
 
-        _programaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
         _programaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
         _programaAtual.Funcoes["tipo"] = new FuncaoEmbutida(tipo);
         _programaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
-        _programaAtual.Funcoes["nao"] = new FuncaoEmbutida(nao);
-        _programaAtual.Funcoes["neg"] = new FuncaoEmbutida(nao);
         _programaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
         _programaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
         _programaAtual.Funcoes["concat"] = new FuncaoEmbutida(concat);
         _programaAtual.Funcoes["pausar"] = new FuncaoEmbutida(pausar);
         _programaAtual.Funcoes["aleatorio"] = new FuncaoEmbutida(aleatorio);
-        _programaAtual.Funcoes["num"] = new FuncaoEmbutida(num);
+        _programaAtual.Funcoes["real"] = new FuncaoEmbutida(real);
         _programaAtual.Funcoes["int"] = new FuncaoEmbutida(_int);
+        _programaAtual.Funcoes["texto"] = new FuncaoEmbutida(texto);
         _programaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
         _programaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
         _programaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
+        
+        // Impedir uso de funções potencialmente perigosas
+        if(Ambiente.AmbienteSeguro)
+            return;
+
         _programaAtual.Funcoes["registrarCSharp"] = new FuncaoEmbutida(registrarCSharp);
         _programaAtual.Funcoes["registrardll"] = new FuncaoEmbutida(registrardll);
         _programaAtual.Funcoes["libra"] = new FuncaoEmbutida(libra);
@@ -73,26 +76,8 @@ public static class LibraBase
         return null;
     }
 
-    public static object nao(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
-
-        if(args[0] is not int)
-            throw new Erro("Esperado número inteiro na função nao()");
-
-        int valor = (int)args[0];
-
-        return valor == 0 ? 1 : 0;
-    }
-
     public static object registrardll(object[] args)
     {
-        int seguro = ((LibraInt)_programaAtual.PilhaEscopos.ObterVariavel("AmbienteSeguro").Valor).Valor;
-        if(seguro != 0)
-        {
-            throw new Erro("Não é possível carregar DLLs externas em um ambiente marcado como seguro.");
-        }
-
         ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
         Assembly assembly = null;
         if(args[0] is string)
@@ -134,39 +119,6 @@ public static class LibraBase
         return null;
     }
 
-    // Usado para executar comandos de shell
-    public static string Executar(string comando, string argumentos)
-    {
-        System.Diagnostics.Process pProcess = new System.Diagnostics.Process();
-
-        pProcess.StartInfo.FileName = comando;
-        pProcess.StartInfo.Arguments = argumentos;
-        pProcess.StartInfo.UseShellExecute = false;
-        pProcess.StartInfo.CreateNoWindow = true;
-        pProcess.StartInfo.RedirectStandardOutput = true;   
-        pProcess.Start();
-
-        string saida = pProcess.StandardOutput.ReadToEnd();
-
-        pProcess.WaitForExit();
-
-        return saida;
-    }
-
-    // Apenas para testar
-    public static object[] ping(object[] args)
-    {
-        Ambiente.Msg("Pong! Função executada pelo C#.");
-
-        if(args.Length > 0)
-        {
-            Ambiente.Msg("Seus argumentos: ");
-            foreach(var arg in args)
-                Ambiente.Msg(arg.ToString(), "");
-        }
-        return null;
-    }
-
     public static object exibir(object[] args)
     {
         int qtd = args.Length;
@@ -174,6 +126,7 @@ public static class LibraBase
         switch(qtd)
         {
             case 0:
+                Ambiente.Msg($"{args[0]}");
                 return null;
             case 1:
                 args[0] = args[0] == null ? "Nulo" : args[0];
@@ -199,36 +152,59 @@ public static class LibraBase
         return final;
     }
 
+    public static object texto(object[] args)
+    {
+        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+
+        return args[0].ToString();
+    }
+
     public static object _int(object[] args)
     {
         if(args.Length == 0)
             new Erro("Esperava 1 argumento");
 
-        double n = (double)args[0];
-        return (int)n;
+        int? resultado = null;
+        try
+        {
+            resultado = (int)double.Parse(args[0].ToString());
+        }
+        catch
+        {
+            Ambiente.Msg($"Não foi possível converter {args[0]} para Int");
+        }
+
+        return resultado;
     }
 
-    public static object num(object[] args)
+    public static object real(object[] args)
     {
         if(args.Length == 0)
             new Erro("Esperava 1 argumento");
 
-        return int.Parse(args[0].ToString());
+        double? resultado = null;
+        try
+        {
+            resultado = double.Parse(args[0].ToString());
+        }
+        catch
+        {
+            Ambiente.Msg($"Não foi possível converter {args[0]} para Real");
+        }
+
+        return resultado;
     }
 
     public static object bytes(object[] args)
     {
         ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
-        var objeto = args[0];
+        var tamanho = LibraObjeto.ParaLibraObjeto(args[0]).ObterTamanhoEmBytes();
 
-        if (objeto is int)
-            return sizeof(int);
+        if(tamanho.Valor < 0)
+            throw new Erro($"Não é possível calcular diretamente o tamanho de {args[0]}");
         
-        if (objeto is string)
-            return sizeof(char) * objeto.ToString().Length;
-
-        return 0;
+        return tamanho;
     }
 
     public static object caractere(object[] args)
@@ -258,6 +234,9 @@ public static class LibraBase
         if (args[0] is Array array)
             return array.Length;
             
+        if(args[0] is LibraVetor vetor)
+            return vetor.Valor.Length;
+
         throw new ArgumentException("Argumento inválido para length.");
 
         return null;
@@ -300,19 +279,7 @@ public static class LibraBase
     {
         ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
-        switch(args[0].GetType().ToString())
-        {
-            case "System.Int32":
-                return "Int";
-            case "System.String":
-                return "Texto";
-            case "System.Char":
-                return "Char";
-            case "System.Double":
-                return "Real";
-        }
-
-        return null;
+        return LibraObjeto.ParaLibraObjeto(args[0]).ToString();
     }
 
     public static object erro(object[] args)
@@ -323,8 +290,6 @@ public static class LibraBase
         }
             
         throw new Erro(args[0].ToString());
-
-        return null;
     }
 
     private static Assembly CompilarCodigo(string codigo)

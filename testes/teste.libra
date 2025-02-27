@@ -79,3 +79,6 @@ fim
 x = testarPot(2,3)
 
 exibir("Fim do Teste, nenhum problema fatal encontrado.")
+
+exibir("Saindo")
+sair(69)

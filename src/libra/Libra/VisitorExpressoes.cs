@@ -36,7 +36,7 @@ public class VisitorExpressoes : IVisitor
             TokenTipo.OperadorMenorIgualQue => a.MenorIgualQue(b),
             TokenTipo.OperadorE => a.E(b),
             TokenTipo.OperadorOu => a.Ou(b),
-            _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}")
+            _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}", expressao.Operador.Linha)
         };
     }
 
@@ -73,7 +73,7 @@ public class VisitorExpressoes : IVisitor
                 return LibraObjeto.ParaLibraObjeto(_interpretador.InterpretarExpressao(expressao.Operando).Mult(new LibraInt(-1)));
         }
 
-        throw new Erro("Operador unário não implementado");
+        throw new Erro("Operador unário não implementado", expressao.Operador.Linha);
     }
 
     public LibraObjeto VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao)

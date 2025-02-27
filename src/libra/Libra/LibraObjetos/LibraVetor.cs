@@ -16,6 +16,17 @@ public class LibraVetor : LibraObjeto
 
     public override string ToString()
     {
-        return "LibraVetor";
+        return "Vetor";
+    }
+
+    public override object ObterValor()
+    {
+        return Valor;
+    }
+
+    public override LibraInt ObterTamanhoEmBytes()
+    {
+        // Não é possível calcular o tamanho diretamente
+        return new LibraInt(-1);
     }
 }

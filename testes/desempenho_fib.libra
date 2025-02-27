@@ -1,0 +1,11 @@
+// Testando desempenho e otimização
+// Tempo esperado: 90 segundos (ainda seria lento)
+funcao fib(n)
+    se n < 2 entao
+        retornar n
+    fim
+
+    retornar fib(n - 1 ) + fib(n - 2)
+fim
+
+fib(40)

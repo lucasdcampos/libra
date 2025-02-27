@@ -24,6 +24,9 @@ public abstract class LibraObjeto
         throw new ErroAcessoNulo($" Causa: Impossível converter {valor.ToString()} para Objeto");
     }
 
+    public abstract object ObterValor();
+    public abstract LibraInt ObterTamanhoEmBytes();
+
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários
     public virtual LibraObjeto Soma(LibraObjeto outro)
     {
