@@ -15,6 +15,7 @@ namespace Libra.Arvore
     public abstract class Expressao 
     {
         public TipoExpressao Tipo { get; protected set ;}
+        public abstract object Aceitar(IVisitor visitor);
     }
 
     public class ExpressaoUnaria : Expressao
@@ -29,6 +30,9 @@ namespace Libra.Arvore
 
             Tipo = TipoExpressao.ExpressaoUnaria;
         }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoUnaria(this);
+
     }
 
     public class ExpressaoLiteral : Expressao
@@ -41,6 +45,9 @@ namespace Libra.Arvore
 
         public Token Token { get; private set; }
         public object Valor => Token.Valor;
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
+
     }
 
     public class ExpressaoVariavel : Expressao
@@ -52,6 +59,8 @@ namespace Libra.Arvore
             Identificador = identificador;
             Tipo = TipoExpressao.ExpressaoVariavel;
         }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoVariavel(this);
 
     }
 
@@ -72,6 +81,8 @@ namespace Libra.Arvore
 
             Tipo = TipoExpressao.ExpressaoChamadaFuncao;
         }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaFuncao(this);
     }
 
     public class ExpressaoAcessoVetor : Expressao
@@ -84,6 +95,8 @@ namespace Libra.Arvore
         }
         public string Identificador {  get; private set; }
         public Expressao Expressao { get; private set; }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoAcessoVetor(this);
     }
 
     public class ExpressaoDeclaracaoVetor : Expressao
@@ -95,6 +108,8 @@ namespace Libra.Arvore
         }
 
         public Expressao Expressao { get; private set; }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoDeclaracaoVetor(this);
     }
 
     public class ExpressaoInicializacaoVetor : Expressao
@@ -106,6 +121,8 @@ namespace Libra.Arvore
         }
 
         public List<Expressao> Expressoes { get; private set; }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoInicializacaoVetor(this);
     }
 
     public class ExpressaoBinaria : Expressao
@@ -122,6 +139,8 @@ namespace Libra.Arvore
 
             Tipo = TipoExpressao.ExpressaoBinaria;
         }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoBinaria(this);
 
         public override string ToString()
         {

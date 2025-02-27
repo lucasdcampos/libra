@@ -12,6 +12,13 @@ public class Interpretador
     private Programa _programa => Ambiente.ProgramaAtual;
     private int _linha = 0;
 
+    private VisitorExpressoes _visitorExpressoes;
+
+    public Interpretador()
+    {
+        _visitorExpressoes = new VisitorExpressoes(this);
+    }
+
     public int Interpretar(string codigo, ILogger logger = null)
     {
         Ambiente.ConfigurarAmbiente(logger);
@@ -23,8 +30,9 @@ public class Interpretador
             var programa = parser.Parse(tokens);
             return Interpretar(programa);
         }
-        catch
+        catch(Exception e)
         {
+            Ambiente.Msg(e.ToString());
             return 1;
         }
     }
@@ -37,13 +45,14 @@ public class Interpretador
             InterpretarInstrucoes(programa.Instrucoes);
             return Ambiente.ProgramaAtual.CodigoSaida;
         }
-        catch
+        catch(Exception e)
         {
+            Ambiente.Msg(e.ToString());
             return 1;
         }
     }
 
-    private void InterpretarInstrucoes(Instrucao[] instrucoes)
+    public void InterpretarInstrucoes(Instrucao[] instrucoes)
     {
         for(int i = 0; i < instrucoes.Length; i++)
         {
@@ -51,7 +60,7 @@ public class Interpretador
         }
     }
 
-    private void InterpretarInstrucao(Instrucao instrucao)
+    public void InterpretarInstrucao(Instrucao instrucao)
     {
         switch(instrucao.TipoInstrucao)
         {
@@ -88,28 +97,28 @@ public class Interpretador
         }
     }
 
-    private void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
+    public void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
     {
         string identificador = instrucao.Identificador;
-        int indice = (int)InterpretarExpressao(instrucao.ExpressaoIndice);
-        object expressao = InterpretarExpressao(instrucao.Expressao);
+        int indice = InterpretarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
+        LibraObjeto expressao = InterpretarExpressao(instrucao.Expressao);
 
         _programa.PilhaEscopos.ModificarVetor(identificador, indice, expressao);
     }
 
-    private void InterpretarRetorno(InstrucaoRetornar instrucao)
+    public void InterpretarRetorno(InstrucaoRetornar instrucao)
     {
         object resultadoExpressao = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
         throw new ExcecaoRetorno(resultadoExpressao);
     }
 
-    private void InterpretarCondicional(Instrucao instrucao)
+    public void InterpretarCondicional(Instrucao instrucao)
     {
         if(instrucao is InstrucaoSe)
         {
             var instrucaoSe = (InstrucaoSe)instrucao;
             var instrucoesSe = instrucaoSe.Instrucoes;
-            if ((int)InterpretarExpressao(instrucaoSe.Expressao) != 0)
+            if (InterpretarExpressao<LibraInt>(instrucaoSe.Expressao).Valor != 0)
             {
                 InterpretarInstrucoes(instrucoesSe);
                 return;
@@ -123,11 +132,11 @@ public class Interpretador
 
         var enquanto = (InstrucaoEnquanto)instrucao;
     	var instrucoes = enquanto.Instrucoes;
-        while((int)InterpretarExpressao(enquanto.Expressao) != 0)
+        while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
             InterpretarInstrucoes(instrucoes);
     }
 
-    private void InterpretarFuncao(InstrucaoFuncao funcao)
+    public void InterpretarFuncao(InstrucaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
 
@@ -142,24 +151,27 @@ public class Interpretador
         _programa.Funcoes[identificador] = novaFuncao;
     }
 
-    private object InterpretarChamadaFuncao(ExpressaoChamadaFuncao expressaoChamadaFuncao)
+    public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao expressaoChamadaFuncao)
     {
         return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(expressaoChamadaFuncao));
     }
 
-    private object ExecutarFuncaoEmbutida(FuncaoEmbutida funcao, ExpressaoChamadaFuncao chamada) 
+    public LibraObjeto ExecutarFuncaoEmbutida(FuncaoEmbutida funcao, ExpressaoChamadaFuncao chamada) 
     {
         var f = (FuncaoEmbutida)_programa.Funcoes[chamada.Identificador];
         List<object> valoresArgumentos = new List<object>();
-        for(int i =0; i < chamada.Argumentos.Count; i++)
+
+        for(int i = 0; i < chamada.Argumentos.Count; i++)
         {
             valoresArgumentos.Add(InterpretarExpressao(chamada.Argumentos[i]));
         }
 
-        return f.Executar(valoresArgumentos.ToArray());
+        var resultadoFuncao = f.Executar(valoresArgumentos.ToArray());
+
+        return LibraObjeto.ParaLibraObjeto(resultadoFuncao);
     }
 
-    private object InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
+    public LibraObjeto InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
     {
         var chamada = instrucaoChamada.Chamada;
         var argumentos = chamada.Argumentos;
@@ -192,7 +204,7 @@ public class Interpretador
         }
         catch(ExcecaoRetorno retorno)
         {
-            return retorno.Valor;
+            return LibraObjeto.ParaLibraObjeto(retorno.Valor);
         }
         finally
         {
@@ -203,36 +215,44 @@ public class Interpretador
         return null;
     }
 
-    private object InterpretarAcessoVetor(ExpressaoAcessoVetor expressao)
+    public LibraObjeto InterpretarInstrucaoVar(InstrucaoVar i)
+    {
+        if(string.IsNullOrWhiteSpace(i.Identificador))
+            throw new Erro("Identificador inválido!", _linha);
+
+        LibraObjeto resultado = InterpretarExpressao(i.Expressao);
+  
+        if(i.EhDeclaracao)
+            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante);
+        else
+            _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
+
+        return resultado;
+    }
+
+    public object InterpretarAcessoVetor(ExpressaoAcessoVetor expressao)
     {
         string ident = expressao.Identificador;
-        var expressaoIndice = InterpretarExpressao(expressao.Expressao);
-
-        if(expressaoIndice is not int indice)
-            throw new ErroEsperado(TokenTipo.NumeroLiteral, TokenTipo.TokenInvalido);
+        int indice = InterpretarExpressao<LibraInt>(expressao.Expressao).Valor;
 
         var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
 
-        if (variavel.Valor is not object[] vetor)
+        if (variavel.Valor is not LibraVetor vetor)
             throw new ErroAcessoNulo();
 
-        if (indice < 0 || indice >= vetor.Length)
+        if (indice < 0 || indice >= vetor.Valor.Length)
             throw new ErroIndiceForaVetor();
 
-        return vetor[indice];
+        return vetor.Valor[indice];
     }
 
-    private object[] InterpretarVetor(ExpressaoDeclaracaoVetor expressao)
+    public object[] InterpretarVetor(ExpressaoDeclaracaoVetor expressao)
     {
-        var expressaoIndice = InterpretarExpressao(expressao.Expressao);
-        
-        if(expressaoIndice is not int tamanho)
-            throw new Erro("Declaração de Vetor deve conter um Número Inteiro");
-
-        return new object[tamanho];
+        int indice = InterpretarExpressao<LibraInt>(expressao.Expressao).Valor;
+        return new LibraObjeto[indice];
     }
 
-    private object[] InterpretarInicializacaoVetor(ExpressaoInicializacaoVetor expressao)
+    public object[] InterpretarInicializacaoVetor(ExpressaoInicializacaoVetor expressao)
     {
         int tamanho = expressao.Expressoes.Count;
         var vetor = new object[tamanho];
@@ -245,233 +265,17 @@ public class Interpretador
         return vetor;
     }
 
-    private object InterpretarExpressao(Expressao expressao)
+    public LibraObjeto InterpretarExpressao(Expressao expressao)
     {
-        switch(expressao.Tipo)
-        {
-            case TipoExpressao.ExpressaoLiteral:
-                return ((ExpressaoLiteral)expressao).Token.Valor;
-            case TipoExpressao.ExpressaoVariavel:
-            {
-                var exprVariavel = (ExpressaoVariavel)expressao;
-                var variavel = _programa.PilhaEscopos.ObterVariavel(exprVariavel.Identificador.Valor.ToString());
-                return variavel.Valor;
-            }
-            case TipoExpressao.ExpressaoChamadaFuncao:
-                return InterpretarChamadaFuncao((ExpressaoChamadaFuncao)expressao);
-            case TipoExpressao.ExpressaoAcessoVetor:
-                return InterpretarAcessoVetor((ExpressaoAcessoVetor)expressao);
-            case TipoExpressao.ExpressaoUnaria:
-                var unaria = (ExpressaoUnaria)expressao;
-                switch(unaria.Operador.Tipo)
-                {
-                    case TokenTipo.OperadorNeg:
-                        return Negar(unaria.Operando);
-                    case TokenTipo.OperadorSub:
-                        return Mult(-1, unaria.Operando);
-                }
-                break;
-            case TipoExpressao.ExpressaoDeclaracaoVetor:
-                return InterpretarVetor((ExpressaoDeclaracaoVetor)expressao);
-            case TipoExpressao.ExpressaoInicializacaoVetor:
-                return InterpretarInicializacaoVetor((ExpressaoInicializacaoVetor)expressao);
-            case TipoExpressao.ExpressaoBinaria:
-                var bin = (ExpressaoBinaria)expressao;
-                var a = InterpretarExpressao(bin.Esquerda);
-                var b = InterpretarExpressao(bin.Direita);
-
-                switch(bin.Operador.Tipo)
-                {
-                    case TokenTipo.OperadorSoma:
-                        return Soma(a, b);
-                    case TokenTipo.OperadorSub:
-                        return Sub(a, b);
-                    case TokenTipo.OperadorMult:
-                        return Mult(a, b);
-                    case TokenTipo.OperadorDiv:
-                        return Div(a, b);
-                    case TokenTipo.OperadorPot:
-                        return Pot(a,b);
-                    case TokenTipo.OperadorComparacao:
-                        return Igual(a, b);
-                    case TokenTipo.OperadorDiferente:
-                        return Diferente(a, b);
-                    case TokenTipo.OperadorMaiorQue:
-                        return MaiorQue(a, b);
-                    case TokenTipo.OperadorMaiorIgualQue:
-                        return MaiorIgualQue(a, b);
-                    case TokenTipo.OperadorMenorQue:
-                        return MenorQue(a, b);
-                    case TokenTipo.OperadorResto:
-                        return Resto(a, b);
-                    case TokenTipo.OperadorMenorIgualQue:
-                        return MenorIgualQue(a, b);
-                    case TokenTipo.OperadorE:
-                        return E(a,b);
-                    case TokenTipo.OperadorOu:
-                        return Ou(a,b);
-                }
-                break;
-        }
-
-        throw new Erro("Expressão não implementada", _linha);
-
-        return null;
+        return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(_visitorExpressoes));
     }
 
-    private int Negar(Expressao expressao)
+    public T InterpretarExpressao<T>(Expressao expressao)
     {
-        int valor = (int)InterpretarExpressao(expressao);
-        
-        return valor == 0 ? 1 : 0;
-    }
+        var resultado = InterpretarExpressao(expressao);
 
-    private object Operar(dynamic a, dynamic b, Func<dynamic, dynamic, dynamic> operacao)
-    {
-        try
-        {
-            return operacao(a, b);
-        }
-        catch (RuntimeBinderException)
-        {
-            return null;
-        }
+        if (resultado is T t) return t;
 
-        return null;
-    }
-
-    private object Soma(object a, object b) => Operar(a, b, (x, y) => x + y);
-    private object Sub(object a, object b) => Operar(a, b, (x, y) => x - y);
-    private object Mult(object a, object b) => Operar(a, b, (x, y) => x * y);
-    private object Div(object a, object b) => Operar(a, b, (x, y) => y == 0 ? throw new ErroDivisaoPorZero(_linha) : x / y);
-    private object Pot(object a, object b)
-    {
-        if(a is int && b is int)
-            return Math.Pow((int)a,(int)b);
-        if(a is double && b is double)
-            return Math.Pow((double)a,(double)b);
-        
-        throw new Erro($"Não é possível calcular {a.ToString()}^{b.ToString()}");
-    }
-
-    private object Resto(object a, object b)
-    {
-        if(a is int && b is int)
-            return (int)a % (int)b;
-        
-        throw new Erro($"Não é possível calcular {a.ToString()}^{b.ToString()}");
-    }
-
-    private int E(object a, object b)
-    {
-        if(a is not int || b is not int)
-            throw new Erro("Esperado valor inteiro");
-
-        return ((int)a != 0 && (int)b != 0) ? 1 : 0;
-
-        return 0;
-    }
-
-    private int Ou(object a, object b)
-    {
-        if(a is not int || b is not int)
-            throw new Erro("Esperado valor inteiro");
-
-        return ((int)a != 0 || (int)b != 0) ? 1 : 0;
-
-        return 0;
-    }
-
-    private int Igual(object a, object b)
-    {
-        if(a is int)
-            return (int)a == (int)b ? 1 : 0;
-        
-        if(a is double)
-            return (double)a == (double)b ? 1 : 0;
-
-        if(a is string)
-            return (string)a == (string)b ? 1 : 0;
-        
-        throw new Erro("Operação Inválida", _linha);
-        return 0;
-    }
-
-    private int Diferente(object a, object b)
-    {
-        if(a is int)
-            return (int)a != (int)b ? 1 : 0;
-        
-        if(a is double)
-            return (double)a != (double)b ? 1 : 0;
-
-        if(a is string)
-            return (string)a != (string)b ? 1 : 0;
-        
-        throw new Erro("Operação Inválida", _linha);
-        return 0;
-    }
-
-    private int MaiorQue(object a, object b)
-    {
-        if(a is int)
-            return (int)a > (int)b ? 1 : 0;
-        
-        if(a is double)
-            return (double)a > (double)b ? 1 : 0;
-        
-        throw new Erro("Operação Inválida", _linha);
-        return 0;
-    }
-
-    private int MaiorIgualQue(object a, object b)
-    {
-        if(a is int)
-            return (int)a >= (int)b ? 1 : 0;
-        
-        if(a is double)
-            return (double)a >= (double)b ? 1 : 0;
-        
-        throw new Erro("Operação Inválida", _linha);
-        return 0;
-    }
-
-    private int MenorQue(object a, object b)
-    {
-        if(a is int)
-            return (int)a < (int)b ? 1 : 0;
-        
-        if(a is double)
-            return (double)a < (double)b ? 1 : 0;
-        
-        throw new Erro("Operação Inválida", _linha);
-        return 0;
-    }
-
-    private int MenorIgualQue(object a, object b)
-    {
-        if(a is int)
-            return (int)a <= (int)b ? 1 : 0;
-        
-        if(a is double)
-            return (double)a <= (double)b ? 1 : 0;
-        
-        throw new Erro("Operação Inválida", _linha);
-        return 0;
-    }
-
-    private object InterpretarInstrucaoVar(InstrucaoVar i)
-    {
-        if(string.IsNullOrWhiteSpace(i.Identificador))
-            throw new Erro("Identificador inválido!", _linha);
-
-        object resultado = InterpretarExpressao(i.Expressao);
-  
-        if(i.EhDeclaracao)
-            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante);
-        else
-            _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
-
-        return resultado;
+        throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado");
     }
 }

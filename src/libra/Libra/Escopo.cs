@@ -4,7 +4,7 @@ public class Escopo
 {
     private Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
 
-    public void DefinirVariavel(string identificador, object valor, bool constante = false)
+    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false)
     {
         if(VariavelExiste(identificador))
             new ErroVariavelJaDeclarada(identificador).LancarErro();
@@ -29,7 +29,7 @@ public class Escopo
         return _variaveis.ContainsKey(identificador);
     }
 
-    public void AtualizarVariavel(string identificador, object novoValor)
+    public void AtualizarVariavel(string identificador, LibraObjeto novoValor)
     {
         if (_variaveis.TryGetValue(identificador, out var variavel))
         {
@@ -41,12 +41,12 @@ public class Escopo
         }
     }
 
-    public void ModificarVetor(string identificador, int indice, object novoValor)
+    public void ModificarVetor(string identificador, int indice, LibraObjeto novoValor)
     {
         if (_variaveis.TryGetValue(identificador, out var variavel))
         {
-            object[] vetor = (object[])variavel.Valor;
-            vetor[indice] = novoValor;
+            LibraVetor vetor = (LibraVetor)variavel.Valor;
+            vetor.Valor[indice] = novoValor;
             variavel.AtualizarValor(vetor);
         }
         else

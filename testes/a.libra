@@ -1,3 +1,2 @@
-importar "so.libra"
-
-exibir(diretorioAtual())
+var x = {1,2,3}
+exibir(x[0])

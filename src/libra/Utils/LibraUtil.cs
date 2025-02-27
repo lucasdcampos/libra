@@ -7,4 +7,9 @@ public static class LibraUtil
         if (valor) return 1;
         else       return 0;
     }
+
+    public static int NegarInteiroLogico(int valor)
+    {
+        return valor != 0 ? 0 : 1;
+    }
 }

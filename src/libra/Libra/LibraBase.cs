@@ -17,7 +17,7 @@ public static class LibraBase
     public static void RegistrarFuncoesEmbutidas()
     {
         // Temporário
-        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", 0, true);
+        _programaAtual.PilhaEscopos.DefinirVariavel("AmbienteSeguro", new LibraInt(0), true);
 
         _programaAtual.Funcoes["ping"] = new FuncaoEmbutida(ping);
         _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
@@ -87,7 +87,7 @@ public static class LibraBase
 
     public static object registrardll(object[] args)
     {
-        int seguro = (int)_programaAtual.PilhaEscopos.ObterVariavel("AmbienteSeguro").Valor;
+        int seguro = ((LibraInt)_programaAtual.PilhaEscopos.ObterVariavel("AmbienteSeguro").Valor).Valor;
         if(seguro != 0)
         {
             throw new Erro("Não é possível carregar DLLs externas em um ambiente marcado como seguro.");

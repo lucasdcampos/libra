@@ -44,6 +44,10 @@ funcao raiz(n)
     retornar raiz_n(n, 2)
 fim
 
+funcao potencia(base, expoente)
+    retornar base^expoente
+fim
+
 // Calcula e retorna a o fatorial de um número
 funcao fatorial(n)
     var resultado = 1

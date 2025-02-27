@@ -5,17 +5,17 @@ namespace Libra
     public class Variavel
     {
         public string Identificador { get; }
-        public object Valor {get; private set; }
+        public LibraObjeto Valor {get; private set; }
         public bool Constante { get; }
 
-        public Variavel(string ident, object valor, bool constante = false)
+        public Variavel(string ident, LibraObjeto valor, bool constante = false)
         {
             Identificador = ident;
             Valor = valor;
             Constante = constante;
         }
 
-        public void AtualizarValor(object novoValor)
+        public void AtualizarValor(LibraObjeto novoValor)
         {
             if (Constante)
                 throw new ErroModificacaoConstante(Identificador);

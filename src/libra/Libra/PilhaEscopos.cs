@@ -35,7 +35,7 @@ public class PilhaDeEscopos
     }
 
     // Define uma variável no escopo atual
-    public void DefinirVariavel(string identificador, object valor, bool constante = false)
+    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false)
     {
         escopos.Peek().DefinirVariavel(identificador, valor, constante);
     }
@@ -55,7 +55,7 @@ public class PilhaDeEscopos
     }
 
     // Atualiza o valor de uma variável existente
-    public void AtualizarVariavel(string identificador, object novoValor)
+    public void AtualizarVariavel(string identificador, LibraObjeto novoValor)
     {
         for(int i = 0; i < escopos.Count; i++)
         {
@@ -70,7 +70,7 @@ public class PilhaDeEscopos
         throw new ErroVariavelNaoDeclarada(identificador);
     }
 
-    public void ModificarVetor(string identificador, int indice, object novoValor)
+    public void ModificarVetor(string identificador, int indice, LibraObjeto novoValor)
     {
         for(int i = 0; i < escopos.Count; i++)
         {
