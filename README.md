@@ -1,4 +1,5 @@
 # Libra
+&copy; 2024 - 2025 Lucas M. Campos
 
 Libra é uma linguagem de programação simples com a sintaxe em **português**! 
 
@@ -27,41 +28,30 @@ fim
 fibonacci(10)
 ```
 
-## Construíndo a DLL e o Interpretador
+## Compilando a Libra
 
 Para compilar o projeto, siga as instruções abaixo:
 
 1. **Garanta que você tenha o .NET SDK instalado:** Antes de compilar o projeto, certifique-se de que você tenha o .NET Core SDK instalado em sua máquina. Você pode baixar o SDK no seguinte link: [https://dotnet.microsoft.com/en-us/download](https://dotnet.microsoft.com/en-us/download).
 
-2. **Clonar o Repositório:** Clone o repositório para sua máquina local usando o seguinte comando:
+2. **Compilando o Projeto:**:
 
 ```
 git clone https://github.com/lucasdcampos/libra.git
+cd libra
+./scripts/build.ps1 (ou build.sh em Linux)
 ```
-
-3. **Compilar o Projeto:** Navegue até o diretório do projeto e execute o seguinte comando para compilar o projeto:
-
-```
-dotnet build
-```
-
-4. **Verificar a Compilação:** Após a compilação, verifique se o projeto foi compilado corretamente. Você deve ver uma mensagem indicando que a compilação foi bem-sucedida. Além disso, você deve ver se os arquivos a seguir foram gerados:
-
-- `libra\src\libra\bin\Debug\net8.0\libra-interpretador.dll`
-- `libra\src\Libra-CLI\bin\Debug\net8.0\Libra.exe`
-
-> **Nota:** Esse tutorial foi feito para Windows, mas você pode compilar o projeto em outros sistemas operacionais, como Linux e macOS.
 
 ## Executando um Programa Libra
 
-Você pode usar o executável `libra.exe` gerado durante a compilação do projeto para executar um programa Libra.
+Você pode usar o executável `libra.exe` ou `libra` gerado durante a compilação do projeto para executar um programa Libra.
 Para isso, use o seguinte comando:
 
-```
-src\Libra-CLI\bin\Debug\net8.0\libra exemplos\teste.libra
-```
+> **Nota:** Coloque o caminho para o executável nas variáveis de ambiente do seu sistema para facilitar a execução de programas Libra.
 
-> **Nota:** Coloque o caminho para o executável `libra.exe` nas variáveis de ambiente do sistema para facilitar a execução de programas Libra.
+## Melhorando a Experiência de Desenvolvimento
+Para facilitar a vida do desenvolvedor, há uma extensão no Visual Studio Code que adiciona Suporte à Libra, adicionando Syntax Highlighting e outras melhorias. 
+Baixe-a em https://marketplace.visualstudio.com/items?itemName=LucasMCampos.libra.
 
 ## Como contribuir?
 
