@@ -18,12 +18,20 @@ var vetor2 = [10]
 vetor2[0] = 1
 
 exibir("Testando Expressões")
-x = (1+2)*3 / 1
-x = 1^2
-x = 10%2
-x = !0
-x = !1
-x = -1
+x = (1+2)*3 / 1 + (10%2) + int(2^2) + (-1)
+x = !x
+x = -x
+x = 1 > 0 ou 1 >= 0 ou x < 0 ou x <= 0 ou x == 0 e x == 69
+
+exibir("Testando Tipos em Expressões")
+var str = "ola"
+str = str + 1
+str = str + "mundo"
+str = str + 6.9
+var decimal = 1.0
+decimal = decimal + 1
+decimal = decimal + 0.1
+decimal = -decimal
 
 exibir("Testando Condicionais")
 se 1 > 0 entao fim
@@ -44,7 +52,22 @@ exibir("Testando Funções")
 funcao foo(bar)
     retornar bar
 fim
-foo(69)
+
+se foo(69) != 69 entao
+    erro("Problema detectado no Retorno de Funções ou Passagem de Argumentos!")
+fim
+
+exibir("Testando Funções Nativas")
+aleatorio(1000)
+texto(1)
+texto(1.0)
+int(1)
+int(1.0)
+int("1")
+real(1)
+real(1.0)
+real("1.0")
+real("1")
 
 exibir("Testando Recursividade")
 funcao testarPot(b, n)
