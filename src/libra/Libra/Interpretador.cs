@@ -12,6 +12,7 @@ public class Interpretador
     public static int LinhaAtual => ObterLinhaAtual();
     private Programa _programa => Ambiente.ProgramaAtual;
     private int _linha = 0;
+    private bool _shell = false;
 
     private VisitorExpressoes _visitorExpressoes;
 
@@ -30,9 +31,13 @@ public class Interpretador
         return _instancia._linha;
     }
 
-    public int Interpretar(string codigo, bool ambienteSeguro = true, ILogger logger = null)
+    public void Resetar()
     {
-        Ambiente.ConfigurarAmbiente(logger, ambienteSeguro);
+        _linha = 0;
+    }
+    
+    public int Interpretar(string codigo, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
+    {
         try
         {
             var tokenizador = new Tokenizador();
@@ -42,7 +47,7 @@ public class Interpretador
 
             programa.PilhaEscopos.DefinirVariavel("__ambienteSeguro__", new LibraInt(ambienteSeguro), true);
 
-            return Interpretar(programa);
+            return Interpretar(programa, ambienteSeguro, logger, shell);
         }
         catch(Exception e)
         {
@@ -52,8 +57,12 @@ public class Interpretador
         }
     }
 
-    public int Interpretar(Programa programa)
+    public int Interpretar(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
     {
+        Resetar();
+        _shell = shell;
+
+        Ambiente.ConfigurarAmbiente(logger, ambienteSeguro);
         try
         {
             Ambiente.SetarPrograma(programa);
@@ -111,7 +120,7 @@ public class Interpretador
         if(instrucao is InstrucaoExibirExpressao)
         {
             var instrucaoExpr = (InstrucaoExibirExpressao)instrucao;
-            Ambiente.Msg(InterpretarExpressao(instrucaoExpr.Expressao).ToString());
+            Ambiente.Msg(InterpretarExpressao(instrucaoExpr.Expressao).ObterValor().ToString());
         }
     }
 
@@ -185,8 +194,15 @@ public class Interpretador
         }
 
         var resultadoFuncao = f.Executar(valoresArgumentos.ToArray());
+        var objeto = LibraObjeto.ParaLibraObjeto(resultadoFuncao);
 
-        return LibraObjeto.ParaLibraObjeto(resultadoFuncao);
+        if(_shell)
+        {
+            if(objeto.ObterValor() != null)
+                Ambiente.Msg(objeto.ObterValor().ToString());
+        }
+
+        return objeto;
     }
 
     public LibraObjeto InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
@@ -200,8 +216,10 @@ public class Interpretador
         var funcao = _programa.Funcoes[chamada.Identificador];
 
         if(_programa.Funcoes[chamada.Identificador] is FuncaoEmbutida)
+        {
             return ExecutarFuncaoEmbutida((FuncaoEmbutida)funcao, chamada);
-
+        }
+            
         var qtdParametros = funcao.Parametros.Count;
 
         if (argumentos.Count != qtdParametros)
@@ -222,7 +240,11 @@ public class Interpretador
         }
         catch(ExcecaoRetorno retorno)
         {
-            return LibraObjeto.ParaLibraObjeto(retorno.Valor);
+            var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
+            if(_shell)
+                Ambiente.Msg(resultado.ObterValor().ToString());
+
+            return resultado;
         }
         finally
         {

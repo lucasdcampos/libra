@@ -9,6 +9,7 @@ public class Tokenizador
     private int _posicao;
     private string? _fonte;
     private List<Token>? _tokens;
+    private List<string> _arquivosImportados;
     private int _linha;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
@@ -34,7 +35,11 @@ public class Tokenizador
     {
         _fonte = source;
         _tokens = new();
+        _arquivosImportados = new();
         _linha = 1;
+        _posicao = 0;
+        
+        PreTokenizar();
 
         var texto = "";
         try
@@ -68,6 +73,64 @@ public class Tokenizador
         return null;
     }
 
+    private void PreTokenizar()
+    {
+        // Expressão regular para encontrar as declarações de importação
+        var regex = new Regex(@"importar\s+""([^""]+)""");
+
+        // Obtém o caminho do diretório do executável/biblioteca
+        string caminhoExecutavel = AppDomain.CurrentDomain.BaseDirectory;
+
+        // Obtém o caminho do diretório atual do usuário
+        string caminhoAtual = Directory.GetCurrentDirectory();
+        // Enquanto houver declarações de importação na string _fonte
+        Match match;
+        while ((match = regex.Match(_fonte)).Success)
+        {
+            // Captura o nome do arquivo a ser importado
+            string nomeArquivo = match.Groups[1].Value;
+
+            // Verifica se o arquivo já foi importado
+            if (!_arquivosImportados.Contains(nomeArquivo))
+            {
+                // Tenta encontrar o arquivo no caminho do executável/biblioteca
+                string caminhoCompleto = Path.Combine(caminhoExecutavel+"/biblioteca/", nomeArquivo);
+
+                // Se o arquivo não existir no caminho do executável, tenta no caminho atual do usuário
+                if (!File.Exists(caminhoCompleto))
+                {
+                    caminhoCompleto = Path.Combine(caminhoAtual, nomeArquivo);
+                }
+
+                // Verifica se o arquivo existe em algum dos caminhos
+                if (File.Exists(caminhoCompleto))
+                {
+                    // Lê o conteúdo do arquivo
+                    string conteudoArquivo = File.ReadAllText(caminhoCompleto);
+
+                    // Substitui a declaração de importação pelo conteúdo do arquivo
+                    _fonte = _fonte.Replace(match.Value, conteudoArquivo);
+
+                    // Adiciona o arquivo à lista de arquivos importados
+                    _arquivosImportados.Add(nomeArquivo);
+                }
+                else
+                {
+                    // Se o arquivo não for encontrado, remove a declaração de importação
+                    _fonte = _fonte.Replace(match.Value, string.Empty);
+
+                    // Opcional: Lançar uma exceção ou registrar um aviso
+                    throw new FileNotFoundException($"Arquivo não encontrado: {nomeArquivo}");
+                }
+            }
+            else
+            {
+                // Se o arquivo já foi importado, remove a declaração de importação
+                _fonte = _fonte.Replace(match.Value, string.Empty);
+            }
+        }
+    }
+
     private void TokenizarNumero()
     {
         string buffer = "";
@@ -99,43 +162,14 @@ public class Tokenizador
         {
             buffer += ConsumirChar();
         }
-
         if (_palavrasReservadas.ContainsKey(buffer))
         {
             AdicionarTokenALista(_palavrasReservadas[buffer]);
-        }
-        else if (buffer == "importar")
-        {
-            buffer = "";
-            while (Atual() == ' ')
-                Passar();
-
-            if (Atual() != '"')
-                throw new Erro("Esperado `\"`", _linha);
-
-            ConsumirChar();
-
-            buffer += ConsumirAte('"');
-
-            string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory + "/biblioteca", buffer);
-            string caminhoUsuario = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), buffer);
-
-            if (!File.Exists(caminhoExecutavel) && !File.Exists(caminhoUsuario))
-                throw new ErroAcessoNulo(" " + caminhoExecutavel);
-
-            string caminhoArquivo = File.Exists(caminhoExecutavel) ? caminhoExecutavel : caminhoUsuario;
-
-            string arquivoCarregado = File.ReadAllText(caminhoArquivo);
-            _fonte = arquivoCarregado + _fonte;
-            string linha = $"importar \"{buffer}\"";
-            _fonte = _fonte.Replace(linha, "");
-            _posicao -= linha.Length;
         }
         else
         {
             AdicionarTokenALista(TokenTipo.Identificador, buffer);
         }
-
     }
 
     private void TokenizarSimbolo()

@@ -1,8 +1,22 @@
 ﻿using Libra;
+using Libra.Arvore;
 
 internal static class Program
 {
-    private const string _ver = "1.0";
+    private const string _ver = "1.0.0-Beta";
+
+    private static Tokenizador _tokenizador = new Tokenizador();
+    private static Parser _parser = new Parser();
+    private static Interpretador _interpretador = new Interpretador();
+
+    // Incluindo as bibliotecas por padrão na Shell da Libra
+    private static string bibliotecas = 
+@"importar ""matematica.libra""
+importar ""so.libra""
+importar ""vetores.libra""
+importar ""utilidades.libra""
+
+";
 
     private static readonly Dictionary<string, Action> _comandos = new()
     {
@@ -25,7 +39,7 @@ internal static class Program
 
             if (ExecutarComando(arg))
             {
-                Interpretar(args[0], false);
+                Interpretar(args[0]);
             }
             
             return;
@@ -33,6 +47,9 @@ internal static class Program
 
         Console.WriteLine($"Bem-vindo à Libra {_ver}");
         Console.WriteLine("Digite \"ajuda\", \"licenca\" ou uma instrução.");
+        
+        var bibliotecaPreTokenizada = _tokenizador.Tokenizar(bibliotecas);
+        var astBiblioteca = _parser.ParseInstrucoes(bibliotecaPreTokenizada);
 
         while (true)
         {
@@ -41,7 +58,12 @@ internal static class Program
 
             if (!string.IsNullOrWhiteSpace(linha) && ExecutarComando(linha))
             {
-                new Interpretador().Interpretar(linha);
+                var tokens = _tokenizador.Tokenizar(linha);
+                var instrucoes = _parser.ParseInstrucoes(tokens).ToList<Instrucao>();
+
+                instrucoes.InsertRange(0, astBiblioteca);
+
+                _interpretador.Interpretar(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
             }
         }
     }
@@ -74,7 +96,7 @@ internal static class Program
         Console.WriteLine("Comandos disponíveis: " + string.Join(", ", _comandos.Keys));
     }
 
-    private static void Interpretar(string arquivoInicial, bool incluirPadrao = false)
+    private static void Interpretar(string arquivoInicial)
     {
         bool debug = true;
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -87,7 +109,7 @@ internal static class Program
 
         string codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings(Environment.NewLine); // Sem isso, o Tokenizador buga
 
-        new Interpretador().Interpretar(codigoFonte);
+        new Interpretador().Interpretar(codigoFonte, false, new ConsoleLogger());
 
         stopwatch.Stop();
 

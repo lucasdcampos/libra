@@ -26,12 +26,28 @@ public class Parser
         { TokenTipo.OperadorOu, 0 }
     };
 
-
-    public Programa Parse(List<Token> tokens)
+    public void Resetar()
     {
+        _posicao = 0;
+        _linha = 0;
+    }
+
+    public Programa Parse(List<Token> tokens, List<Token> extra = null)
+    {
+        Resetar();
+
         _tokens = tokens;
+        if(extra != null)
+            _tokens.AddRange(extra);
 
         return new Programa(ParseInstrucoes(TokenTipo.FimDoArquivo));
+    }
+
+    public Instrucao[] ParseInstrucoes(List<Token> tokens)
+    {
+        Resetar();
+        _tokens = tokens;
+        return ParseInstrucoes(TokenTipo.FimDoArquivo);
     }
 
     private Instrucao[] ParseInstrucoes(TokenTipo fim = TokenTipo.Fim)
@@ -182,8 +198,12 @@ public class Parser
             // Detectando problemas em tempo de compilação
             if(opr.Tipo == TokenTipo.OperadorDiv && expr_dir is ExpressaoLiteral exprLit)
             {
-                if((int)exprLit.Valor == 0 || (double)exprLit.Valor == 0)
+                if ((exprLit.Valor is int intValue && intValue == 0) || 
+                    (exprLit.Valor is double doubleValue && doubleValue == 0.0))
+                {
                     throw new ErroDivisaoPorZero();
+                }
+
             }
             
             expr_esq = new ExpressaoBinaria(expr_esq, opr, expr_dir);

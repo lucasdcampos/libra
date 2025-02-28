@@ -31,7 +31,6 @@ public static class LibraBase
         _programaAtual.Funcoes["real"] = new FuncaoEmbutida(real);
         _programaAtual.Funcoes["int"] = new FuncaoEmbutida(_int);
         _programaAtual.Funcoes["texto"] = new FuncaoEmbutida(texto);
-        _programaAtual.Funcoes["caractere"] = new FuncaoEmbutida(caractere);
         _programaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
         _programaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
         

@@ -3,45 +3,45 @@
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
 // Constantes matemáticas
-const PI = 3.14159                    // Valor de Pi (π)
-const E = 2.718281                    // Base do logaritmo natural (e)
-const RAZAO_AUREA = 1.61803           // Razão Áurea (φ)
-const RAIZ2 = 1.41421                 // Raiz quadrada de 2
-const RAIZ3 = 1.73205                 // Raiz quadrada de 3
-const LN2 = 0.69314                   // Logaritmo natural de 2
-const LN10 = 2.30258                  // Logaritmo natural de 10
+const PI = 3.14159
+const E = 2.718281
+const RAZAO_AUREA = 1.61803
+const RAIZ2 = 1.41421
+const RAIZ3 = 1.73205
+const LN2 = 0.69314
+const LN10 = 2.30258
 
-const GRAUS_PARA_RAD = PI / 180       // Conversão de graus para radianos
-const RAD_PARA_GRAUS = 180 / PI       // Conversão de radianos para graus
+const GRAUS_PARA_RAD = PI / 180
+const RAD_PARA_GRAUS = 180.0 / PI
 
-const VERDADEIRO = 1                  // Valor lógico para Verdadeiro
-const FALSO = 0                       // Valor lógico para FALSO
+const VERDADEIRO = 1
+const FALSO = 0
 
-const SEN_45 = 0.70710                // Seno de 45 graus
-const COS_45 = 0.70710                // Cosseno de 45 graus
-const SEN_90 = 1.0                    // Seno de 90 graus
-const COS_90 = 0.0                    // Cosseno de 90 graus
-const SEN_30 = 0.5                    // Seno de 30 graus
-const COS_30 = 0.86602                // Cosseno de 30 graus
-const SEN_60 = 0.86602                // Seno de 60 graus
-const COS_60 = 0.5                    // Cosseno de 60 graus
+const SEN_45 = 0.70710
+const COS_45 = 0.70710
+const SEN_90 = 1.0
+const COS_90 = 0.0
+const SEN_30 = 0.5
+const COS_30 = 0.86602
+const SEN_60 = 0.86602
+const COS_60 = 0.5
 
-const MAX_INT = 2147483646            // Valor máximo para inteiros de 32 bits
-const MIN_INT = 0 - 2147483647        // Valor mínimo para inteiros de 32 bits
+const MAX_INT = 2147483646
+const MIN_INT = -2147483647
 
-const BYTE = 8                        // Número de bits em um byte
-const KB = 1024                       // Número de bytes em um kilobyte
-const MB = 1024 * 1024                // Número de bytes em um megabyte
-const GB = 1024 * 1024 * 1024         // Número de bytes em um gigabyte
+const BYTE = 8
+const KB = 1024
+const MB = 1024 * 1024
+const GB = 1024 * 1024 * 1024
 
 // Calcula e retorna a raiz enésima de um número
-funcao raiz_n(numero, indice)
-    retornar numero^(1 / indice)
+funcao raiz(numero, indice)
+    retornar numero^(1.0 / indice)
 fim
 
 // Calcula e retorna a raiz quadrada de um número
-funcao raiz(n)
-    retornar raiz_n(n, 2)
+funcao raizq(n)
+    retornar raiz(n, 2)
 fim
 
 funcao potencia(base, expoente)
@@ -66,7 +66,7 @@ funcao abs(n)
         retornar n
     fim
 
-    retornar  0 - n
+    retornar -n
 
 fim
 

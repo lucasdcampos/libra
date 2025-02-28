@@ -47,13 +47,13 @@ enquanto n < 3 faca
 fim
 n = 0
 
-
 exibir("Testando Funções")
 funcao foo(bar)
     retornar bar
 fim
 
-se foo(69) != 69 entao
+const testeArgumento = 69
+se foo(testeArgumento) != testeArgumento entao
     erro("Problema detectado no Retorno de Funções ou Passagem de Argumentos!")
 fim
 
@@ -68,6 +68,9 @@ real(1)
 real(1.0)
 real("1.0")
 real("1")
+bytes(int)
+tamanho("abc")
+tipo(int)
 
 exibir("Testando Recursividade")
 funcao testarPot(b, n)
@@ -77,6 +80,36 @@ funcao testarPot(b, n)
     retornar b * testarPot(b, n-1)
 fim
 x = testarPot(2,3)
+
+exibir("Testando Importação de Arquivos e Biblioteca Padrão")
+
+exibir("    Importando so.libra")
+importar "so.libra"
+
+exibir("    Importando matematica.libra")
+importar "matematica.libra"
+
+exibir("    Importando vetores.libra")
+importar "vetores.libra"
+
+exibir("    Importando utilidades.libra")
+importar "utilidades.libra"
+
+exibir("Testando algumas funções das bibliotecas")
+exibir("   Testando funções matemáticas")
+se (raizq(64) != 8) ou (raiz(27, 3) != 3) entao
+    exibir("    Problema com a função raiz()")
+fim
+
+exibir("   Testando funções de vetores:")
+
+var testeVetor = {1,2,3}
+exibir("   Testando reverter()")
+testeVetor = reverter(testeVetor)
+
+exibir("   Testando incluir()")
+testeVetor = incluir(testeVetor, 1)
+
 
 exibir("Fim do Teste, nenhum problema fatal encontrado.")
 

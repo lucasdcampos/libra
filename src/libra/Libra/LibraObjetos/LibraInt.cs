@@ -76,7 +76,7 @@ public class LibraInt : LibraObjeto
         return (outro) switch
         {
             (LibraInt libraInt) => new LibraReal(Math.Pow(Valor, libraInt.Valor)),
-            (LibraReal libraReal) => new LibraReal(Valor * libraReal.Valor),
+            (LibraReal libraReal) => new LibraReal(Math.Pow(Valor, libraReal.Valor)),
             _ => throw new Erro($"Não é possível calcular {this.ToString()}^{outro.ToString()}")
         };
     }
