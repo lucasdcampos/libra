@@ -1,4 +1,3 @@
 TODO:
-    - Adicionar objetos Libra ao invés de nativos do C# (Ex: LibraInt ao invés do Int padrão)
     - Melhorar trechos suscetíveis a erros (e error handling)
     - Otimizar código
