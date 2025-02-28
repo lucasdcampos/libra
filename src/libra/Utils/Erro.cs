@@ -47,6 +47,40 @@ public class Erro : Exception
         Ambiente.Encerrar(this.Codigo);
     }
 
+    internal static void MensagemBug(Exception e)
+    {
+        if (e is ExcecaoSaida)
+            return;
+        if (e is Erro)
+        {
+            Ambiente.Msg(e.ToString());
+            return;
+        }
+
+        string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+        string logFile = Path.Combine(logsDir, $"erro-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+
+        if (!Directory.Exists(logsDir))
+        {
+            Directory.CreateDirectory(logsDir);
+        }
+
+        string mensagemLog = "Ocorreu um erro interno na Libra, veja a descrição para mais detalhes:\n";
+        mensagemLog += "Versão: Libra 1.0.0-Beta\n";
+        mensagemLog += $"Ultima linha do Script Libra executada: {Interpretador.LinhaAtual}\n";
+        mensagemLog += $"Problema:\n{e.ToString()}\n";
+        mensagemLog += "Por favor reportar em https://github.com/lucasdcampos/libra/issues/ (se possível incluir script que causou o problema)\n";
+
+        File.WriteAllText(logFile, mensagemLog);
+
+        Ambiente.Msg("\nHouve um problema, mas não foi culpa sua :(");
+        Ambiente.Msg($"Uma descrição do erro foi salva em: {logFile}");
+        Ambiente.Msg("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
+        Ambiente.Msg("Versão: Libra 1.0.0-Beta"); // TODO: Não deixar a versão hardcoded dessa forma
+        Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
+
+    }
+
     internal void Dica(string msg)
     {
         Ambiente.Msg($"Dica: {msg}");

@@ -34,6 +34,9 @@ public class Ambiente
 
     public static void Msg(string msg, string final = "\n")
     {
+        if(_ambienteAtual == null)
+            ConfigurarAmbiente(null, false);
+
         var loggerReal = Logger == null ? new ConsoleLogger() : Logger;
         loggerReal.Msg(msg, final);
     }

@@ -1,0 +1,31 @@
+exibir("Calculadora")
+exibir("Primeiro número:", " ")
+var x = real(entrada())
+
+exibir("Operador: ", " ")
+var operador = entrada()
+
+exibir("Segundo número:", " ")
+var y = real(entrada())
+
+funcao calcular(a, b, opr)
+    se opr == "+" entao
+        retornar a+b
+    fim
+    se opr == "-" entao
+        retornar a-b
+    fim
+    se opr == "*" entao
+        retornar a*b
+    fim
+    se opr == "/" entao
+        se b == 0 entao
+            erro("Divisão por zero!")
+        fim
+        retornar a/b
+    fim
+    erro("Operador inválido! " + opr)
+fim
+
+var resultado = calcular(x, y, operador)
+exibir(resultado)

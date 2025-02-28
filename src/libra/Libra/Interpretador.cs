@@ -51,8 +51,7 @@ public class Interpretador
         }
         catch(Exception e)
         {
-            if(e is not ExcecaoSaida)
-                Ambiente.Msg(e.ToString());
+            Erro.MensagemBug(e);
             return 1;
         }
     }
@@ -61,7 +60,7 @@ public class Interpretador
     {
         Resetar();
         _shell = shell;
-
+        
         Ambiente.ConfigurarAmbiente(logger, ambienteSeguro);
         try
         {
@@ -71,8 +70,7 @@ public class Interpretador
         }
         catch(Exception e)
         {
-            if(e is not ExcecaoSaida)
-                Ambiente.Msg(e.ToString());
+            Erro.MensagemBug(e);
             return 1;
         }
     }

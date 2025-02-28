@@ -28,4 +28,9 @@ public class LibraTexto : LibraObjeto
     {
         return new LibraTexto(Valor + outro.ObterValor().ToString());
     }
+
+    public override LibraInt Igual(LibraObjeto outro)
+    {
+        return new LibraInt(Valor == outro.ObterValor().ToString());
+    }
 }
