@@ -12,4 +12,10 @@ public static class LibraUtil
     {
         return valor != 0 ? 0 : 1;
     }
+
+    internal static void ChecarArgumentos(string ident, int esperado, int recebido)
+    {
+        if(esperado != recebido)
+            throw new ErroEsperadoNArgumentos(ident, esperado, recebido);
+    }
 }

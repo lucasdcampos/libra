@@ -62,6 +62,7 @@ public class Interpretador
         _shell = shell;
         
         Ambiente.ConfigurarAmbiente(logger, ambienteSeguro);
+
         try
         {
             Ambiente.SetarPrograma(programa);
@@ -85,40 +86,30 @@ public class Interpretador
 
     public void InterpretarInstrucao(Instrucao instrucao)
     {
+        if(instrucao is null)
+            return;
+
         _linha++;
 
-        switch(instrucao.TipoInstrucao)
+        var acoes = new Dictionary<TokenTipo, Action>
         {
-            case TokenTipo.Var:
-                InterpretarInstrucaoVar((InstrucaoVar)instrucao);
-                break;
-            case TokenTipo.Const:
-                InterpretarInstrucaoVar((InstrucaoVar)instrucao);
-                break;
-            case TokenTipo.Se:
-                InterpretarCondicional((InstrucaoSe)instrucao);
-                break;
-            case TokenTipo.Enquanto:
-                InterpretarCondicional((InstrucaoEnquanto)instrucao);
-                break;
-            case TokenTipo.Funcao:
-                InterpretarFuncao((InstrucaoFuncao)instrucao);
-                break;
-            case TokenTipo.Identificador:
-                InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao);
-                break;
-            case TokenTipo.Vetor:
-                InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao);
-                break;
-            case TokenTipo.Retornar:
-                InterpretarRetorno((InstrucaoRetornar)instrucao);
-                break;
-        }
+            { TokenTipo.Var, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
+            { TokenTipo.Const, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
+            { TokenTipo.Se, () => InterpretarCondicional((InstrucaoSe)instrucao) },
+            { TokenTipo.Enquanto, () => InterpretarCondicional((InstrucaoEnquanto)instrucao) },
+            { TokenTipo.Funcao, () => InterpretarFuncao((InstrucaoFuncao)instrucao) },
+            { TokenTipo.Identificador, () => InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao) },
+            { TokenTipo.Vetor, () => InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao) },
+            { TokenTipo.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) }
+        };
 
-        if(instrucao is InstrucaoExibirExpressao)
-        {
-            var instrucaoExpr = (InstrucaoExibirExpressao)instrucao;
-            Ambiente.Msg(InterpretarExpressao(instrucaoExpr.Expressao).ObterValor().ToString());
+        // Executa a ação associada ao tipo, se existir.
+        if (acoes.TryGetValue(instrucao.TipoInstrucao, out var acao))
+            acao();
+
+        if(instrucao is InstrucaoExibirExpressao exibirExpr)
+        {       
+            Ambiente.Msg(InterpretarExpressao(exibirExpr.Expressao).ObterValor().ToString());
         }
     }
 
@@ -139,19 +130,37 @@ public class Interpretador
 
     public void InterpretarCondicional(Instrucao instrucao)
     {
-        if(instrucao is InstrucaoSe)
+        if (instrucao is InstrucaoSe instrucaoSe)
         {
-            var instrucaoSe = (InstrucaoSe)instrucao;
-            var instrucoesSe = instrucaoSe.Instrucoes;
-            if (InterpretarExpressao<LibraInt>(instrucaoSe.Expressao).Valor != 0)
+            // Verifica a condição do bloco "Se"
+            if (InterpretarExpressao<LibraInt>(instrucaoSe.Condicao).Valor != 0)
             {
-                InterpretarInstrucoes(instrucoesSe);
-                return;
+                InterpretarInstrucoes(instrucaoSe.Entao.ToArray());
+                return; // "Se" foi verdadeiro, encerra.
             }
-            
-            if(instrucaoSe.SenaoInstrucoes != null)
-                InterpretarInstrucoes(instrucaoSe.SenaoInstrucoes);
-            
+
+            // Itera pelos ramos "SenaoSe" ou "Senao"
+            var proximoBloco = instrucaoSe.Senao;
+
+            while (proximoBloco is InstrucaoSe senaoSe)
+            {
+                // Verifica a condição do "SenaoSe"
+                if (InterpretarExpressao<LibraInt>(senaoSe.Condicao).Valor != 0)
+                {
+                    InterpretarInstrucoes(senaoSe.Entao.ToArray());
+                    return; // "SenaoSe" foi verdadeiro, encerra.
+                }
+
+                // Avança para o próximo bloco (pode ser outro "SenaoSe" ou "Senao" final)
+                proximoBloco = senaoSe.Senao;
+            }
+
+            // Caso o bloco final seja um "Senao" (array de instruções), executa-o
+            if (proximoBloco is Instrucao[] blocoSenao)
+            {
+                InterpretarInstrucoes(blocoSenao);
+            }
+
             return;
         }
 
@@ -181,9 +190,9 @@ public class Interpretador
         return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(_linha, expressaoChamadaFuncao));
     }
 
-    public LibraObjeto ExecutarFuncaoEmbutida(FuncaoEmbutida funcao, ExpressaoChamadaFuncao chamada) 
+    public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, ExpressaoChamadaFuncao chamada) 
     {
-        var f = (FuncaoEmbutida)_programa.Funcoes[chamada.Identificador];
+        var f = (FuncaoNativa)_programa.Funcoes[chamada.Identificador];
         List<object> valoresArgumentos = new List<object>();
 
         for(int i = 0; i < chamada.Argumentos.Count; i++)
@@ -213,9 +222,9 @@ public class Interpretador
 
         var funcao = _programa.Funcoes[chamada.Identificador];
 
-        if(_programa.Funcoes[chamada.Identificador] is FuncaoEmbutida)
+        if(_programa.Funcoes[chamada.Identificador] is FuncaoNativa nativa)
         {
-            return ExecutarFuncaoEmbutida((FuncaoEmbutida)funcao, chamada);
+            return ExecutarFuncaoEmbutida(nativa, chamada);
         }
             
         var qtdParametros = funcao.Parametros.Count;
@@ -240,7 +249,13 @@ public class Interpretador
         {
             var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
             if(_shell)
+            {
+                if(resultado.ObterValor() == null)
+                    return null;
+
                 Ambiente.Msg(resultado.ObterValor().ToString());
+            }
+                
 
             return resultado;
         }

@@ -63,7 +63,7 @@ public class LibraInt : LibraObjeto
     {
         return (outro) switch
         {
-            (LibraInt libraInt) when libraInt.Valor != 0 => new LibraInt(Valor / libraInt.Valor),
+            (LibraInt libraInt) when libraInt.Valor != 0 => new LibraReal(Valor / libraInt.Valor),
             (LibraReal libraReal) when libraReal.Valor != 0 => new LibraReal(Valor / libraReal.Valor),
             (LibraInt libraInt) => throw new ErroDivisaoPorZero(),
             (LibraReal libraReal) => throw new ErroDivisaoPorZero(),

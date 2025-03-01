@@ -2,14 +2,17 @@
 // Arquivo: matematica.libra
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
+__ativarmodulo__("matematica")
+
 // Constantes matemáticas
-const PI = 3.14159
-const E = 2.718281
-const RAZAO_AUREA = 1.61803
-const RAIZ2 = 1.41421
-const RAIZ3 = 1.73205
-const LN2 = 0.69314
-const LN10 = 2.30258
+const PI = 3.141592653589793
+const E = 2.718281828459045
+const TAU = 6.283185307179586
+const RAIZ2 = 1.4142135623730951
+const RAIZ3 = 1.7320508075688772
+const LN2 = 0.6931471805599453
+const LN10 = 2.302585092994046
+const RAZAO_AUREA = 1.618033988749895
 
 const GRAUS_PARA_RAD = PI / 180
 const RAD_PARA_GRAUS = 180.0 / PI
@@ -17,13 +20,13 @@ const RAD_PARA_GRAUS = 180.0 / PI
 const VERDADEIRO = 1
 const FALSO = 0
 
-const SEN_45 = 0.70710
-const COS_45 = 0.70710
+const SEN_45 = 0.7071067811865476
+const COS_45 = 0.7071067811865476
 const SEN_90 = 1.0
 const COS_90 = 0.0
 const SEN_30 = 0.5
-const COS_30 = 0.86602
-const SEN_60 = 0.86602
+const COS_30 = 0.8660254037844386
+const SEN_60 = 0.8660254037844386
 const COS_60 = 0.5
 
 const MAX_INT = 2147483646
@@ -42,10 +45,6 @@ fim
 // Calcula e retorna a raiz quadrada de um número
 funcao raizq(n)
     retornar raiz(n, 2)
-fim
-
-funcao potencia(base, expoente)
-    retornar base^expoente
 fim
 
 // Calcula e retorna a o fatorial de um número
@@ -86,4 +85,16 @@ funcao chao(a, b)
     fim
     
     retornar b
+fim
+
+funcao sen(angulo)
+    retornar __mathsin__(angulo)
+fim
+
+funcao cos(angulo)
+    retornar __mathcos__(angulo)
+fim
+
+funcao tan(angulo)
+    retornar __mathtan__(angulo)
 fim

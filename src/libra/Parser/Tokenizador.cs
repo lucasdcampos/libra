@@ -67,7 +67,7 @@ public class Tokenizador
         }
         catch (Exception e)
         {
-            
+            Erro.MensagemBug(e);
         }
 
         return null;
@@ -162,6 +162,19 @@ public class Tokenizador
         {
             buffer += ConsumirChar();
         }
+        if(buffer == "senao")
+        {
+            ConsumirEspacos();
+
+            if(Atual() == 's' && Proximo(1) == 'e')
+            {
+                Passar();
+                Passar();
+                AdicionarTokenALista(TokenTipo.SenaoSe);
+                return;
+            }
+        }
+
         if (_palavrasReservadas.ContainsKey(buffer))
         {
             AdicionarTokenALista(_palavrasReservadas[buffer]);
@@ -353,7 +366,15 @@ public class Tokenizador
         return buffer;
     }
 
-    private void ConsumirEspacosVazios()
+    private void ConsumirEspacos()
+    {
+        while(Atual() == ' ')
+        {
+            Passar();
+        }
+    }
+
+    private void ConsumirEspacosELinhas()
     {
         while(Atual() == ' ' || Atual() == '\n')
         {

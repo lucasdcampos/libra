@@ -47,7 +47,7 @@ public class Erro : Exception
         Ambiente.Encerrar(this.Codigo);
     }
 
-    internal static void MensagemBug(Exception e)
+    public static void MensagemBug(Exception e)
     {
         if (e is ExcecaoSaida)
             return;

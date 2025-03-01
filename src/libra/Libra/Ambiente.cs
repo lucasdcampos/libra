@@ -1,4 +1,5 @@
 using Libra.Arvore;
+using Libra.Modulos;
 
 namespace Libra;
 
@@ -29,7 +30,7 @@ public class Ambiente
     public static void SetarPrograma(Programa programa)
     {
         _ambienteAtual._programaAtual = programa;
-        LibraBase.RegistrarFuncoesEmbutidas();
+        new LibraBase().RegistrarFuncoes(programa);
     }
 
     public static void Msg(string msg, string final = "\n")

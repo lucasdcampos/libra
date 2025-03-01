@@ -1,6 +1,0 @@
-importar "matematica.libra"
-importar "vetores.libra"
-
-exibir(PI)
-var x = {1,2,3}
-mostrarVetor(x)

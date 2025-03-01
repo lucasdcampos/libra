@@ -16,12 +16,12 @@ namespace Libra
             }
     }
 
-    // Definidas em LibraBase.cs
-    public class FuncaoEmbutida : Funcao
+    // Definidas em Modulos/
+    public class FuncaoNativa : Funcao
     {
         private readonly Func<object[], object> _implementacao;
 
-        public FuncaoEmbutida(Func<object[], object> implementacao) : base("", null, null)
+        public FuncaoNativa(Func<object[], object> implementacao) : base("", null, null)
         {
             _implementacao = implementacao;
         }

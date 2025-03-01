@@ -9,43 +9,65 @@ using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-public static class LibraBase
-{
-    public static bool DEBUG = false;
-    private static Programa _programaAtual => Ambiente.ProgramaAtual;
-    public static void RegistrarFuncoesEmbutidas()
-    {
-        // Usados em bytes(tipo) para obter a quantidade de memória em bytes usada por esses tipos
-        _programaAtual.PilhaEscopos.DefinirVariavel("int", new LibraInt(4), true);
-        _programaAtual.PilhaEscopos.DefinirVariavel("real", new LibraReal(8), true);
+namespace Libra.Modulos;
 
-        _programaAtual.Funcoes["sair"] = new FuncaoEmbutida(sair);
-        _programaAtual.Funcoes["exibir"] = new FuncaoEmbutida(exibir);
-        _programaAtual.Funcoes["tipo"] = new FuncaoEmbutida(tipo);
-        _programaAtual.Funcoes["tamanho"] = new FuncaoEmbutida(tamanho);
-        _programaAtual.Funcoes["ler_int"] = new FuncaoEmbutida(ler_int);
-        _programaAtual.Funcoes["entrada"] = new FuncaoEmbutida(entrada);
-        _programaAtual.Funcoes["concat"] = new FuncaoEmbutida(concat);
-        _programaAtual.Funcoes["pausar"] = new FuncaoEmbutida(pausar);
-        _programaAtual.Funcoes["aleatorio"] = new FuncaoEmbutida(aleatorio);
-        _programaAtual.Funcoes["real"] = new FuncaoEmbutida(real);
-        _programaAtual.Funcoes["int"] = new FuncaoEmbutida(_int);
-        _programaAtual.Funcoes["texto"] = new FuncaoEmbutida(texto);
-        _programaAtual.Funcoes["bytes"] = new FuncaoEmbutida(bytes);
-        _programaAtual.Funcoes["erro"] = new FuncaoEmbutida(erro);
+public class LibraBase : IModulo
+{
+    public  bool DEBUG = false;
+    private Programa _programa;
+
+    public void RegistrarFuncoes(Programa programa)
+    {
+        _programa = programa;
+
+        // Usados em bytes(tipo) para obter a quantidade de memória em bytes usada por esses tipos
+        _programa.PilhaEscopos.DefinirVariavel("int", new LibraInt(4), true);
+        _programa.PilhaEscopos.DefinirVariavel("real", new LibraReal(8), true);
+
+        _programa.Funcoes["__ativarmodulo__"] = new FuncaoNativa(__ativarmodulo__);
+
+        _programa.Funcoes["sair"] = new FuncaoNativa(sair);
+        _programa.Funcoes["exibir"] = new FuncaoNativa(exibir);
+        _programa.Funcoes["tipo"] = new FuncaoNativa(tipo);
+        _programa.Funcoes["tamanho"] = new FuncaoNativa(tamanho);
+        _programa.Funcoes["entrada"] = new FuncaoNativa(entrada);
+        _programa.Funcoes["concat"] = new FuncaoNativa(concat);
+        _programa.Funcoes["pausar"] = new FuncaoNativa(pausar);
+        _programa.Funcoes["real"] = new FuncaoNativa(real);
+        _programa.Funcoes["int"] = new FuncaoNativa(_int);
+        _programa.Funcoes["texto"] = new FuncaoNativa(texto);
+        _programa.Funcoes["bytes"] = new FuncaoNativa(bytes);
+        _programa.Funcoes["erro"] = new FuncaoNativa(erro);
         
         // Impedir uso de funções potencialmente perigosas
         if(Ambiente.AmbienteSeguro)
             return;
 
-        _programaAtual.Funcoes["registrarCSharp"] = new FuncaoEmbutida(registrarCSharp);
-        _programaAtual.Funcoes["registrardll"] = new FuncaoEmbutida(registrardll);
-        _programaAtual.Funcoes["libra"] = new FuncaoEmbutida(libra);
+        _programa.Funcoes["registrarCSharp"] = new FuncaoNativa(registrarCSharp);
+        _programa.Funcoes["registrardll"] = new FuncaoNativa(registrardll);
+        _programa.Funcoes["libra"] = new FuncaoNativa(libra);
     }
 
-    public static object libra(object[] args)
+    public object __ativarmodulo__(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+
+        if(args[0] is not string str)
+            throw new ErroAcessoNulo(" Esperava Texto", Interpretador.LinhaAtual);
+        
+        switch(str)
+        {
+            case "matematica":
+                new LibraMatematica().RegistrarFuncoes(_programa);
+                break;
+        }
+
+        return 0;
+    }
+
+    public object libra(object[] args)
+    {
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         if(args[0] is not string)
             throw new Erro("Esperado um texto");
@@ -54,7 +76,7 @@ public static class LibraBase
 
     }
     
-    public static object sair(object[] args)
+    public object sair(object[] args)
     {
         int codigo = 0;
 
@@ -62,12 +84,7 @@ public static class LibraBase
         {
             int.TryParse(args[0].ToString(), out int resultado);
             codigo = resultado;
-            _programaAtual.Sair(codigo);
-        }
-
-        if(DEBUG)
-        {
-            Console.WriteLine($"Código de Saída: {codigo}");
+            _programa.Sair(codigo);
         }
 
         Ambiente.Encerrar(codigo);
@@ -75,9 +92,9 @@ public static class LibraBase
         return null;
     }
 
-    public static object registrardll(object[] args)
+    public object registrardll(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
         Assembly assembly = null;
         if(args[0] is string)
         {
@@ -95,16 +112,16 @@ public static class LibraBase
             {
                 string nomeFuncao = $"{tipo.Name}_{metodo.Name}";
                 Func<object[], object> funcao = args => metodo.Invoke(null, args);
-                _programaAtual.Funcoes[nomeFuncao] = new FuncaoEmbutida(funcao);
+                _programa.Funcoes[nomeFuncao] = new FuncaoNativa(funcao);
             }
         }
 
         return null;
     }
 
-    public static object registrarCSharp(object[] args)
+    public object registrarCSharp(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 3, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 3, args.Length);
 
         string classe = args[0].ToString();
         string nome = args[1].ToString();
@@ -118,7 +135,7 @@ public static class LibraBase
         return null;
     }
 
-    public static object exibir(object[] args)
+    public object exibir(object[] args)
     {
         int qtd = args.Length;
         
@@ -140,7 +157,7 @@ public static class LibraBase
         return null;
     }
 
-    public static object concat(object[] args)
+    public object concat(object[] args)
     {
         string final = "";
         for(int i = 0; i < args.Length; i++)
@@ -151,14 +168,14 @@ public static class LibraBase
         return final;
     }
 
-    public static object texto(object[] args)
+    public object texto(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         return args[0].ToString();
     }
 
-    public static object _int(object[] args)
+    public object _int(object[] args)
     {
         if(args.Length == 0)
             new Erro("Esperava 1 argumento");
@@ -176,7 +193,7 @@ public static class LibraBase
         return resultado;
     }
 
-    public static object real(object[] args)
+    public object real(object[] args)
     {
         if(args.Length == 0)
             new Erro("Esperava 1 argumento");
@@ -194,9 +211,9 @@ public static class LibraBase
         return resultado;
     }
 
-    public static object bytes(object[] args)
+    public object bytes(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         var tamanho = LibraObjeto.ParaLibraObjeto(args[0]).ObterTamanhoEmBytes();
 
@@ -206,26 +223,21 @@ public static class LibraBase
         return tamanho;
     }
 
-    public static object caractere(object[] args)
+    public object caractere(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         return (char)args[0];
     }
 
-    public static object ler_int(object[] args)
-    {
-        return int.Parse(Console.ReadLine());
-    }
-
-    public static object entrada(object[] args)
+    public object entrada(object[] args)
     {
         return Console.ReadLine();
     }
 
-    public static object tamanho(object[] args)
+    public object tamanho(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         if (args[0] is string str)
             return str.Length;
@@ -242,9 +254,9 @@ public static class LibraBase
     }
 
 
-    public static object pausar(object[] args)
+    public object pausar(object[] args)
     {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         int i = (int)args[0];
 
@@ -253,35 +265,14 @@ public static class LibraBase
         return null;
     }
 
-    public static object aleatorio(object[] args)
+    public object tipo(object[] args)
     {
-        Random random = new Random();
-        double num = 0;
-
-        int qtd = args.Length;
-        switch(qtd)
-        {
-            case 0:
-                num = random.NextDouble();
-                break;
-            case 1:
-                num = random.Next((int)args[0]);
-                break;
-            case 2:
-                num = random.Next((int)args[0], (int)args[1]);
-                break;
-        }
-        return num;
-    }
-
-    public static object tipo(object[] args)
-    {
-        ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         return LibraObjeto.ParaLibraObjeto(args[0]).ToString();
     }
 
-    public static object erro(object[] args)
+    public object erro(object[] args)
     {
         if(args.Length == 0)
         {
@@ -291,7 +282,7 @@ public static class LibraBase
         throw new Erro(args[0].ToString());
     }
 
-    private static Assembly CompilarCodigo(string codigo)
+    private Assembly CompilarCodigo(string codigo)
     {
         var tree = CSharpSyntaxTree.ParseText(codigo);
         var compilation = CSharpCompilation.Create(
@@ -318,11 +309,4 @@ public static class LibraBase
         ms.Seek(0, SeekOrigin.Begin);
         return Assembly.Load(ms.ToArray());
     }
-
-    private static void ChecarArgumentos(string ident, int esperado, int recebido)
-    {
-        if(esperado != recebido)
-            throw new ErroEsperadoNArgumentos(ident, esperado, recebido);
-    }
-
 }

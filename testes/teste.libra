@@ -37,6 +37,20 @@ exibir("Testando Condicionais")
 se 1 > 0 entao fim
 senao fim
 
+// else if deve ser corrigido
+var owo = 12312
+se owo > 0 entao
+
+fim
+senao
+    se owo < 0 entao
+
+    fim
+    senao
+
+    fim
+fim
+
 se 1 < 0 entao fim
 senao fim
 
@@ -109,7 +123,6 @@ testeVetor = reverter(testeVetor)
 
 exibir("   Testando incluir()")
 testeVetor = incluir(testeVetor, 1)
-
 
 exibir("Fim do Teste, nenhum problema fatal encontrado.")
 

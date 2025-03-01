@@ -48,20 +48,20 @@ namespace Libra.Arvore
 
     public class InstrucaoSe : Instrucao
     {
-        public InstrucaoSe(int linha, Expressao expressao, Instrucao[] instrucoes, Instrucao[] senaoInstrucoes = null)
+        public InstrucaoSe(int linha, Expressao condicao, Instrucao[] entao, Instrucao[] senao = null)
         {
-            Expressao = expressao;
-            Instrucoes = instrucoes;
-            SenaoInstrucoes = senaoInstrucoes;
+            Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
+            Entao = entao ?? throw new ArgumentNullException(nameof(entao));
+            Senao = senao;
             TipoInstrucao = TokenTipo.Se;
             Linha = linha;
         }
 
-        public Expressao Expressao { get; private set; }
-        public Instrucao[] Instrucoes {get; private set; }
-        public Instrucao[] SenaoInstrucoes {get; private set; }
-
+        public Expressao Condicao { get; private set; }
+        public IReadOnlyList<Instrucao> Entao { get; private set; }
+        public IReadOnlyList<Instrucao> Senao { get; private set; }
     }
+
 
     public class InstrucaoEnquanto : Instrucao
     {

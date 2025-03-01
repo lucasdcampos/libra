@@ -58,8 +58,18 @@ importar ""utilidades.libra""
 
             if (!string.IsNullOrWhiteSpace(linha) && ExecutarComando(linha))
             {
-                var tokens = _tokenizador.Tokenizar(linha);
-                var instrucoes = _parser.ParseInstrucoes(tokens).ToList<Instrucao>();
+                List<Token> tokens;
+                List<Instrucao> instrucoes = null;
+
+                try
+                {
+                    tokens = _tokenizador.Tokenizar(linha);
+                    instrucoes = _parser.ParseInstrucoes(tokens).ToList<Instrucao>();
+                }
+                catch (Exception e)
+                {
+                    Erro.MensagemBug(e);
+                }
 
                 instrucoes.InsertRange(0, astBiblioteca);
 

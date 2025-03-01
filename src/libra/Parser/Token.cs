@@ -49,6 +49,7 @@ public enum TokenTipo
     Funcao,
     Se,
     Senao,
+    SenaoSe,
     Entao,
     Enquanto,
     Faca,

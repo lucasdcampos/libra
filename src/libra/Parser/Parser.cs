@@ -35,8 +35,8 @@ public class Parser
     public Programa Parse(List<Token> tokens, List<Token> extra = null)
     {
         Resetar();
-
         _tokens = tokens;
+
         if(extra != null)
             _tokens.AddRange(extra);
 
@@ -46,6 +46,7 @@ public class Parser
     public Instrucao[] ParseInstrucoes(List<Token> tokens)
     {
         Resetar();
+
         _tokens = tokens;
         return ParseInstrucoes(TokenTipo.FimDoArquivo);
     }
@@ -63,7 +64,7 @@ public class Parser
     }
 
     private Instrucao? ParseInstrucao()
-    {
+    {        
         switch(Atual().Tipo)
         {
             case TokenTipo.Var: return ParseInstrucaoVar();
@@ -80,7 +81,12 @@ public class Parser
                     return ParseInstrucaoVar();
         }
 
-        return new InstrucaoExibirExpressao(_linha, ParseExpressao());
+        var expr = new InstrucaoExibirExpressao(_linha, ParseExpressao());
+        
+        if(expr.Expressao != null && expr.Expressao is not ExpressaoChamadaFuncao)
+            return expr;
+        
+        return null;
     }
 
     private Instrucao? ParseInstrucaoVar()
@@ -160,14 +166,45 @@ public class Parser
 
         ConsumirToken(TokenTipo.Entao);
 
-        var instrucoes = ParseInstrucoes().ToArray();
-        
-        var instrucoesSenao = new List<Instrucao>().ToArray();
-        if(TentarConsumirToken(TokenTipo.Senao) != null)
-            instrucoesSenao = ParseInstrucoes().ToArray();
+        List<Instrucao> entao = new();
+        while (Atual().Tipo != TokenTipo.Senao && Atual().Tipo != TokenTipo.SenaoSe && Atual().Tipo != TokenTipo.Fim)
+        {
+            entao.Add(ParseInstrucao());
+        }
 
-        return new InstrucaoSe(_linha, expressao, instrucoes, instrucoesSenao);
+        List<Instrucao> senao = new();
+        while (Atual().Tipo == TokenTipo.Senao || Atual().Tipo == TokenTipo.SenaoSe)
+        {
+            if (Atual().Tipo == TokenTipo.SenaoSe)
+            {
+                ConsumirToken(TokenTipo.SenaoSe);
+                var condicaoSenaoSe = ParseExpressao();
+                ConsumirToken(TokenTipo.Entao);
+
+                List<Instrucao> entaoSenaoSe = new();
+                while (Atual().Tipo != TokenTipo.Senao && Atual().Tipo != TokenTipo.SenaoSe && Atual().Tipo != TokenTipo.Fim)
+                {
+                    entaoSenaoSe.Add(ParseInstrucao());
+                }
+
+                return new InstrucaoSe(_linha, condicaoSenaoSe, entaoSenaoSe.ToArray(), ParseInstrucaoSe()?.Entao.ToArray());
+            }
+            else if (Atual().Tipo == TokenTipo.Senao)
+            {
+                ConsumirToken(TokenTipo.Senao);
+
+                while (Atual().Tipo != TokenTipo.Fim)
+                {
+                    senao.Add(ParseInstrucao());
+                }
+            }
+        }
+
+        ConsumirToken(TokenTipo.Fim);
+
+        return new InstrucaoSe(_linha, expressao, entao.ToArray(), senao.Count > 0 ? senao.ToArray() : null);
     }
+
 
     private InstrucaoEnquanto? ParseInstrucaoEnquanto()
     {
@@ -263,7 +300,7 @@ public class Parser
                 return exprDentroParenteses;
         }
 
-        return null;
+        throw new ErroAcessoNulo(" Não foi possível parsear a expressão", _linha);
     }
 
     private Expressao? ParseExpressaoAcessoVetor()
@@ -310,12 +347,12 @@ public class Parser
 
     private Token Proximo(int offset)
     {
-        if(_posicao + offset < _tokens.Count)
+        if (_posicao + offset >= _tokens.Count)
         {
-            return _tokens[_posicao + offset];
+            return new Token(TokenTipo.FimDoArquivo, _linha);
         }
 
-        return new Token(TokenTipo.FimDoArquivo, _linha);
+        return _tokens[_posicao + offset];
     }
 
     private void Passar(int quantidade = 1) 
