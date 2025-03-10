@@ -1,5 +1,5 @@
 # Tokenização
-É o processo de transformar um arquivo com código-fonte de um programa Libra em partes menores chamas de Tokens.
+É o processo de transformar um arquivo com código-fonte de um programa Libra em partes menores chamadas de Tokens.
 
 ## Token
 Definição de Token na Libra: (`Token.cs`)
