@@ -31,3 +31,6 @@ O Tokenizador e Parser, ou front-end da linguagem, está em `src/libra/Parser/`,
 
 `src/libra/Arvore` contém as definições dos nós da AST, `src/libra/Libra/` contém as classes associadas ao Runtime da Libra, `src/libra/Modulos/` contém funções nativas escritas em C# que podem 
 ser chamadas internamente da Libra, e por fim, `src/libra/Utils/` contém arquivos com funções feitas para facilitar a vida do desenvolvedor.
+
+<hr>
+Se quiser saber por onde começar a entender o código, veja [Tokenização](tokenizacao.md)
