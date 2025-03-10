@@ -33,4 +33,5 @@ O Tokenizador e Parser, ou front-end da linguagem, está em `src/libra/Parser/`,
 ser chamadas internamente da Libra, e por fim, `src/libra/Utils/` contém arquivos com funções feitas para facilitar a vida do desenvolvedor.
 
 <hr>
+
 Se quiser saber por onde começar a entender o código, veja [Tokenização](tokenizacao.md)
