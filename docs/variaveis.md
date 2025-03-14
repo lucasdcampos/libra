@@ -9,6 +9,13 @@ Na Libra, as variáveis podem ser declaradas com as palavras-chave var ou const,
 (var | const) identificador = expressao
 ```
 
+**O que é um identificador?** <br>
+Um identificador é o nome dado à variável. Ele segue estas regras:
+
+Pode conter letras, números e underscores (_). <br>
+Não pode começar com um número. <br>
+Deve ser único no escopo atual (não pode repetir o nome de outra variável ativa no mesmo contexto). <br>
+
 **Exemplos:**
 ```js
 var x = 10 // Cria uma variável `x` com valor 10
@@ -35,5 +42,11 @@ Variáveis também podem conter outros tipos de valores, como Textos ou Vetores:
 const NOME = "Libra" 
 var lista = {1, 3, 5, 7, 9}
 ```
+
+### Diferença entre var e const
+| Palavra-chave | Pode alterar o valor? | Exemplos de uso |
+|----|----|----|
+| var | Sim | Contadores, valores que mudam ao longo do programa. |
+| const | Não | Configurações fixas, valores que não devem ser alterados. |
 
 Próximo Capítulo: [Controles de Fluxo](controles_de_fluxo.md)
