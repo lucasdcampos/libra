@@ -1,6 +1,7 @@
 using System;
 using System.Text.RegularExpressions;
 using System.Linq;
+using System.ComponentModel;
 
 namespace Libra;
 
@@ -52,6 +53,23 @@ public class Tokenizador
         {
             while (Atual() != '\0')
             {
+                if(Atual() == '0')
+                {
+                    if(Proximo(1) == 'b')
+                    {
+                        ConsumirChar();
+                        ConsumirChar();
+                        TokenizarBinario();
+                        continue;
+                    }
+                    if(Proximo(1) == 'x')
+                    {
+                        ConsumirChar();
+                        ConsumirChar();
+                        TokenizarHexa();
+                        continue;
+                    }
+                }
                 if(char.IsDigit(Atual()))
                 {
                     TokenizarNumero();
@@ -125,12 +143,103 @@ public class Tokenizador
         }
     }
 
+    private void TokenizarBinario()
+    {
+        string buffer = "";
+        
+        if(Atual() != '0' && Atual() != '1')
+            throw new Erro("Esperado `0` ou `1`, recebido: " + Atual(), _linha);
+
+        while (Atual() == '0' || Atual() == '1')
+        {
+            buffer += ConsumirChar();
+            if(buffer.Length >= 31)
+                break;
+        }
+
+        int resultado = 0;
+        try 
+        {
+            resultado = Convert.ToInt32(buffer, 2);
+        }
+        catch
+        {
+            throw new ErroAcessoNulo($" Não foi possível converter {buffer} para Int");
+        }
+
+        AdicionarTokenALista(TokenTipo.NumeroLiteral, resultado);
+    }
+
+    private bool DigitoHexadecimal(char c)
+    {
+        switch(c.ToString().ToUpper()[0])
+        {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+            case 'A':
+            case 'B':
+            case 'C':
+            case 'D':
+            case 'E':
+            case 'F':
+                return true;
+                break;
+            default:
+                return false;
+            break;
+        }
+    }
+    private void TokenizarHexa()
+    {
+        string buffer = "";
+        
+        if(DigitoHexadecimal(Atual()))
+            buffer += ConsumirChar();
+        else
+            throw new Erro("Esperado digito Hexadecimal, recebido: " + Atual(), _linha);
+        
+        
+        while (DigitoHexadecimal(Atual()))
+        {
+            buffer += ConsumirChar();
+            if(buffer.Length >= 7)
+                break;
+        }
+
+        int resultado = 0;
+        try 
+        {
+            resultado = Convert.ToInt32(buffer, 16);
+        }
+        catch
+        {
+            throw new ErroAcessoNulo($" Não foi possível converter {buffer} para Int");
+        }
+        AdicionarTokenALista(TokenTipo.NumeroLiteral, resultado);
+    }
+
     private void TokenizarNumero()
     {
         string buffer = "";
         var ponto = false;
-        while (char.IsDigit(Atual()))
+        while (char.IsDigit(Atual()) || Atual() == '_')
         {
+            // Ignorando underscores em números, facilita visualização
+            // de números grandes. Ex: 1_000_000_000 = 1000000000
+            if(Atual() == '_')
+            {
+                ConsumirChar();
+                continue;
+            }
+                
             buffer += ConsumirChar();
             if (Atual() == '.')
             {
@@ -339,8 +448,11 @@ public class Tokenizador
                 AdicionarTokenALista(TokenTipo.Virgula);
                 Passar();
                 break;
+            case '\0':
+                throw new ErroAcessoNulo(" Chegou ao fim do arquivo de forma inesperada.");
+                break;
             default:
-                throw new ErroTokenInvalido($"{Atual()} - ASCII = {(int)Atual()}", _linha);
+                throw new ErroTokenInvalido($"{Atual()} ASCII = {(int)Atual()}", _linha);
                 break;
         }
     }

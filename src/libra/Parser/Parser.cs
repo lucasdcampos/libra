@@ -125,6 +125,13 @@ public class Parser
     private ExpressaoDeclaracaoVetor? ParseVetor()
     {
         ConsumirToken(TokenTipo.AbrirCol);
+
+        // Converte [ ] para [0] automaticamente
+        if(TentarConsumirToken(TokenTipo.FecharCol) != null)
+        {
+            return new ExpressaoDeclaracaoVetor(ExpressaoLiteral.CriarInt(_linha, 0));
+        }
+
         Expressao expr = ParseExpressao();
         ConsumirToken(TokenTipo.FecharCol);
         return new ExpressaoDeclaracaoVetor(expr);
@@ -246,7 +253,7 @@ public class Parser
                 if ((exprLit.Valor is int intValue && intValue == 0) || 
                     (exprLit.Valor is double doubleValue && doubleValue == 0.0))
                 {
-                    throw new ErroDivisaoPorZero();
+                    throw new ErroDivisaoPorZero(_linha);
                 }
 
             }
