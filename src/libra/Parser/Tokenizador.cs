@@ -11,7 +11,7 @@ public class Tokenizador
     private string? _fonte;
     private List<Token>? _tokens;
     private Dictionary<string, int> _arquivosImportados = new();
-    private int _linha;
+    private LocalToken _local;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
         { "var", TokenTipo.Var },
@@ -32,11 +32,11 @@ public class Tokenizador
         { "nao", TokenTipo.OperadorNeg }
     };
 
-    public List<Token> Tokenizar(string source) 
+    public List<Token> Tokenizar(string source, string arquivo = "") 
     {
         _fonte = source;
         _tokens = new();
-        _linha = 1;
+        _local = new LocalToken(arquivo, 1);
         _posicao = 0;
         
         try
@@ -148,7 +148,7 @@ public class Tokenizador
         string buffer = "";
         
         if(Atual() != '0' && Atual() != '1')
-            throw new Erro("Esperado `0` ou `1`, recebido: " + Atual(), _linha);
+            throw new Erro("Esperado `0` ou `1`, recebido: " + Atual(), _local);
 
         while (Atual() == '0' || Atual() == '1')
         {
@@ -204,7 +204,7 @@ public class Tokenizador
         if(DigitoHexadecimal(Atual()))
             buffer += ConsumirChar();
         else
-            throw new Erro("Esperado digito Hexadecimal, recebido: " + Atual(), _linha);
+            throw new Erro("Esperado digito Hexadecimal, recebido: " + Atual(), _local);
         
         
         while (DigitoHexadecimal(Atual()))
@@ -244,7 +244,7 @@ public class Tokenizador
             if (Atual() == '.')
             {
                 if (ponto)
-                    throw new Erro("Número inválido!", _linha);
+                    throw new Erro("Número inválido!", _local);
 
                 buffer += ConsumirChar();
                 ponto = true;
@@ -297,7 +297,7 @@ public class Tokenizador
                 Passar();
                 break;
             case '\n':
-                _linha++;
+                _local.Linha++;
                 Passar();
                 break;
             case '\r':
@@ -440,7 +440,7 @@ public class Tokenizador
                 buffer = "";
                 if (Atual() != '\'')
                 {
-                    throw new Erro("Esperado `'`", _linha);
+                    throw new Erro("Esperado `'`", _local);
                 }
                 Passar();
                 break;
@@ -452,7 +452,7 @@ public class Tokenizador
                 throw new ErroAcessoNulo(" Chegou ao fim do arquivo de forma inesperada.");
                 break;
             default:
-                throw new ErroTokenInvalido($"{Atual()} ASCII = {(int)Atual()}", _linha);
+                throw new ErroTokenInvalido($"{Atual()} ASCII = {(int)Atual()}", _local);
                 break;
         }
     }
@@ -465,7 +465,7 @@ public class Tokenizador
             buffer += ConsumirChar();
 
             if (Atual() == '\0')
-                throw new Erro($"Esperado `{caractere}`", _linha);
+                throw new Erro($"Esperado `{caractere}`", _local);
         }
 
         Passar();
@@ -550,11 +550,11 @@ public class Tokenizador
 
     private void AdicionarTokenALista(TokenTipo tipo)
     {
-        _tokens.Add(new Token(tipo, _linha));
+        _tokens.Add(new Token(tipo, _local));
     }
 
     private void AdicionarTokenALista(TokenTipo tipo, object valor)
     {
-        _tokens.Add(new Token(tipo, _linha, valor));
+        _tokens.Add(new Token(tipo, _local, valor));
     }
 }

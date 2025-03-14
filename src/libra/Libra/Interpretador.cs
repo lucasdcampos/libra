@@ -9,9 +9,9 @@ namespace Libra;
 public class Interpretador
 {
     public static int NivelDebug = 0;
-    public static int LinhaAtual => ObterLinhaAtual();
+    public static LocalToken LocalAtual => ObterLocalAtual();
     private Programa _programa => Ambiente.ProgramaAtual;
-    private int _linha = 0;
+    private LocalToken _local = new LocalToken();
     private bool _shell = false;
 
     private VisitorExpressoes _visitorExpressoes;
@@ -24,24 +24,24 @@ public class Interpretador
         _visitorExpressoes = new VisitorExpressoes(this);
     }
 
-    private static int ObterLinhaAtual()
+    private static LocalToken ObterLocalAtual()
     {
         if(_instancia == null)
-            return 0;
-        return _instancia._linha;
+            return new LocalToken();
+        return _instancia._local;
     }
 
     public void Resetar()
     {
-        _linha = 0;
+        _local = new LocalToken();
     }
     
-    public int Interpretar(string codigo, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
+    public int Interpretar(string codigo, bool ambienteSeguro = true, ILogger logger = null, bool shell = false, string arquivo = "")
     {
         try
         {
             var tokenizador = new Tokenizador();
-            var tokens = tokenizador.Tokenizar(codigo);
+            var tokens = tokenizador.Tokenizar(codigo, arquivo);
             var parser = new Parser();
             var programa = parser.Parse(tokens);
 
@@ -89,7 +89,7 @@ public class Interpretador
         if(instrucao is null)
             return;
 
-        _linha++;
+        _local = instrucao.Local;
 
         var acoes = new Dictionary<TokenTipo, Action>
         {
@@ -173,10 +173,10 @@ public class Interpretador
         string identificador = funcao.Identificador;
 
         if(string.IsNullOrWhiteSpace(identificador))
-            throw new Erro("Identificador inválido!", _linha);
+            throw new Erro("Identificador inválido!", _local);
         
         if(_programa.FuncaoExiste(identificador))
-            throw new ErroFuncaoJaDefinida(identificador, _linha);
+            throw new ErroFuncaoJaDefinida(identificador, _local);
         
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros);
 
@@ -185,7 +185,7 @@ public class Interpretador
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao expressaoChamadaFuncao)
     {
-        return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(_linha, expressaoChamadaFuncao));
+        return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(_local, expressaoChamadaFuncao));
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, ExpressaoChamadaFuncao chamada) 
@@ -216,7 +216,7 @@ public class Interpretador
         var argumentos = chamada.Argumentos;
 
         if (!_programa.FuncaoExiste(chamada.Identificador))
-            throw new ErroFuncaoNaoDefinida(chamada.Identificador, _linha);
+            throw new ErroFuncaoNaoDefinida(chamada.Identificador, _local);
 
         var funcao = _programa.Funcoes[chamada.Identificador];
 
@@ -228,7 +228,7 @@ public class Interpretador
         var qtdParametros = funcao.Parametros.Count;
 
         if (argumentos.Count != qtdParametros)
-            throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Count, _linha);
+            throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Count, _local);
 
         _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
 
@@ -261,7 +261,7 @@ public class Interpretador
     public LibraObjeto InterpretarInstrucaoVar(InstrucaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
-            throw new Erro("Identificador inválido!", _linha);
+            throw new Erro("Identificador inválido!", _local);
 
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
   
@@ -303,7 +303,7 @@ public class Interpretador
 
         if (resultado is T t) return t;
 
-        throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado", _linha);
+        throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado", _local);
     }
 
 }

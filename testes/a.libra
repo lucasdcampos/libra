@@ -7,6 +7,9 @@ funcao fibonacci(n)
         var temp = a
         a = b
         b = temp + b
+        se b > 5 entao
+            1/(1-1)
+        fim
         contador = contador + 1 
     fim
 fim

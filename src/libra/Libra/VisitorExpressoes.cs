@@ -36,7 +36,7 @@ public class VisitorExpressoes : IVisitor
             TokenTipo.OperadorMenorIgualQue => a.MenorIgualQue(b),
             TokenTipo.OperadorE => a.E(b),
             TokenTipo.OperadorOu => a.Ou(b),
-            _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}", expressao.Operador.Linha)
+            _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}", expressao.Operador.Local)
         };
     }
 
@@ -73,7 +73,7 @@ public class VisitorExpressoes : IVisitor
                 return LibraObjeto.ParaLibraObjeto(_interpretador.InterpretarExpressao(expressao.Operando).Mult(new LibraInt(-1)));
         }
 
-        throw new Erro("Operador unário não implementado", expressao.Operador.Linha);
+        throw new Erro("Operador unário não implementado", expressao.Operador.Local);
     }
 
     public LibraObjeto VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao)
@@ -86,13 +86,13 @@ public class VisitorExpressoes : IVisitor
         if(variavel.Valor is LibraVetor vetor)
         {
             if (indice < 0 || indice >= vetor.Valor.Length)
-                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", Interpretador.LinhaAtual);
+                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", Interpretador.LocalAtual);
             return vetor.Valor[indice];
         }
         if(variavel.Valor is LibraTexto texto)
         {
             if (indice < 0 || indice >= texto.Valor.Length)
-                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", Interpretador.LinhaAtual);
+                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", Interpretador.LocalAtual);
             return new LibraTexto(texto.Valor[indice].ToString());
         }
 

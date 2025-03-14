@@ -48,9 +48,9 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
 
-        public static ExpressaoLiteral CriarInt(int linha, int valor)
+        public static ExpressaoLiteral CriarInt(LocalToken local, int valor)
         {
-            return new ExpressaoLiteral(new Token(TokenTipo.NumeroLiteral, linha, valor));
+            return new ExpressaoLiteral(new Token(TokenTipo.NumeroLiteral, local, valor));
         }
     }
 

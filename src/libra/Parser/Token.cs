@@ -3,7 +3,13 @@ namespace Libra;
 public struct LocalToken
 {
     public string Arquivo;
-    public int Linha;
+    public int Linha = 1;
+
+    public LocalToken(string arquivo, int linha)
+    {
+        Arquivo = arquivo;
+        Linha = linha;
+    }
 }
 
 public enum TokenTipo
@@ -65,22 +71,22 @@ public enum TokenTipo
 
 public class Token
 {
-    public Token(TokenTipo tipo, int linha, object valor = null)
+    public Token(TokenTipo tipo, LocalToken local, object valor = null)
     {
         Tipo = tipo;
         Valor = valor;
-        Linha = linha;
+        Local = local;
     }
 
     public TokenTipo Tipo { get; private set; }
     public object Valor { get; internal set; }
-    public int Linha { get; private set; }
+    public LocalToken Local { get; private set; }
 
     public override string ToString()
     {
         if(Valor != null)
         {
-            return $"Token: {Tipo} | Valor: {Valor}";
+            return $"Token: {Tipo} | Valor: {Valor} | Arquivo {Local.Arquivo} - Linha {Local.Linha}";
         }
 
         return $"Token: {Tipo}";

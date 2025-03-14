@@ -58,7 +58,7 @@ public class LibraBase : IModulo
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         if(args[0] is not string str)
-            throw new ErroAcessoNulo(" Esperava Texto", Interpretador.LinhaAtual);
+            throw new ErroAcessoNulo(" Esperava Texto", Interpretador.LocalAtual);
         
         switch(str)
         {

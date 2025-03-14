@@ -11,26 +11,24 @@ public class Erro : Exception
 {
     public int Codigo { get; protected set; }
     public string Mensagem { get; protected set; }
-    public int Linha { get; protected set; }
-    public int Coluna { get; protected set; }
+    public LocalToken Local { get; protected set; }
     public ErroCategoria Categoria { get; protected set; }
 
-    public Erro(string mensagem, int linha = 0, int codigo = 1)
+    public Erro(string mensagem, LocalToken local = new LocalToken(), int codigo = 1)
     {
         Codigo = codigo;
-        Linha = linha;
+        Local = local;
         Mensagem = mensagem;
 
         AtribuirCategoria();
         LancarErro();
     }
 
-    protected Erro(int codigo, string mensagem, int linha = 0, int coluna = 0)
+    protected Erro(int codigo, string mensagem, LocalToken local = new LocalToken(), int coluna = 0)
     {
         Codigo = codigo;
         Mensagem = mensagem;
-        Linha = linha;
-        Coluna = coluna;
+        Local = local;
 
         AtribuirCategoria();
         LancarErro();
@@ -68,7 +66,7 @@ public class Erro : Exception
 
         string mensagemLog = "Ocorreu um erro interno na Libra, veja a descrição para mais detalhes:\n";
         mensagemLog += "Versão: Libra 1.0.0-Beta\n";
-        mensagemLog += $"Ultima linha do Script Libra executada: {Interpretador.LinhaAtual}\n";
+        mensagemLog += $"Ultima local do Script Libra executada: {Interpretador.LocalAtual}\n";
         mensagemLog += $"Problema:\n{e.ToString()}\n";
         mensagemLog += "Por favor reportar em https://github.com/lucasdcampos/libra/issues/ (se possível incluir script que causou o problema)\n";
 
@@ -99,26 +97,20 @@ public class Erro : Exception
 
     public override string ToString()
     {
-        if(Linha == 0)
-            Linha = Interpretador.LinhaAtual;
+        if(Local.Linha == 0)
+            Local = Interpretador.LocalAtual;
 
         string msg = "";
         string categoria = $"{Categoria}: ";
 
         msg += categoria;
 
-        if(Linha == 0)
+        if(Local.Linha == 0 || string.IsNullOrEmpty(Local.Arquivo))
             msg += $"{Mensagem}";
         else
-            msg +=$"{Mensagem}, linha {Linha}";
+            msg +=$"{Mensagem}\n--> `{Local.Arquivo}`, Linha: {Local.Linha}";
         
-        string arrows = "";
-
-        foreach(var c in Mensagem)
-            arrows += "^";
-        
-
-        msg += Environment.NewLine + String.Concat(Enumerable.Repeat(' ', categoria.Length)) + arrows;
+        msg += String.Concat(Enumerable.Repeat(' ', categoria.Length));
 
         return msg;
     }
@@ -126,26 +118,26 @@ public class Erro : Exception
 
 public class ErroTokenInvalido : Erro
 {
-    public ErroTokenInvalido(string token, int linha = 0, int coluna = 0) 
-        : base(1001, $"Token inválido `{token}`", linha, coluna) { }
+    public ErroTokenInvalido(string token, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(1001, $"Token inválido `{token}`", local, coluna) { }
 }
 
 public class ErroEsperado : Erro
 {
-    public ErroEsperado(TokenTipo esperado, TokenTipo recebido, int linha = 0, int coluna = 0) 
-        : base(1002, $"Esperado Token {Token.TipoParaString(esperado)}, recebido {Token.TipoParaString(recebido)}", linha, coluna) { }
+    public ErroEsperado(TokenTipo esperado, TokenTipo recebido, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(1002, $"Esperado Token {Token.TipoParaString(esperado)}, recebido {Token.TipoParaString(recebido)}", local, coluna) { }
 }
 
 public class ErroDivisaoPorZero : Erro
 {
-    public ErroDivisaoPorZero(int linha = 0, int coluna = 0) 
-        : base(2001, "Divisão por zero.", linha, coluna) { }
+    public ErroDivisaoPorZero(LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(2001, "Divisão por zero.", local, coluna) { }
 }
 
 public class ErroVariavelNaoDeclarada : Erro
 {
-    public ErroVariavelNaoDeclarada(string variavel, int linha = 0, int coluna = 0) 
-        : base(2002, $"Variável não declarada `{variavel}`.", linha, coluna) 
+    public ErroVariavelNaoDeclarada(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(2002, $"Variável não declarada `{variavel}`.", local, coluna) 
         {
             Dica($"Use `var {variavel}` para declarará-la, variáveis só são acessíveis no mesmo escopo.");
         }
@@ -153,8 +145,8 @@ public class ErroVariavelNaoDeclarada : Erro
 
 public class ErroVariavelJaDeclarada : Erro
 {
-    public ErroVariavelJaDeclarada(string variavel, int linha = 0, int coluna = 0) 
-        : base(2003, $"Variável já declarada `{variavel}`.", linha, coluna) 
+    public ErroVariavelJaDeclarada(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(2003, $"Variável já declarada `{variavel}`.", local, coluna) 
         { 
             Dica("Não use 'var' caso queira apenas modificar o valor de uma variável.");
         }
@@ -162,20 +154,20 @@ public class ErroVariavelJaDeclarada : Erro
 
 public class ErroFuncaoNaoDefinida : Erro
 {
-    public ErroFuncaoNaoDefinida(string variavel, int linha = 0, int coluna = 0) 
-        : base(2004, $"Função não definida `{variavel}`.", linha, coluna) { }
+    public ErroFuncaoNaoDefinida(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(2004, $"Função não definida `{variavel}`.", local, coluna) { }
 }
 
 public class ErroFuncaoJaDefinida : Erro
 {
-    public ErroFuncaoJaDefinida(string variavel, int linha = 0, int coluna = 0) 
-        : base(2005, $"Função já definida `{variavel}`.", linha, coluna) { }
+    public ErroFuncaoJaDefinida(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(2005, $"Função já definida `{variavel}`.", local, coluna) { }
 }
 
 public class ErroModificacaoConstante : Erro
 {
-    public ErroModificacaoConstante(string variavel, int linha = 0, int coluna = 0) 
-        : base(2006, $"Não é possível modificar a constante `{variavel}`.", linha, coluna) 
+    public ErroModificacaoConstante(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
+        : base(2006, $"Não é possível modificar a constante `{variavel}`.", local, coluna) 
         { 
             Dica("Use 'var' ao invés de 'const' para declarar variáveis modificáveis.");
         }
@@ -183,8 +175,8 @@ public class ErroModificacaoConstante : Erro
 
 public class ErroAcessoNulo : Erro
 {
-    public ErroAcessoNulo(string msg = "", int linha = 0, int coluna = 0)
-        : base(2007, $"Tentando acessar um valor Nulo.{msg}", linha, coluna) 
+    public ErroAcessoNulo(string msg = "", LocalToken local = new LocalToken(), int coluna = 0)
+        : base(2007, $"Tentando acessar um valor Nulo.{msg}", local, coluna) 
         { 
             Dica("Você tentou acessar um objeto sem referência (Nulo).");
         }
@@ -192,14 +184,14 @@ public class ErroAcessoNulo : Erro
 
 public class ErroIndiceForaVetor : Erro
 {
-    public ErroIndiceForaVetor(string msg = "", int linha = 0, int coluna = 0)
-        : base(2008, $"O indice se encontra fora dos limites do Vetor. {msg}", linha, coluna) { }
+    public ErroIndiceForaVetor(string msg = "", LocalToken local = new LocalToken(), int coluna = 0)
+        : base(2008, $"O indice se encontra fora dos limites do Vetor. {msg}", local, coluna) { }
 }
 
 public class ErroTipoIncompativel : Erro
 {
-    public ErroTipoIncompativel(string identificador, int linha = 0, int coluna = 0)
-        : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", linha, coluna) 
+    public ErroTipoIncompativel(string identificador, LocalToken local = new LocalToken(), int coluna = 0)
+        : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", local, coluna) 
         { 
             Dica("Não é possível modificar o tipo de uma variável durante a execução.");
         }
@@ -207,8 +199,8 @@ public class ErroTipoIncompativel : Erro
 
 public class ErroTransbordoDePilha : Erro
 {
-    public ErroTransbordoDePilha(string causador = "", int linha = 0, int coluna = 0)
-        : base(2010, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", linha, coluna) 
+    public ErroTransbordoDePilha(string causador = "", LocalToken local = new LocalToken(), int coluna = 0)
+        : base(2010, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", local, coluna) 
         { 
             Dica("Verifique se não há nenhuma recursão infinita.");
         }
@@ -216,8 +208,8 @@ public class ErroTransbordoDePilha : Erro
 
 public class ErroEsperadoNArgumentos : Erro
 {
-    public ErroEsperadoNArgumentos(string ident, int esperado, int recebido, int linha = 0, int coluna = 0)
-        : base(2010, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", linha, coluna) 
+    public ErroEsperadoNArgumentos(string ident, int esperado, int recebido, LocalToken local = new LocalToken(), int coluna = 0)
+        : base(2010, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", local, coluna) 
         { 
         }
 }

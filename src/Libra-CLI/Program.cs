@@ -146,7 +146,7 @@ importar ""utilidades.libra""
 
         string codigoFonte = File.ReadAllText(arquivoInicial).ReplaceLineEndings(Environment.NewLine); // Sem isso, o Tokenizador buga
 
-        new Interpretador().Interpretar(codigoFonte, false, new ConsoleLogger());
+        new Interpretador().Interpretar(codigoFonte, false, new ConsoleLogger(), false, arquivoInicial);
 
         stopwatch.Stop();
 
