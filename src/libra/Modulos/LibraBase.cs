@@ -36,6 +36,8 @@ public class LibraBase : IModulo
         _programa.Funcoes["real"] = new FuncaoNativa(real);
         _programa.Funcoes["int"] = new FuncaoNativa(_int);
         _programa.Funcoes["texto"] = new FuncaoNativa(texto);
+        _programa.Funcoes["tentarReal"] = new FuncaoNativa(tentarReal);
+        _programa.Funcoes["tentarInt"] = new FuncaoNativa(tentarInt);
         _programa.Funcoes["bytes"] = new FuncaoNativa(bytes);
         _programa.Funcoes["erro"] = new FuncaoNativa(erro);
         
@@ -183,17 +185,41 @@ public class LibraBase : IModulo
         if(args.Length == 0)
             new Erro("Esperava 1 argumento");
 
-        int? resultado = null;
+        var r = (int?)tentarInt(args);
+        if(r == null)
+            throw new ErroAcessoNulo($" Não foi possível converter `{args[0]}` para Int");
+
+        return r;
+    }
+
+    public object tentarInt(object[] args)
+    {
+        if(args.Length == 0)
+            new Erro("Esperava 1 argumento");
+
+        int resultado;
         try
         {
             resultado = (int)double.Parse(args[0].ToString());
         }
         catch
         {
-            Ambiente.Msg($"Não foi possível converter {args[0]} para Int");
+            return null;
         }
 
         return resultado;
+    }
+
+    public object tentarReal(object[] args)
+    {
+        if(args.Length == 0)
+            new Erro("Esperava 1 argumento");
+
+        var r = (double?)tentarInt(args);
+        if(r == null)
+            throw new ErroAcessoNulo($" Não foi possível converter `{args[0]}` para Real");
+
+        return r;
     }
 
     public object real(object[] args)
@@ -201,14 +227,14 @@ public class LibraBase : IModulo
         if(args.Length == 0)
             new Erro("Esperava 1 argumento");
 
-        double? resultado = null;
+        double resultado;
         try
         {
             resultado = double.Parse(args[0].ToString());
         }
         catch
         {
-            Ambiente.Msg($"Não foi possível converter {args[0]} para Real");
+            return null;
         }
 
         return resultado;

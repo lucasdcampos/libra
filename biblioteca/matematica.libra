@@ -39,12 +39,15 @@ const GB = 1024 * 1024 * 1024
 
 // Calcula e retorna a raiz enésima de um número
 funcao raiz(numero, indice)
-    retornar numero^(1.0 / indice)
+    numero = real(numero)
+    indice = real(numero)
+    retornar __csraiz__(numero, indice)
 fim
 
 // Calcula e retorna a raiz quadrada de um número
 funcao raizq(x)
-    retornar raiz(x, 2)
+    x = real(x)
+    retornar __csraizq__(x)
 fim
 
 // Calcula e retorna a o fatorial de um número
@@ -103,17 +106,17 @@ fim
 
 // Retorna o seno de um ângulo x
 funcao sen(x)
-    retornar __mathsin__(x)
+    retornar __cssen__(x)
 fim
 
 // Retorna o cosseno de um ângulo x
 funcao cos(x)
-    retornar __mathcos__(x)
+    retornar __cscos__(x)
 fim
 
 // Retorna a tangente de um ângulo x
 funcao tan(x)
-    retornar __mathtan__(x)
+    retornar __cstan__(x)
 fim
 
 // Retorna o arco-seno de um ângulo x
@@ -135,10 +138,10 @@ fim
 funcao log(x, n)
     var xReal = real(x)
     var baseReal = real(n)
-    se tipo(xReal) == nulo ou tipo(baseReal) == nulo entao
+    se tipo(xReal) == "Nulo" ou tipo(baseReal) == "Nulo" entao
         erro("log(x, base) deve receber números reais!")
     fim
-    retornar __mathlog__(x, n)
+    retornar __cslog__(x, n)
 fim
 
 funcao ln(x)
@@ -155,4 +158,11 @@ fim
 
 funcao exp2(x)
     retornar 2^x
+fim
+
+funcao aleatorio(min, max)
+    min = real(min)
+    max = real(max)
+
+    retornar __csrand__(min, max)
 fim

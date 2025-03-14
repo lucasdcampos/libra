@@ -90,7 +90,15 @@ importar ""utilidades.libra""
     {
         if(comando.EndsWith(".libra"))
         {
-            Interpretar(comando);
+            try
+            {
+                Interpretar(comando);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Algo deu errado: {e.Message}");
+            }
+            
             return false;
         }
 
