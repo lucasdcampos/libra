@@ -1,5 +1,11 @@
 namespace Libra;
 
+public struct LocalToken
+{
+    public string Arquivo;
+    public int Linha;
+}
+
 public enum TokenTipo
 {
     
