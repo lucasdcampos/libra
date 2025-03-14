@@ -134,7 +134,9 @@ public class Interpretador
         {
             if(InterpretarExpressao<LibraInt>(instrucaoSe.Condicao).Valor != 0)
             {
+                _programa.PilhaEscopos.EmpilharEscopo();
                 InterpretarInstrucoes(instrucaoSe.Corpo.ToArray());
+                _programa.PilhaEscopos.DesempilharEscopo();
                 return;
             }
 
@@ -145,7 +147,10 @@ public class Interpretador
             {
                 if(InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
                 {
+                    _programa.PilhaEscopos.EmpilharEscopo();
                     InterpretarInstrucoes(inst.Corpo.ToArray());
+                    _programa.PilhaEscopos.DesempilharEscopo();
+                    
                     return;
                 }
             }
@@ -155,7 +160,12 @@ public class Interpretador
         var enquanto = (InstrucaoEnquanto)instrucao;
     	var instrucoes = enquanto.Instrucoes;
         while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
+        {
+            _programa.PilhaEscopos.EmpilharEscopo();
             InterpretarInstrucoes(instrucoes);
+            _programa.PilhaEscopos.DesempilharEscopo();
+        }
+            
     }
 
     public void InterpretarFuncao(InstrucaoFuncao funcao)
