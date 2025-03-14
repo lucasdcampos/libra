@@ -7,8 +7,8 @@ public enum TokenTipo
     NumeroLiteral,
     CaractereLiteral,
     TextoLiteral,
-    Vetor,
     Identificador,
+    Vetor,
     Nulo,
     TokenInvalido,
 
@@ -40,7 +40,6 @@ public enum TokenTipo
     FecharChave,
     PontoEVirgula,
     Virgula,
-    NovaLinha,
     FimDoArquivo,
 
     // Palavras Reservadas
@@ -83,6 +82,7 @@ public class Token
 
     public static string TipoParaString(TokenTipo tipo)
     {
+        // TODO: Adicionar resto dos Tokens
         switch(tipo)
         {
             case TokenTipo.PontoEVirgula:
@@ -112,7 +112,6 @@ public class Token
             default:
                 return tipo.ToString();
         }
-
     }
 
 }

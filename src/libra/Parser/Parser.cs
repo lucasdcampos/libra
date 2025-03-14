@@ -48,6 +48,10 @@ public class Parser
         Resetar();
 
         _tokens = tokens;
+
+        if(_tokens == null)
+            return new Instrucao[0];
+
         return ParseInstrucoes(TokenTipo.FimDoArquivo);
     }
 

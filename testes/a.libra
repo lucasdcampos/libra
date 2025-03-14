@@ -1,0 +1,4 @@
+importar "matematica.libra"
+importar "matematica.libra"
+
+exibir(PI)

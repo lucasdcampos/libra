@@ -1,4 +1,8 @@
-﻿using Libra;
+﻿// TODO: Necessita de refatoração
+// Está uma bagunça porque esse arquivo é só uma
+// ferramenta que serve de cli para rodar programas Libra
+// não dei muita atenção ao código
+using Libra;
 using Libra.Arvore;
 
 internal static class Program

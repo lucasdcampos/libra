@@ -9,7 +9,7 @@ public class Tokenizador
     private int _posicao;
     private string? _fonte;
     private List<Token>? _tokens;
-    private List<string> _arquivosImportados;
+    private Dictionary<string, int> _arquivosImportados = new();
     private int _linha;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
@@ -35,7 +35,6 @@ public class Tokenizador
     {
         _fonte = source;
         _tokens = new();
-        _arquivosImportados = new();
         _linha = 1;
         _posicao = 0;
         
@@ -80,6 +79,7 @@ public class Tokenizador
         return null;
     }
 
+    // TODO: Precisa ser corrigido, é possível chamar arquivos libra recursivamente ou mais de uma vez
     private void PreTokenizar()
     {
         // Expressão regular para encontrar as declarações de importação
@@ -96,7 +96,7 @@ public class Tokenizador
         {
             string nomeArquivo = match.Groups[1].Value;
 
-            if (!_arquivosImportados.Contains(nomeArquivo))
+            if (!_arquivosImportados.ContainsKey(nomeArquivo))
             {
                 string caminhoCompleto = Path.Combine(caminhoExecutavel+"/biblioteca/", nomeArquivo);
 
@@ -108,10 +108,8 @@ public class Tokenizador
                 if (File.Exists(caminhoCompleto))
                 {
                     string conteudoArquivo = File.ReadAllText(caminhoCompleto);
-
                     _fonte = _fonte.Replace(match.Value, conteudoArquivo);
-
-                    _arquivosImportados.Add(nomeArquivo);
+                    _arquivosImportados.Add(nomeArquivo, 1);
                 }
                 else
                 {
@@ -121,7 +119,7 @@ public class Tokenizador
             }
             else
             {
-                // Se o arquivo já foi importado, remove a declaração de importação
+                // Se o arquivo já foi importado, remove a declaração de importação (importar "nome")
                 _fonte = _fonte.Replace(match.Value, string.Empty);
             }
         }

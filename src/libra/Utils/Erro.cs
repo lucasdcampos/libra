@@ -51,6 +51,7 @@ public class Erro : Exception
     {
         if (e is ExcecaoSaida)
             return;
+            
         if (e is Erro)
         {
             Ambiente.Msg(e.ToString());
