@@ -10,6 +10,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <OutputPath>../../bin/Libra/</OutputPath>
     <Version>0.1.0</Version>
+    <SatelliteResourceLanguages></SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

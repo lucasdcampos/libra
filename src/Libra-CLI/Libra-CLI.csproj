@@ -9,6 +9,7 @@
     <AssemblyName>libra</AssemblyName>
     <OutputPath>../../bin/Libra-CLI/</OutputPath>
     <Version>0.1.0</Version>
+    <SatelliteResourceLanguages></SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>

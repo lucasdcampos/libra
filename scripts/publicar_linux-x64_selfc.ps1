@@ -1,6 +1,6 @@
 # Diretórios
 $sourceDir = "biblioteca"
-$destinationDir = "bin/Libra-CLI/net8.0/biblioteca"
+$destinationDir = "bin/linux-x64-selfc/biblioteca"
 
 # Verifica se o diretório de destino existe, cria se não existir
 if (-not (Test-Path -Path $destinationDir)) {
@@ -10,4 +10,4 @@ if (-not (Test-Path -Path $destinationDir)) {
 # Copia os arquivos da pasta biblioteca para bin/Libra-CLI/net8.0
 Copy-Item -Path "$sourceDir\*" -Destination $destinationDir -Recurse -Force
 
-dotnet build --configuration RELEASE
+dotnet publish --runtime linux-x64 --output bin/linux-x64-selfc/ --self-contained
