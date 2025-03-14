@@ -3,19 +3,17 @@ using Libra.Arvore;
 
 internal static class Program
 {
-    private const string _ver = "1.0.0-Beta";
-
     private static Tokenizador _tokenizador = new Tokenizador();
     private static Parser _parser = new Parser();
     private static Interpretador _interpretador = new Interpretador();
 
+    private static bool _carregarBibliotecas = true;
     // Incluindo as bibliotecas por padrão na Shell da Libra
     private static string bibliotecas = 
 @"importar ""matematica.libra""
 importar ""so.libra""
 importar ""vetores.libra""
 importar ""utilidades.libra""
-
 ";
 
     private static readonly Dictionary<string, Action> _comandos = new()
@@ -26,7 +24,7 @@ importar ""utilidades.libra""
         { "creditos", MostrarCreditos },
         { "autor", MostrarCreditos },
         { "ajuda", MostrarAjuda },
-        { "versao", () => Console.WriteLine(_ver) },
+        { "versao", () => Console.WriteLine(LibraUtil.VersaoAtual()) },
     };
 
     internal static void Main(string[] args)
@@ -45,7 +43,7 @@ importar ""utilidades.libra""
             return;
         }
 
-        Console.WriteLine($"Bem-vindo à Libra {_ver}");
+        Console.WriteLine($"Bem-vindo à Libra {LibraUtil.VersaoAtual()}");
         Console.WriteLine("Digite \"ajuda\", \"licenca\" ou uma instrução.");
         
         var bibliotecaPreTokenizada = _tokenizador.Tokenizar(bibliotecas);
@@ -71,8 +69,14 @@ importar ""utilidades.libra""
                     Erro.MensagemBug(e);
                 }
 
-                instrucoes.InsertRange(0, astBiblioteca);
-
+                // Haverá problemas se executar pelo botão do Visual Studio, pois ele não conseguirá
+                // carregar as bibliotecas. Isso se certifica de não carregar em DEBUG mode.
+                #if DEBUG
+                #else
+                    if(_carregarBibliotecas)
+                        instrucoes.InsertRange(0, astBiblioteca);
+                #endif
+                
                 _interpretador.Interpretar(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
             }
         }
@@ -80,6 +84,12 @@ importar ""utilidades.libra""
 
     private static bool ExecutarComando(string comando)
     {
+        if(comando.EndsWith(".libra"))
+        {
+            Interpretar(comando);
+            return false;
+        }
+
         if (_comandos.TryGetValue(comando, out var acao))
         {
             acao.Invoke();
@@ -103,6 +113,11 @@ importar ""utilidades.libra""
 
     private static void MostrarAjuda()
     {
+        Console.WriteLine("Libra é uma linguagem de programação, você está no modo Interativo,");
+        Console.WriteLine("ou seja, pode digitar uma instrução diretamente por aqui.");
+        Console.WriteLine("Tente executar uma expressão. Exemplos: `1+1`, `2^10`, `raizq(64)`. Ou digite um comando.");
+        Console.WriteLine();
+        Console.WriteLine("Para interpretar um arquivo, use `nomeDoArquivo.libra`");
         Console.WriteLine("Comandos disponíveis: " + string.Join(", ", _comandos.Keys));
     }
 

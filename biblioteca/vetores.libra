@@ -78,7 +78,6 @@ funcao reverter(vetor)
     retornar temp
 fim
 
-
 // Retorna o maior elemento de um Vetor
 funcao maiorElemento(vetor)
     se tamanho(vetor) == 0 entao

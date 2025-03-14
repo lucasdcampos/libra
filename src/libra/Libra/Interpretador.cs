@@ -108,7 +108,7 @@ public class Interpretador
             acao();
 
         if(instrucao is InstrucaoExibirExpressao exibirExpr)
-        {       
+        {   
             Ambiente.Msg(InterpretarExpressao(exibirExpr.Expressao).ObterValor().ToString());
         }
     }
@@ -132,35 +132,23 @@ public class Interpretador
     {
         if (instrucao is InstrucaoSe instrucaoSe)
         {
-            // Verifica a condição do bloco "Se"
-            if (InterpretarExpressao<LibraInt>(instrucaoSe.Condicao).Valor != 0)
+            if(InterpretarExpressao<LibraInt>(instrucaoSe.Condicao).Valor != 0)
             {
-                InterpretarInstrucoes(instrucaoSe.Entao.ToArray());
-                return; // "Se" foi verdadeiro, encerra.
+                InterpretarInstrucoes(instrucaoSe.Corpo.ToArray());
+                return;
             }
 
-            // Itera pelos ramos "SenaoSe" ou "Senao"
-            var proximoBloco = instrucaoSe.Senao;
+            if(instrucaoSe.ListaSenaoSe == null || instrucaoSe.ListaSenaoSe.Count == 0)
+                return;
 
-            while (proximoBloco is InstrucaoSe senaoSe)
+            foreach(var inst in instrucaoSe.ListaSenaoSe)
             {
-                // Verifica a condição do "SenaoSe"
-                if (InterpretarExpressao<LibraInt>(senaoSe.Condicao).Valor != 0)
+                if(InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
                 {
-                    InterpretarInstrucoes(senaoSe.Entao.ToArray());
-                    return; // "SenaoSe" foi verdadeiro, encerra.
+                    InterpretarInstrucoes(inst.Corpo.ToArray());
+                    return;
                 }
-
-                // Avança para o próximo bloco (pode ser outro "SenaoSe" ou "Senao" final)
-                proximoBloco = senaoSe.Senao;
             }
-
-            // Caso o bloco final seja um "Senao" (array de instruções), executa-o
-            if (proximoBloco is Instrucao[] blocoSenao)
-            {
-                InterpretarInstrucoes(blocoSenao);
-            }
-
             return;
         }
 
@@ -248,14 +236,6 @@ public class Interpretador
         catch(ExcecaoRetorno retorno)
         {
             var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
-            if(_shell)
-            {
-                if(resultado.ObterValor() == null)
-                    return null;
-
-                Ambiente.Msg(resultado.ObterValor().ToString());
-            }
-                
 
             return resultado;
         }
@@ -281,22 +261,6 @@ public class Interpretador
             _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
         return resultado;
-    }
-
-    public object InterpretarAcessoVetor(ExpressaoAcessoVetor expressao)
-    {
-        string ident = expressao.Identificador;
-        int indice = InterpretarExpressao<LibraInt>(expressao.Expressao).Valor;
-
-        var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
-
-        if (variavel.Valor is not LibraVetor vetor)
-            throw new ErroAcessoNulo(variavel.Identificador, _linha);
-
-        if (indice < 0 || indice >= vetor.Valor.Length)
-            throw new ErroIndiceForaVetor(indice.ToString(), _linha);
-
-        return vetor.Valor[indice];
     }
 
     public object[] InterpretarVetor(ExpressaoDeclaracaoVetor expressao)

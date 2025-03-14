@@ -26,6 +26,8 @@ public class LibraTexto : LibraObjeto
 
     public override LibraObjeto Soma(LibraObjeto outro)
     {
+        if(outro.ObterValor() == null)
+            return new LibraTexto(Valor + "Nulo");
         return new LibraTexto(Valor + outro.ObterValor().ToString());
     }
 

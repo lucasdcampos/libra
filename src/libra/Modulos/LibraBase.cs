@@ -46,6 +46,9 @@ public class LibraBase : IModulo
         _programa.Funcoes["registrarCSharp"] = new FuncaoNativa(registrarCSharp);
         _programa.Funcoes["registrardll"] = new FuncaoNativa(registrardll);
         _programa.Funcoes["libra"] = new FuncaoNativa(libra);
+
+        _programa.PilhaEscopos.DefinirVariavel("NL", new LibraTexto("\n"), true);
+        _programa.PilhaEscopos.DefinirVariavel("FDA", new LibraTexto("\0"), true);
     }
 
     public object __ativarmodulo__(object[] args)
@@ -62,7 +65,7 @@ public class LibraBase : IModulo
                 break;
         }
 
-        return 0;
+        return null;
     }
 
     public object libra(object[] args)
@@ -302,7 +305,7 @@ public class LibraBase : IModulo
         if (!result.Success)
         {
             foreach (var diagnostic in result.Diagnostics)
-                Ambiente.Msg(diagnostic.ToString());
+                Ambiente.Msg("Falha ao compilar assembly: " + diagnostic.ToString());
             return null;
         }
 

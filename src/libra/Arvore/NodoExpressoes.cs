@@ -48,6 +48,10 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
 
+        public static ExpressaoLiteral CriarInt(int linha, int valor)
+        {
+            return new ExpressaoLiteral(new Token(TokenTipo.NumeroLiteral, linha, valor));
+        }
     }
 
     public class ExpressaoVariavel : Expressao

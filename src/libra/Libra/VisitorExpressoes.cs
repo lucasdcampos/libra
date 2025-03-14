@@ -83,13 +83,20 @@ public class VisitorExpressoes : IVisitor
 
         var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
 
-        if (variavel.Valor is not LibraVetor vetor)
-            throw new ErroAcessoNulo($" `{variavel.Identificador}` não é um Vetor.");
+        if(variavel.Valor is LibraVetor vetor)
+        {
+            if (indice < 0 || indice >= vetor.Valor.Length)
+                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", Interpretador.LinhaAtual);
+            return vetor.Valor[indice];
+        }
+        if(variavel.Valor is LibraTexto texto)
+        {
+            if (indice < 0 || indice >= texto.Valor.Length)
+                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", Interpretador.LinhaAtual);
+            return new LibraTexto(texto.Valor[indice].ToString());
+        }
 
-        if (indice < 0 || indice >= vetor.Valor.Length)
-            throw new ErroIndiceForaVetor();
-
-        return vetor.Valor[indice];
+        throw new ErroAcessoNulo($" {variavel.Valor} não é um Vetor");
     }
 
     public LibraObjeto VisitarExpressaoChamadaFuncao(ExpressaoChamadaFuncao expressao)

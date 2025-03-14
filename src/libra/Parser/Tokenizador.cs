@@ -39,8 +39,15 @@ public class Tokenizador
         _linha = 1;
         _posicao = 0;
         
-        PreTokenizar();
-
+        try
+        {
+            PreTokenizar();
+        }
+        catch
+        {
+            return null;
+        }
+        
         var texto = "";
         try
         {
@@ -87,40 +94,29 @@ public class Tokenizador
         Match match;
         while ((match = regex.Match(_fonte)).Success)
         {
-            // Captura o nome do arquivo a ser importado
             string nomeArquivo = match.Groups[1].Value;
 
-            // Verifica se o arquivo já foi importado
             if (!_arquivosImportados.Contains(nomeArquivo))
             {
-                // Tenta encontrar o arquivo no caminho do executável/biblioteca
                 string caminhoCompleto = Path.Combine(caminhoExecutavel+"/biblioteca/", nomeArquivo);
 
-                // Se o arquivo não existir no caminho do executável, tenta no caminho atual do usuário
                 if (!File.Exists(caminhoCompleto))
                 {
                     caminhoCompleto = Path.Combine(caminhoAtual, nomeArquivo);
                 }
 
-                // Verifica se o arquivo existe em algum dos caminhos
                 if (File.Exists(caminhoCompleto))
                 {
-                    // Lê o conteúdo do arquivo
                     string conteudoArquivo = File.ReadAllText(caminhoCompleto);
 
-                    // Substitui a declaração de importação pelo conteúdo do arquivo
                     _fonte = _fonte.Replace(match.Value, conteudoArquivo);
 
-                    // Adiciona o arquivo à lista de arquivos importados
                     _arquivosImportados.Add(nomeArquivo);
                 }
                 else
                 {
-                    // Se o arquivo não for encontrado, remove a declaração de importação
-                    _fonte = _fonte.Replace(match.Value, string.Empty);
-
-                    // Opcional: Lançar uma exceção ou registrar um aviso
-                    throw new FileNotFoundException($"Arquivo não encontrado: {nomeArquivo}");
+                    throw new ErroAcessoNulo($" Arquivo não encontrado: {caminhoCompleto}");
+                    return;
                 }
             }
             else

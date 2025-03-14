@@ -1,5 +1,0 @@
-se 1 > 0 entao
-    exibir("a")
-senao se 1 < 0 entao
-    exibir("b")
-fim

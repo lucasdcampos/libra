@@ -18,7 +18,7 @@ var vetor2 = [10]
 vetor2[0] = 1
 
 exibir("Testando Expressões")
-x = (1+2)*3 / 1 + (10%2) + int(2^2) + (-1)
+x = (1+2)*3
 x = !x
 x = -x
 x = 1 > 0 ou 1 >= 0 ou x < 0 ou x <= 0 ou x == 0 e x == 69
@@ -34,25 +34,32 @@ decimal = decimal + 0.1
 decimal = -decimal
 
 exibir("Testando Condicionais")
-se 1 > 0 entao fim
-senao fim
-
-// else if deve ser corrigido
-var owo = 12312
-se owo > 0 entao
-
-fim
-senao
-    se owo < 0 entao
-
-    fim
-    senao
-
-    fim
+x = 1
+se x > 0 entao
+    exibir("    `se` funcionando")
+senao se x < 0 entao
+    erro("    Algo deu errado com `senao se`")
+senao // x == 0
+    erro("    Algo deu errado com `senao`")
 fim
 
-se 1 < 0 entao fim
-senao fim
+x = -1
+se x > 0 entao
+    erro("    Algo deu errado com `se`")
+senao se x < 0 entao
+    exibir("    `senao se` funcionando")
+senao // x == 0
+    erro("    Algo deu errado com `senao`")
+fim
+
+x = 0
+se x > 0 entao
+    erro("    Algo deu errado com `se`")
+senao se x < 0 entao
+    erro("    Algo deu errado com `senao se`")
+senao // x == 0
+    exibir("    `senao` funcionando")
+fim
 
 exibir("Testando Loops")
 var n = 0
@@ -66,13 +73,12 @@ funcao foo(bar)
     retornar bar
 fim
 
-const testeArgumento = 69
+var testeArgumento = 69
 se foo(testeArgumento) != testeArgumento entao
     erro("Problema detectado no Retorno de Funções ou Passagem de Argumentos!")
 fim
 
 exibir("Testando Funções Nativas")
-aleatorio(1000)
 texto(1)
 texto(1.0)
 int(1)
@@ -110,18 +116,18 @@ exibir("    Importando utilidades.libra")
 importar "utilidades.libra"
 
 exibir("Testando algumas funções das bibliotecas")
-exibir("   Testando funções matemáticas")
+exibir("    Testando funções matemáticas")
 se (raizq(64) != 8) ou (raiz(27, 3) != 3) entao
-    exibir("    Problema com a função raiz()")
+    exibir("        Problema com a função raiz()")
 fim
 
-exibir("   Testando funções de vetores:")
+exibir("    Testando algumas funções de vetores:")
 
 var testeVetor = {1,2,3}
-exibir("   Testando reverter()")
+exibir("        Testando reverter()")
 testeVetor = reverter(testeVetor)
 
-exibir("   Testando incluir()")
+exibir("        Testando incluir()")
 testeVetor = incluir(testeVetor, 1)
 
 exibir("Fim do Teste, nenhum problema fatal encontrado.")

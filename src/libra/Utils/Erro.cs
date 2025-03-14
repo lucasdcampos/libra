@@ -76,7 +76,7 @@ public class Erro : Exception
         Ambiente.Msg("\nHouve um problema, mas não foi culpa sua :(");
         Ambiente.Msg($"Uma descrição do erro foi salva em: {logFile}");
         Ambiente.Msg("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
-        Ambiente.Msg("Versão: Libra 1.0.0-Beta"); // TODO: Não deixar a versão hardcoded dessa forma
+        Ambiente.Msg($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
         Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
 
     }
@@ -192,7 +192,7 @@ public class ErroAcessoNulo : Erro
 public class ErroIndiceForaVetor : Erro
 {
     public ErroIndiceForaVetor(string msg = "", int linha = 0, int coluna = 0)
-        : base(2008, $"O indice se encontra fora dos limites do Vetor.", linha, coluna) { }
+        : base(2008, $"O indice se encontra fora dos limites do Vetor. {msg}", linha, coluna) { }
 }
 
 public class ErroTipoIncompativel : Erro

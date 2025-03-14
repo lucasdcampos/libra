@@ -1,3 +1,5 @@
+using System.Reflection;
+
 namespace Libra;
 
 public static class LibraUtil
@@ -17,5 +19,12 @@ public static class LibraUtil
     {
         if(esperado != recebido)
             throw new ErroEsperadoNArgumentos(ident, esperado, recebido);
+    }
+
+    public static string VersaoAtual()
+    {
+        var assembly = Assembly.GetExecutingAssembly();
+
+        return assembly.GetName().Version.ToString();
     }
 }

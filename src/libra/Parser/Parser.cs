@@ -166,45 +166,49 @@ public class Parser
 
         ConsumirToken(TokenTipo.Entao);
 
-        List<Instrucao> entao = new();
-        while (Atual().Tipo != TokenTipo.Senao && Atual().Tipo != TokenTipo.SenaoSe && Atual().Tipo != TokenTipo.Fim)
+        Instrucao[] corpoSe = ParseCorpoSe();
+        List<InstrucaoSenaoSe> listaSenaoSe = new();
+
+        while(Atual().Tipo == TokenTipo.SenaoSe || Atual().Tipo == TokenTipo.Senao)
         {
-            entao.Add(ParseInstrucao());
+            listaSenaoSe.Add(ParseInstrucaoSenaoSe());
         }
 
-        List<Instrucao> senao = new();
-        while (Atual().Tipo == TokenTipo.Senao || Atual().Tipo == TokenTipo.SenaoSe)
-        {
-            if (Atual().Tipo == TokenTipo.SenaoSe)
-            {
-                ConsumirToken(TokenTipo.SenaoSe);
-                var condicaoSenaoSe = ParseExpressao();
-                ConsumirToken(TokenTipo.Entao);
-
-                List<Instrucao> entaoSenaoSe = new();
-                while (Atual().Tipo != TokenTipo.Senao && Atual().Tipo != TokenTipo.SenaoSe && Atual().Tipo != TokenTipo.Fim)
-                {
-                    entaoSenaoSe.Add(ParseInstrucao());
-                }
-
-                return new InstrucaoSe(_linha, condicaoSenaoSe, entaoSenaoSe.ToArray(), ParseInstrucaoSe()?.Entao.ToArray());
-            }
-            else if (Atual().Tipo == TokenTipo.Senao)
-            {
-                ConsumirToken(TokenTipo.Senao);
-
-                while (Atual().Tipo != TokenTipo.Fim)
-                {
-                    senao.Add(ParseInstrucao());
-                }
-            }
-        }
-
-        ConsumirToken(TokenTipo.Fim);
-
-        return new InstrucaoSe(_linha, expressao, entao.ToArray(), senao.Count > 0 ? senao.ToArray() : null);
+        return new InstrucaoSe(_linha, expressao, corpoSe, listaSenaoSe.Count > 0 ? listaSenaoSe.ToArray() : null);
     }
 
+    private InstrucaoSenaoSe? ParseInstrucaoSenaoSe()
+    {
+        
+        // Senao será convertido para um "senao se 1", que é uma expressão sempre verdadeira
+        if(TentarConsumirToken(TokenTipo.Senao) != null)
+        {
+            return new InstrucaoSenaoSe(_linha, ExpressaoLiteral.CriarInt(_linha, 1), ParseCorpoSe());
+        }
+
+        while(TentarConsumirToken(TokenTipo.SenaoSe) != null)
+        {
+            var expr = ParseExpressao();
+            ConsumirToken(TokenTipo.Entao);
+            List<Instrucao> corpo = new();
+
+            return new InstrucaoSenaoSe(_linha, expr, ParseCorpoSe());
+        }
+
+        return null;
+    }
+
+    private Instrucao[] ParseCorpoSe()
+    {
+        List<Instrucao> corpoSe = new();
+        while (TentarConsumirToken(TokenTipo.Fim) == null && 
+        Atual().Tipo != TokenTipo.Senao &&
+        Atual().Tipo != TokenTipo.SenaoSe)
+        {
+            corpoSe.Add(ParseInstrucao());
+        }
+        return corpoSe.ToArray();
+    }
 
     private InstrucaoEnquanto? ParseInstrucaoEnquanto()
     {
@@ -252,6 +256,11 @@ public class Parser
     private ExpressaoInicializacaoVetor ParseInicializacaoVetor()
     {
         ConsumirToken(TokenTipo.AbrirChave);
+        if(TentarConsumirToken(TokenTipo.FecharChave) != null)
+        {
+            return new ExpressaoInicializacaoVetor(new List<Expressao>());
+        }
+        
         var expressoes = new List<Expressao>();
         while(true)
         {
@@ -300,7 +309,7 @@ public class Parser
                 return exprDentroParenteses;
         }
 
-        throw new ErroAcessoNulo(" Não foi possível parsear a expressão", _linha);
+        throw new ErroAcessoNulo($" Não foi possível parsear a expressão: {Atual().Tipo}", _linha);
     }
 
     private Expressao? ParseExpressaoAcessoVetor()
@@ -376,8 +385,10 @@ public class Parser
         return token;
     }
 
-    private Token? TentarConsumirToken(TokenTipo tipo)
+    private Token? TentarConsumirToken(TokenTipo tipo, bool seguro = false)
     {
+        if(Atual().Tipo == TokenTipo.FimDoArquivo && seguro)
+            new ErroTokenInvalido("Fim do Arquivo", _linha);
         if(Atual().Tipo == tipo)
         {
             return ConsumirToken();

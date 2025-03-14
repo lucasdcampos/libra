@@ -43,8 +43,8 @@ funcao raiz(numero, indice)
 fim
 
 // Calcula e retorna a raiz quadrada de um número
-funcao raizq(n)
-    retornar raiz(n, 2)
+funcao raizq(x)
+    retornar raiz(x, 2)
 fim
 
 // Calcula e retorna a o fatorial de um número
@@ -60,12 +60,12 @@ funcao fatorial(n)
 fim
 
 // Retorna o valor absoluto (módulo) de um número
-funcao abs(n)
-    se n > 0 entao
-        retornar n
+funcao abs(x)
+    se x > 0 entao
+        retornar x
     fim
 
-    retornar -n
+    retornar -x
 
 fim
 
@@ -87,14 +87,72 @@ funcao chao(a, b)
     retornar b
 fim
 
-funcao sen(angulo)
-    retornar __mathsin__(angulo)
+// Retorna o inteiro mais próximo de um valor real
+funcao arrendondar(x)
+    x = real(x)
+    se x > int(x) + 0.5 entao
+        retornar int(x+1)
+    fim
+    retornar int(x)
 fim
 
-funcao cos(angulo)
-    retornar __mathcos__(angulo)
+// Retorna a hipotenusa de dois lados
+funcao hipotenusa(a, b)
+    retornar raizq(a*a + b*b)
 fim
 
-funcao tan(angulo)
-    retornar __mathtan__(angulo)
+// Retorna o seno de um ângulo x
+funcao sen(x)
+    retornar __mathsin__(x)
+fim
+
+// Retorna o cosseno de um ângulo x
+funcao cos(x)
+    retornar __mathcos__(x)
+fim
+
+// Retorna a tangente de um ângulo x
+funcao tan(x)
+    retornar __mathtan__(x)
+fim
+
+// Retorna o arco-seno de um ângulo x
+funcao arcsen(x)
+    retornar sen(x)^-1
+fim
+
+// Retorna o arco-cosseno de um ângulo x
+funcao arccos(x)
+    retornar cos(x)^-1
+fim
+
+// Retorna a arco-tangente de um ângulo x
+funcao arctan(x)
+    retornar tan(x)^-1
+fim
+
+// Retorna o logaritmo de x na base n
+funcao log(x, n)
+    var xReal = real(x)
+    var baseReal = real(n)
+    se tipo(xReal) == nulo ou tipo(baseReal) == nulo entao
+        erro("log(x, base) deve receber números reais!")
+    fim
+    retornar __mathlog__(x, n)
+fim
+
+funcao ln(x)
+    retornar log(x, E)
+fim
+
+funcao log2(x)
+    retornar log(x, 2)
+fim
+
+funcao exp(x)
+    retornar E^x
+fim
+
+funcao exp2(x)
+    retornar 2^x
 fim
