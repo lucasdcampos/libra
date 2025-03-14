@@ -45,11 +45,9 @@ public class Parser
 
     public Instrucao[] ParseInstrucoes(List<Token> tokens)
     {
-        Resetar();
-
         _tokens = tokens;
 
-        if(_tokens == null)
+        if(_tokens == null || _tokens.Count == 0)
             return new Instrucao[0];
 
         return ParseInstrucoes(TokenTipo.FimDoArquivo);
@@ -68,7 +66,9 @@ public class Parser
     }
 
     private Instrucao? ParseInstrucao()
-    {        
+    {   
+        _local = Atual().Local;
+        
         switch(Atual().Tipo)
         {
             case TokenTipo.Var: return ParseInstrucaoVar();
@@ -399,6 +399,7 @@ public class Parser
     {
         if(Atual().Tipo == TokenTipo.FimDoArquivo && seguro)
             new ErroTokenInvalido("Fim do Arquivo", _local);
+
         if(Atual().Tipo == tipo)
         {
             return ConsumirToken();

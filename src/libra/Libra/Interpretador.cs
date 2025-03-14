@@ -28,6 +28,7 @@ public class Interpretador
     {
         if(_instancia == null)
             return new LocalToken();
+        
         return _instancia._local;
     }
 

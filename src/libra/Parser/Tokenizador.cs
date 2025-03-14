@@ -39,15 +39,6 @@ public class Tokenizador
         _local = new LocalToken(arquivo, 1);
         _posicao = 0;
         
-        try
-        {
-            PreTokenizar();
-        }
-        catch
-        {
-            return null;
-        }
-        
         var texto = "";
         try
         {
@@ -95,52 +86,6 @@ public class Tokenizador
         }
 
         return null;
-    }
-
-    // TODO: Precisa ser corrigido, é possível chamar arquivos libra recursivamente ou mais de uma vez
-    private void PreTokenizar()
-    {
-        // Expressão regular para encontrar as declarações de importação
-        var regex = new Regex(@"importar\s+""([^""]+)""");
-
-        // Obtém o caminho do diretório do executável/biblioteca
-        string caminhoExecutavel = AppDomain.CurrentDomain.BaseDirectory;
-
-        // Obtém o caminho do diretório atual do usuário
-        string caminhoAtual = Directory.GetCurrentDirectory();
-        // Enquanto houver declarações de importação na string _fonte
-        Match match;
-        while ((match = regex.Match(_fonte)).Success)
-        {
-            string nomeArquivo = match.Groups[1].Value;
-
-            if (!_arquivosImportados.ContainsKey(nomeArquivo))
-            {
-                string caminhoCompleto = Path.Combine(caminhoExecutavel+"/biblioteca/", nomeArquivo);
-
-                if (!File.Exists(caminhoCompleto))
-                {
-                    caminhoCompleto = Path.Combine(caminhoAtual, nomeArquivo);
-                }
-
-                if (File.Exists(caminhoCompleto))
-                {
-                    string conteudoArquivo = File.ReadAllText(caminhoCompleto);
-                    _fonte = _fonte.Replace(match.Value, conteudoArquivo);
-                    _arquivosImportados.Add(nomeArquivo, 1);
-                }
-                else
-                {
-                    throw new ErroAcessoNulo($" Arquivo não encontrado: {caminhoCompleto}");
-                    return;
-                }
-            }
-            else
-            {
-                // Se o arquivo já foi importado, remove a declaração de importação (importar "nome")
-                _fonte = _fonte.Replace(match.Value, string.Empty);
-            }
-        }
     }
 
     private void TokenizarBinario()
@@ -265,6 +210,31 @@ public class Tokenizador
         {
             buffer += ConsumirChar();
         }
+        
+        if(buffer == "importar")
+        {
+            ConsumirEspacos();
+
+            if(Atual() != '"')
+                throw new Erro("Esperado `\"`", _local);
+            
+            ConsumirChar(); // Consumindo `"`
+            string caminhoArquivo = "";
+
+            while(Atual() != '"')
+            {
+                if(Atual() == '\n' || ConsumirEspacos() != 0)
+                    throw new Erro("Esperado `\"`", _local);
+
+                caminhoArquivo += ConsumirChar();
+            }
+            ConsumirChar(); // Consumindo `"`
+
+            ImportarArquivo(caminhoArquivo);
+
+            return;
+        }
+
         if(buffer == "senao")
         {
             ConsumirEspacos();
@@ -472,18 +442,24 @@ public class Tokenizador
         return buffer;
     }
 
-    private void ConsumirEspacos()
+    private int ConsumirEspacos()
     {
+        int espacosConsumidos = 0;
         while(Atual() == ' ')
         {
+            espacosConsumidos++;
             Passar();
         }
+        return espacosConsumidos;
     }
 
     private void ConsumirEspacosELinhas()
     {
         while(Atual() == ' ' || Atual() == '\n')
         {
+            if(Atual() == '\n')
+                _local.Linha++;
+
             Passar();
         }
     }
@@ -508,16 +484,47 @@ public class Tokenizador
                 Passar(); // Consome '/'
                 break;
             }
+            if(Atual() == '\n')
+                _local.Linha++;
+
             Passar();
         }
     }
 
+    private void ImportarArquivo(string caminho)
+    {
+        if(_arquivosImportados.ContainsKey(caminho))
+            return;
+        
+        _arquivosImportados.Add(caminho, 1);
+
+        string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "biblioteca/" + caminho);
+        string caminhoUsuario = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), caminho);
+
+        if (!File.Exists(caminhoExecutavel) && !File.Exists(caminhoUsuario))
+            throw new ErroAcessoNulo(caminhoExecutavel);
+
+        string caminhoFinalArquivo = File.Exists(caminhoExecutavel) ? caminhoExecutavel : caminhoUsuario;
+
+        string codigoArquivo = File.ReadAllText(caminhoFinalArquivo).ReplaceLineEndings(Environment.NewLine);;
+
+        var novosTokens = new Tokenizador().Tokenizar(codigoArquivo, caminho);
+
+        for (int i = 0; i < novosTokens.Count - 1; i++)
+        {
+            _tokens.Add(novosTokens[i]);
+        }
+
+    }
+
     public void PrintarListaTokens()
     {
+        Console.WriteLine($"Tokens {_local.Arquivo}:");
         foreach(var token in _tokens)
         {
-            Ambiente.Msg(token.ToString());
+            Ambiente.Msg("    " + token.ToString());
         }
+        Ambiente.Msg("\n");
     }
 
     private char Atual() 

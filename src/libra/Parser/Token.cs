@@ -2,7 +2,7 @@ namespace Libra;
 
 public struct LocalToken
 {
-    public string Arquivo;
+    public string Arquivo = "";
     public int Linha = 1;
 
     public LocalToken(string arquivo, int linha)

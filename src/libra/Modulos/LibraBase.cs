@@ -109,7 +109,7 @@ public class LibraBase : IModulo
         else if(args[0] is Assembly)
             assembly = (Assembly)args[0];
         else
-            throw new Erro("Esperado um caminho para DLL");
+            throw new Erro("Esperado um caminho para DLL", Interpretador.LocalAtual);
             
         foreach (var tipo in assembly.GetTypes())
         {
@@ -134,7 +134,7 @@ public class LibraBase : IModulo
 
         // Compilar o código do usuário
         var assembly = CompilarCodigo(codigo);
-        if (assembly == null) throw new Erro("Erro ao compilar o código.");
+        if (assembly == null) throw new Erro("Erro ao compilar o código.", Interpretador.LocalAtual);
         registrardll(new object[] {assembly});
 
         return null;
@@ -183,7 +183,7 @@ public class LibraBase : IModulo
     public object _int(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento");
+            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
 
         var r = (int?)tentarInt(args);
         if(r == null)
@@ -195,7 +195,7 @@ public class LibraBase : IModulo
     public object tentarInt(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento");
+            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
 
         int resultado;
         try
@@ -213,11 +213,11 @@ public class LibraBase : IModulo
     public object tentarReal(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento");
+            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
 
         var r = (double?)tentarInt(args);
         if(r == null)
-            throw new ErroAcessoNulo($" Não foi possível converter `{args[0]}` para Real");
+            throw new ErroAcessoNulo($" Não foi possível converter `{args[0]}` para Real", Interpretador.LocalAtual);
 
         return r;
     }
@@ -225,7 +225,7 @@ public class LibraBase : IModulo
     public object real(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento");
+            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
 
         double resultado;
         try
@@ -247,7 +247,7 @@ public class LibraBase : IModulo
         var tamanho = LibraObjeto.ParaLibraObjeto(args[0]).ObterTamanhoEmBytes();
 
         if(tamanho.Valor < 0)
-            throw new Erro($"Não é possível calcular diretamente o tamanho de {args[0]}");
+            throw new Erro($"Não é possível calcular diretamente o tamanho de {args[0]}", Interpretador.LocalAtual);
         
         return tamanho;
     }
@@ -277,7 +277,7 @@ public class LibraBase : IModulo
         if(args[0] is LibraVetor vetor)
             return vetor.Valor.Length;
 
-        throw new ArgumentException("Argumento inválido para length.");
+        throw new Erro("Argumento inválido para tamanho().", Interpretador.LocalAtual);
 
         return null;
     }
@@ -308,7 +308,7 @@ public class LibraBase : IModulo
             throw new Erro("Erro!");
         }
             
-        throw new Erro(args[0].ToString());
+        throw new Erro(args[0].ToString(), Interpretador.LocalAtual);
     }
 
     private Assembly CompilarCodigo(string codigo)
