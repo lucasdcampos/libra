@@ -67,7 +67,7 @@ public class Interpretador
         try
         {
             Ambiente.SetarPrograma(programa);
-            InterpretarInstrucoes(programa.Instrucoes);
+            InterpretarInstrucoes(programa.Instrucoes, true);
             return Ambiente.ProgramaAtual.CodigoSaida;
         }
         catch(Exception e)
@@ -77,21 +77,21 @@ public class Interpretador
         }
     }
 
-    public void InterpretarInstrucoes(Instrucao[] instrucoes)
+    public void InterpretarInstrucoes(Instrucao[] instrucoes, bool mostrarResultado = false)
     {
         for(int i = 0; i < instrucoes.Length; i++)
         {
-            InterpretarInstrucao(instrucoes[i]);
+            InterpretarInstrucao(instrucoes[i], mostrarResultado);
         }
     }
 
-    public void InterpretarInstrucao(Instrucao instrucao)
+    public void InterpretarInstrucao(Instrucao instrucao, bool mostrarResultado = false)
     {
         if(instrucao is null)
             return;
 
         _local = instrucao.Local;
-
+        
         var acoes = new Dictionary<TokenTipo, Action>
         {
             { TokenTipo.Var, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
@@ -109,7 +109,7 @@ public class Interpretador
         if (acoes.TryGetValue(instrucao.TipoInstrucao, out var acao))
             acao();
 
-        if(instrucao is InstrucaoExibirExpressao exibirExpr)
+        if(instrucao is InstrucaoExibirExpressao exibirExpr && mostrarResultado)
         {   
             Ambiente.Msg(InterpretarExpressao(exibirExpr.Expressao).ObterValor().ToString());
         }
@@ -180,7 +180,6 @@ public class Interpretador
             }
             _programa.PilhaEscopos.DesempilharEscopo();
         }
-            
     }
 
     public void InterpretarFuncao(InstrucaoFuncao funcao)
@@ -215,12 +214,6 @@ public class Interpretador
 
         var resultadoFuncao = f.Executar(valoresArgumentos.ToArray());
         var objeto = LibraObjeto.ParaLibraObjeto(resultadoFuncao);
-
-        if(_shell)
-        {
-            if(objeto.ObterValor() != null)
-                Ambiente.Msg(objeto.ObterValor().ToString());
-        }
 
         return objeto;
     }

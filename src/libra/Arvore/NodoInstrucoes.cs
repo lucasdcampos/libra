@@ -95,16 +95,18 @@ namespace Libra.Arvore
     // Não necessitam de implementação
     public class InstrucaoRomper : Instrucao
     {
-        public InstrucaoRomper()
+        public InstrucaoRomper(LocalToken local)
         {
             TipoInstrucao = TokenTipo.Romper;
+            Local = local;
         }
     }
     public class InstrucaoContinuar : Instrucao
     {
-        public InstrucaoContinuar()
+        public InstrucaoContinuar(LocalToken local)
         {
             TipoInstrucao = TokenTipo.Continuar;
+            Local = local;
         }
     }
 
@@ -142,6 +144,7 @@ namespace Libra.Arvore
             Local = local;
             Expressao = expressao;
             TipoInstrucao = TokenTipo.TokenInvalido;
+
         }
 
         public Expressao Expressao { get; private set; }

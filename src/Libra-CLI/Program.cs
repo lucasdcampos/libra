@@ -7,10 +7,6 @@ using Libra.Arvore;
 
 internal static class Program
 {
-    private static Tokenizador _tokenizador = new Tokenizador();
-    private static Parser _parser = new Parser();
-    private static Interpretador _interpretador = new Interpretador();
-
     private static bool _carregarBibliotecas = true;
     // Incluindo as bibliotecas por padrão na Shell da Libra
     private static string bibliotecas = 
@@ -50,9 +46,14 @@ importar ""utilidades.libra""
         Console.WriteLine($"Bem-vindo à Libra {LibraUtil.VersaoAtual()}");
         Console.WriteLine("Digite \"ajuda\", \"licenca\" ou uma instrução.");
         
-        var bibliotecaPreTokenizada = _tokenizador.Tokenizar(bibliotecas);
-        var astBiblioteca = _parser.ParseInstrucoes(bibliotecaPreTokenizada);
-
+        List<Token> bibliotecaPreTokenizada = new();
+        Instrucao[] astBiblioteca = new Instrucao[0];
+        if(_carregarBibliotecas)
+        {
+            bibliotecaPreTokenizada = new Tokenizador().Tokenizar(bibliotecas);
+            astBiblioteca = new Parser().ParseInstrucoes(bibliotecaPreTokenizada);
+        }
+        
         while (true)
         {
             Console.Write(">>> ");
@@ -65,23 +66,23 @@ importar ""utilidades.libra""
 
                 try
                 {
-                    tokens = _tokenizador.Tokenizar(linha);
-                    instrucoes = _parser.ParseInstrucoes(tokens).ToList<Instrucao>();
+                    tokens = new Tokenizador().Tokenizar(linha);
+                    instrucoes = new Parser().ParseInstrucoes(tokens).ToList<Instrucao>();
+
+                    // Haverá problemas se executar pelo botão do Visual Studio, pois ele não conseguirá
+                    // carregar as bibliotecas. Isso se certifica de não carregar em DEBUG mode.
+                    #if DEBUG
+                    #else
+                        if(_carregarBibliotecas && astBiblioteca != null && instrucoes != null)
+                            instrucoes.InsertRange(0, astBiblioteca);
+                    #endif
+
+                    new Interpretador().Interpretar(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
                 }
                 catch (Exception e)
                 {
                     Erro.MensagemBug(e);
                 }
-
-                // Haverá problemas se executar pelo botão do Visual Studio, pois ele não conseguirá
-                // carregar as bibliotecas. Isso se certifica de não carregar em DEBUG mode.
-                #if DEBUG
-                #else
-                    if(_carregarBibliotecas)
-                        instrucoes.InsertRange(0, astBiblioteca);
-                #endif
-                
-                _interpretador.Interpretar(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
             }
         }
     }

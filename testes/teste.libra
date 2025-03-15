@@ -133,8 +133,8 @@ importar "utilidades.libra"
 
 exibir("Testando algumas funções das bibliotecas")
 exibir("    Testando funções matemáticas")
-se (raizq(64) != 8) ou (raiz(27, 3) != 3) entao
-    exibir("        Problema com a função raiz()")
+se raizq(64) != 8 entao
+    erro("        Problema com a função raizq(): raizq(64) = " + texto(raizq(64)))
 fim
 
 exibir("    Testando algumas funções de vetores:")

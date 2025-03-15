@@ -59,6 +59,9 @@ public class Parser
 
         while(TentarConsumirToken(fim) == null)
         {
+            if(TentarConsumirToken(TokenTipo.FimDoArquivo) != null)
+                break;
+
             instrucoes.Add(ParseInstrucao());
         }
         
@@ -76,8 +79,8 @@ public class Parser
             case TokenTipo.Funcao: return ParseInstrucaoFuncao();
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
-            case TokenTipo.Romper: ConsumirToken(); return new InstrucaoRomper();
-            case TokenTipo.Continuar: ConsumirToken(); return new InstrucaoContinuar();
+            case TokenTipo.Romper: ConsumirToken(); return new InstrucaoRomper(_local);
+            case TokenTipo.Continuar: ConsumirToken(); return new InstrucaoContinuar(_local);
             case TokenTipo.Retornar: ConsumirToken(); return new InstrucaoRetornar(_local, ParseExpressao());
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
@@ -88,10 +91,12 @@ public class Parser
 
         var expr = new InstrucaoExibirExpressao(_local, ParseExpressao());
         
-        if(expr.Expressao != null && expr.Expressao is not ExpressaoChamadaFuncao)
+        if(expr.Expressao != null)
+        {
             return expr;
-        
-        return null;
+        }
+            
+        throw new Erro($"Instrução inválida {Atual()}", _local);
     }
 
     private Instrucao? ParseInstrucaoVar()
