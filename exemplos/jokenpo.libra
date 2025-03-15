@@ -3,6 +3,7 @@ importar "matematica.libra"
 funcao jogar()
     var opcoes = { "Pedra", "Papel", "Tesoura" }
     var computador = int(aleatorio(0, 3))
+    
     exibir("Escolha: 0 - Pedra, 1 - Papel, 2 - Tesoura" + NL, "> ")
     var jogador = int(entrada())
 
