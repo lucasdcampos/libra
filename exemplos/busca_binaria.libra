@@ -1,16 +1,16 @@
 funcao buscaBinaria(vetor, alvo)
     var inicio = 0
-    var fim = tamanho(vetor) - 1
-    enquanto inicio <= fim faca
-        var meio = int((inicio + fim))
+    var fimVetor = tamanho(vetor) - 1
+    enquanto inicio <= fimVetor faca
+        var meio = int((inicio + fimVetor))
         se vetor[meio] == alvo entao
             exibir(concat("Elemento encontrado na posição: ", meio))
-            retornar
+            retornar nulo
         fim
         se vetor[meio] < alvo entao
             inicio = meio + 1
         senao
-            fim = meio - 1
+            fimVetor = meio - 1
         fim
     fim
     exibir("Elemento não encontrado.")
