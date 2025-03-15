@@ -88,13 +88,6 @@ public class Parser
                 else
                     return ParseInstrucaoVar();
         }
-
-        var expr = new InstrucaoExibirExpressao(_local, ParseExpressao());
-        
-        if(expr.Expressao != null)
-        {
-            return expr;
-        }
             
         throw new Erro($"Instrução inválida {Atual()}", _local);
     }
@@ -116,11 +109,8 @@ public class Parser
             modificacaoVetor = true;
         }
 
-        if(TentarConsumirToken(TokenTipo.OperadorDefinir) == null)
-        {
-            return new InstrucaoExibirExpressao(_local, new ExpressaoVariavel(tokenIdentificador));
-        }
-
+        ConsumirToken(TokenTipo.OperadorDefinir);
+        
         var expressao = ParseExpressao();
         
         if(modificacaoVetor) return new InstrucaoModificacaoVetor(_local, identificador, indiceExpr, expressao);

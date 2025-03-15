@@ -134,22 +134,6 @@ namespace Libra.Arvore
         public ExpressaoChamadaFuncao Chamada { get; private set; }
     }
 
-    // Usada na CLI da Libra. Ex:
-    // >>> 1+1
-    // Saída: 2
-    public class InstrucaoExibirExpressao : Instrucao
-    {
-        public InstrucaoExibirExpressao(LocalToken local, Expressao expressao)
-        {
-            Local = local;
-            Expressao = expressao;
-            TipoInstrucao = TokenTipo.TokenInvalido;
-
-        }
-
-        public Expressao Expressao { get; private set; }
-    }
-
     public class InstrucaoModificacaoVetor : Instrucao
     {
         public InstrucaoModificacaoVetor(LocalToken local, string identificador, Expressao indiceExpr, Expressao expressao)

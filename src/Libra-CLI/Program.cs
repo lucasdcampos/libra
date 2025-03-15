@@ -66,7 +66,7 @@ importar ""utilidades.libra""
 
                 try
                 {
-                    tokens = new Tokenizador().Tokenizar(linha);
+                    tokens = new Tokenizador().Tokenizar("exibir("+linha+")");
                     instrucoes = new Parser().ParseInstrucoes(tokens).ToList<Instrucao>();
 
                     // Haverá problemas se executar pelo botão do Visual Studio, pois ele não conseguirá

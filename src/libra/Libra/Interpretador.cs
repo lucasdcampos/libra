@@ -67,7 +67,7 @@ public class Interpretador
         try
         {
             Ambiente.SetarPrograma(programa);
-            InterpretarInstrucoes(programa.Instrucoes, true);
+            InterpretarInstrucoes(programa.Instrucoes);
             return Ambiente.ProgramaAtual.CodigoSaida;
         }
         catch(Exception e)
@@ -77,15 +77,15 @@ public class Interpretador
         }
     }
 
-    public void InterpretarInstrucoes(Instrucao[] instrucoes, bool mostrarResultado = false)
+    public void InterpretarInstrucoes(Instrucao[] instrucoes)
     {
         for(int i = 0; i < instrucoes.Length; i++)
         {
-            InterpretarInstrucao(instrucoes[i], mostrarResultado);
+            InterpretarInstrucao(instrucoes[i]);
         }
     }
 
-    public void InterpretarInstrucao(Instrucao instrucao, bool mostrarResultado = false)
+    public void InterpretarInstrucao(Instrucao instrucao)
     {
         if(instrucao is null)
             return;
@@ -108,11 +108,6 @@ public class Interpretador
         // Executa a ação associada ao tipo, se existir.
         if (acoes.TryGetValue(instrucao.TipoInstrucao, out var acao))
             acao();
-
-        if(instrucao is InstrucaoExibirExpressao exibirExpr && mostrarResultado)
-        {   
-            Ambiente.Msg(InterpretarExpressao(exibirExpr.Expressao).ObterValor().ToString());
-        }
     }
 
     public void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
