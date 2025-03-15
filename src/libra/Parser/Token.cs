@@ -10,6 +10,11 @@ public struct LocalToken
         Arquivo = arquivo;
         Linha = linha;
     }
+
+    public override string ToString()
+    {
+        return $"{Arquivo}:{Linha}";
+    }
 }
 
 public enum TokenTipo
@@ -65,6 +70,7 @@ public enum TokenTipo
     Enquanto,
     Faca,
     Romper,
+    Continuar,
     Retornar,
     Fim,    
 }

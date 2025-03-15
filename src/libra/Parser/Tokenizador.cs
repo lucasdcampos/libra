@@ -22,6 +22,7 @@ public class Tokenizador
         { "enquanto", TokenTipo.Enquanto },
         { "faca", TokenTipo.Faca },
         { "romper", TokenTipo.Romper },
+        { "continuar", TokenTipo.Continuar },
         { "retornar", TokenTipo.Retornar },
         { "entao", TokenTipo.Entao },
         { "fim", TokenTipo.Fim },

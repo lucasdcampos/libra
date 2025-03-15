@@ -1,2 +1,9 @@
-importar "matematica.libra"
-raizq()
+var n = 0
+enquanto n < 3 faca
+    n = n+1
+    se n == 1 entao
+        romper
+    fim
+fim
+
+exibir(n)

@@ -10,6 +10,10 @@ public class ExcecaoRetorno : Exception
     }
 }
 
+public class ExcecaoRomper : Exception
+{
+}
+
 public class ExcecaoSaida : Exception
 {
     public int Codigo { get; private set; }

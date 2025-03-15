@@ -101,7 +101,8 @@ public class Interpretador
             { TokenTipo.Funcao, () => InterpretarFuncao((InstrucaoFuncao)instrucao) },
             { TokenTipo.Identificador, () => InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao) },
             { TokenTipo.Vetor, () => InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao) },
-            { TokenTipo.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) }
+            { TokenTipo.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
+            { TokenTipo.Romper, () => throw new ExcecaoRomper() }
         };
 
         // Executa a ação associada ao tipo, se existir.
@@ -159,11 +160,24 @@ public class Interpretador
         }
 
         var enquanto = (InstrucaoEnquanto)instrucao;
-    	var instrucoes = enquanto.Instrucoes;
         while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
             _programa.PilhaEscopos.EmpilharEscopo();
-            InterpretarInstrucoes(instrucoes);
+            foreach(var i in enquanto.Instrucoes)
+            {
+                try
+                {
+                    InterpretarInstrucao(i);
+                }
+                catch (Exception e)
+                {
+                    if(e is ExcecaoRomper)
+                    {
+                        _programa.PilhaEscopos.DesempilharEscopo();
+                        return;
+                    }
+                }
+            }
             _programa.PilhaEscopos.DesempilharEscopo();
         }
             

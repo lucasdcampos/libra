@@ -92,9 +92,20 @@ namespace Libra.Arvore
 
     }
 
+    // Não necessitam de implementação
     public class InstrucaoRomper : Instrucao
     {
-        // TODO: Implementar
+        public InstrucaoRomper()
+        {
+            TipoInstrucao = TokenTipo.Romper;
+        }
+    }
+    public class InstrucaoContinuar : Instrucao
+    {
+        public InstrucaoContinuar()
+        {
+            TipoInstrucao = TokenTipo.Continuar;
+        }
     }
 
     public class InstrucaoRetornar : Instrucao

@@ -68,7 +68,7 @@ public class Parser
     private Instrucao? ParseInstrucao()
     {   
         _local = Atual().Local;
-        
+
         switch(Atual().Tipo)
         {
             case TokenTipo.Var: return ParseInstrucaoVar();
@@ -76,7 +76,8 @@ public class Parser
             case TokenTipo.Funcao: return ParseInstrucaoFuncao();
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
-            case TokenTipo.Romper: return new InstrucaoRomper();
+            case TokenTipo.Romper: ConsumirToken(); return new InstrucaoRomper();
+            case TokenTipo.Continuar: ConsumirToken(); return new InstrucaoContinuar();
             case TokenTipo.Retornar: ConsumirToken(); return new InstrucaoRetornar(_local, ParseExpressao());
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)

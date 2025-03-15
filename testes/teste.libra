@@ -13,15 +13,22 @@ exibir("Testando Constantes")
 const QIDoLucas = 9999
 
 exibir("Testando Vetores")
-var vetor = { 1, 2, 3}
-var vetor2 = [10]
-vetor2[0] = 1
+var vetor = { 1, 2, 3 }
+vetor = [10]
+vetor[0] = 1
+vetor = {}
+vetor = []
 
 exibir("Testando Expressões")
 x = (1+2)*3
 x = !x
 x = -x
 x = 1 > 0 ou 1 >= 0 ou x < 0 ou x <= 0 ou x == 0 e x == 69
+
+exibir("Testando Expressões Especiais")
+x = 0b1111
+x = 0xCAFE
+
 
 exibir("Testando Tipos em Expressões")
 var str = "ola"
@@ -68,6 +75,15 @@ enquanto n < 3 faca
 fim
 n = 0
 
+enquanto n < 3 faca
+    se n == 1 entao
+        romper
+    fim
+    n = n+1
+fim
+se n != 1 entao
+    erro("Erro com instrução romper! n = " + texto(n) + " ao invés de 1")
+fim
 exibir("Testando Funções")
 funcao foo(bar)
     retornar bar
