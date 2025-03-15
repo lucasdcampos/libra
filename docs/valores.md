@@ -7,7 +7,7 @@ Libra é composta pelos seguintes tipos de dados:
 |----------|----------------------|
 | Nulo | Ausência de valor |
 | Int | Número inteiro de 32 bits |
-| Real | Número real de 32 bits |
+| Real | Número real de 64 bits |
 | Texto | Sequência de vários caracteres |
 | Vetor | Lista de valores |
 
