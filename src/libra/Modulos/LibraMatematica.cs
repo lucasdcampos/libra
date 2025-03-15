@@ -86,7 +86,7 @@ public class LibraMatematica : IModulo
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
 
         if(args[0] is double min && args[1] is double max)
-            return Math.Log(min, max);
+            return random.NextDouble() * (max - min) + min;
 
         return null;
     }
