@@ -144,19 +144,23 @@ public class LibraBase : IModulo
     {
         int qtd = args.Length;
         
+        for(int i = 0; i < args.Length; i++)
+        {
+            if(args[i] == null)
+                return null;
+        }
+
         switch(qtd)
         {
             case 0:
                 Ambiente.Msg($"{args[0]}");
-                return null;
+                break;
             case 1:
-                args[0] = args[0] == null ? "Nulo" : args[0];
                 Ambiente.Msg($"{args[0]}");
-                return null;
+                break;
             case 2:
-                args[0] = args[0] == null ? "Nulo" : args[0];
                 Ambiente.Msg(args[0].ToString(), args[1].ToString());
-                return null;
+                break;
         }
 
         return null;

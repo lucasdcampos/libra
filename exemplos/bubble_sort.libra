@@ -1,3 +1,5 @@
+importar "vetores.libra"
+
 funcao bubbleSort(vetor)
     var i = 0
     enquanto i < tamanho(vetor) faca
@@ -12,7 +14,7 @@ funcao bubbleSort(vetor)
         fim
         i = i + 1
     fim
-    exibir("Vetor ordenado: ", vetor)
+    exibir("Vetor ordenado: ", mostrarVetor(vetor))
 fim
 
 var numeros = { 64, 34, 25, 12, 22, 11, 90 }
