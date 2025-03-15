@@ -1,5 +1,7 @@
-se 1 > 0 entao
-    sair(1)
+se x > 10 entao
+    exibir("x é maior que 10")
+senao se x == 10 entao
+    exibir("x é igual a 10")
+senao
+    exibir("x é menor que 10")
 fim
-
-sair(0)
