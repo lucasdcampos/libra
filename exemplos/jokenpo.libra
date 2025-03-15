@@ -1,12 +1,12 @@
 funcao jogar()
     var opcoes = { "Pedra", "Papel", "Tesoura" }
-    var computador = aleatorio(3)
+    var computador = int(aleatorio(0, 3))
     exibir("> Escolha: 0 - Pedra, 1 - Papel, 2 - Tesoura", " ")
-    var jogador = ler_int()
+    var jogador = int(entrada())
 
     se jogador < 0 ou jogador >= tamanho(opcoes) entao
         exibir("Escolha inválida!")
-        retornar
+        retornar nulo
     fim
 
     exibir(concat("Você escolheu: ", opcoes[jogador]))
