@@ -468,7 +468,7 @@ public class Tokenizador
     private void ConsumirComentarioLinha()
     {
         Passar();
-        while(Atual() != '\n')
+        while(Atual() != '\n' && Atual() != '\0')
         {
             Passar();
         }
