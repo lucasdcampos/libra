@@ -242,8 +242,8 @@ public class Tokenizador
 
             if(Atual() == 's' && Proximo(1) == 'e')
             {
-                Passar();
-                Passar();
+                ConsumirChar();
+                ConsumirChar();
                 AdicionarTokenALista(TokenTipo.SenaoSe);
                 return;
             }
@@ -265,25 +265,24 @@ public class Tokenizador
         switch (Atual())
         {
             case ' ':
-                Passar();
+                ConsumirChar();
                 break;
             case '\n':
-                _local.Linha++;
-                Passar();
+                ConsumirChar();
                 break;
             case '\r':
-                Passar();
+                ConsumirChar();
                 break;
             case '\t':
-                Passar();
+                ConsumirChar();
                 break;
             case ';':
                 AdicionarTokenALista(TokenTipo.PontoEVirgula);
-                Passar();
+                ConsumirChar();
                 break;
             case '(':
                 AdicionarTokenALista(TokenTipo.AbrirParen);
-                Passar();
+                ConsumirChar();
                 break;
             case '[':
                 ConsumirChar();
@@ -291,7 +290,7 @@ public class Tokenizador
                 break;
             case ']':
                 AdicionarTokenALista(TokenTipo.FecharCol);
-                Passar();
+                ConsumirChar();
                 break;
             case '{':
                 ConsumirChar();
@@ -299,57 +298,57 @@ public class Tokenizador
                 break;
             case '}':
                 AdicionarTokenALista(TokenTipo.FecharChave);
-                Passar();
+                ConsumirChar();
                 break;
             case '>':
                 if (Proximo(1) == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorMaiorIgualQue);
-                    Passar();
-                    Passar();
+                    ConsumirChar();
+                    ConsumirChar();
                     break;
                 }
 
                 AdicionarTokenALista(TokenTipo.OperadorMaiorQue);
-                Passar();
+                ConsumirChar();
                 break;
             case '<':
                 if (Proximo(1) == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorMenorIgualQue);
-                    Passar();
-                    Passar();
+                    ConsumirChar();
+                    ConsumirChar();
                     break;
                 }
 
                 AdicionarTokenALista(TokenTipo.OperadorMenorQue);
-                Passar();
+                ConsumirChar();
                 break;
             case '!':
                 if (Proximo(1) == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorDiferente);
-                    Passar();
-                    Passar();
+                    ConsumirChar();
+                    ConsumirChar();
                     break;
                 }
                 AdicionarTokenALista(TokenTipo.OperadorNeg);
-                Passar();
+                ConsumirChar();
                 break;
             case '+':
                 AdicionarTokenALista(TokenTipo.OperadorSoma);
-                Passar();
+                ConsumirChar();
                 break;
             case '-':
                 AdicionarTokenALista(TokenTipo.OperadorSub);
-                Passar();
+                ConsumirChar();
                 break;
             case '*':
                 AdicionarTokenALista(TokenTipo.OperadorMult);
-                Passar();
+                ConsumirChar();
                 break;
             case '/':
-                Passar();
+                ConsumirChar();
                 if (Atual() == '/')
                 {
                     ConsumirComentarioLinha();
@@ -365,15 +364,15 @@ public class Tokenizador
                 break;
             case '^':
                 AdicionarTokenALista(TokenTipo.OperadorPot);
-                Passar();
+                ConsumirChar();
                 break;
             case '%':
                 AdicionarTokenALista(TokenTipo.OperadorResto);
-                Passar();
+                ConsumirChar();
                 break;
             case ')':
                 AdicionarTokenALista(TokenTipo.FecharParen);
-                Passar();
+                ConsumirChar();
                 break;
             case '=':
                 ConsumirChar();
@@ -381,7 +380,7 @@ public class Tokenizador
                 if (Atual() == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorComparacao);
-                    Passar();
+                    ConsumirChar();
                 }
                 else
                 {
@@ -389,23 +388,23 @@ public class Tokenizador
                 }
                 break;
             case '"':
-                Passar();
+                ConsumirChar();
 
                 while (Atual() != '"')
                 {
                     if (Atual() == '\\' && Proximo(1) == '"')
                     {
-                        Passar();
+                        ConsumirChar();
                     }
                     buffer += ConsumirChar();
                 }
 
                 AdicionarTokenALista(TokenTipo.TextoLiteral, buffer);
                 buffer = "";
-                Passar();
+                ConsumirChar();
                 break;
             case '\'':
-                Passar();
+                ConsumirChar();
                 buffer += ConsumirChar();
                 AdicionarTokenALista(TokenTipo.CaractereLiteral, buffer);
                 buffer = "";
@@ -413,11 +412,11 @@ public class Tokenizador
                 {
                     throw new Erro("Esperado `'`", _local);
                 }
-                Passar();
+                ConsumirChar();
                 break;
             case ',':
                 AdicionarTokenALista(TokenTipo.Virgula);
-                Passar();
+                ConsumirChar();
                 break;
             case '\0':
                 throw new ErroAcessoNulo(" Chegou ao fim do arquivo de forma inesperada.");
@@ -439,7 +438,7 @@ public class Tokenizador
                 throw new Erro($"Esperado `{caractere}`", _local);
         }
 
-        Passar();
+        ConsumirChar();
         return buffer;
     }
 
@@ -449,7 +448,7 @@ public class Tokenizador
         while(Atual() == ' ')
         {
             espacosConsumidos++;
-            Passar();
+            ConsumirChar();
         }
         return espacosConsumidos;
     }
@@ -461,35 +460,33 @@ public class Tokenizador
             if(Atual() == '\n')
                 _local.Linha++;
 
-            Passar();
+            ConsumirChar();
         }
     }
 
     private void ConsumirComentarioLinha()
     {
-        Passar();
+        ConsumirChar();
         while(Atual() != '\n' && Atual() != '\0')
         {
-            Passar();
+            ConsumirChar();
         }
         ConsumirChar();
     }
 
     private void ConsumirComentarioBloco()
     {
-        Passar();
+        ConsumirChar();
         while (Proximo(1) != '\0')
         {
             if (Atual() == '*' && Proximo(1) == '/')
             {
-                Passar(); // Consome '*'
-                Passar(); // Consome '/'
+                ConsumirChar(); // Consome '*'
+                ConsumirChar(); // Consome '/'
                 break;
             }
-            if(Atual() == '\n')
-                _local.Linha++;
 
-            Passar();
+            ConsumirChar();
         }
     }
 
@@ -544,16 +541,13 @@ public class Tokenizador
         return '\0';
     }
 
-    private void Passar(int quantidade = 1) 
-    {
-        _posicao += quantidade;
-    }
-
     private char ConsumirChar()
     {
         var c = Atual();
-        Passar();
-        
+        _posicao++;
+        if(c == '\n')
+            _local.Linha++;
+            
         return c;
     }
 
