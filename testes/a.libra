@@ -1,26 +1,5 @@
-importar "matematica.libra"
-
-funcao jogar()
-    var opcoes = { "Pedra", "Papel", "Tesoura" }
-    var computador = int(aleatorio(0, 3))
-    exibir("> Escolha: 0 - Pedra, 1 - Papel, 2 - Tesoura", " ")
-    var jogador = int(entrada())
-
-    se jogador < 0 ou jogador >= tamanho(opcoes) entao
-        exibir("Escolha inválida!")
-        retornar nulo
-    fim
-
-    exibir(concat("Você escolheu: ", opcoes[jogador]))
-    exibir(concat("Computador escolheu: ", opcoes[computador]))
-
-    se jogador == computador entao
-        exibir("Empate!")
-    senao se (jogador == 0 e computador == 2) ou (jogador == 1 e computador == 0) ou (jogador == 2 e computador == 1) entao
-        exibir("Você ganhou!")
-    senao
-        exibir("Você perdeu!")
-    fim
+var n = 0
+exibir("Calculando...")
+enquanto n < 1_000_000_000 faca
+    n = n+1
 fim
-
-jogar()

@@ -35,7 +35,7 @@ public class Tokenizador
 
     public List<Token> Tokenizar(string source, string arquivo = "") 
     {
-        _fonte = source;
+        _fonte = source.ReplaceLineEndings("\n");
         _tokens = new();
         _local = new LocalToken(arquivo, 1);
         _posicao = 0;
@@ -468,10 +468,11 @@ public class Tokenizador
     private void ConsumirComentarioLinha()
     {
         Passar();
-        while (Proximo(1) != '\n' && Proximo(1) != '\0')
+        while(Atual() != '\n')
         {
             Passar();
         }
+        ConsumirChar();
     }
 
     private void ConsumirComentarioBloco()
@@ -507,8 +508,8 @@ public class Tokenizador
 
         string caminhoFinalArquivo = File.Exists(caminhoExecutavel) ? caminhoExecutavel : caminhoUsuario;
 
-        string codigoArquivo = File.ReadAllText(caminhoFinalArquivo).ReplaceLineEndings(Environment.NewLine);;
-
+        string codigoArquivo = File.ReadAllText(caminhoFinalArquivo).ReplaceLineEndings("\n");
+        
         var novosTokens = new Tokenizador().Tokenizar(codigoArquivo, caminho);
 
         for (int i = 0; i < novosTokens.Count - 1; i++)
