@@ -33,19 +33,20 @@ namespace Libra.Arvore
 
     public class InstrucaoFuncao : Instrucao
     {
-        public InstrucaoFuncao(LocalToken local, string identificador, Instrucao[] instrucoes, List<string> parametros = null)
+        public InstrucaoFuncao(LocalToken local, string identificador, Instrucao[] instrucoes, List<Parametro> parametros = null, LibraTipo tipoRetorno = LibraTipo.Objeto)
         {
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
             TipoInstrucao = TokenTipo.Funcao;
             Local = local;
+            TipoRetorno = tipoRetorno;
         }
 
         public Instrucao[] Instrucoes { get; private set; }
         public string Identificador {get; private set; }
-        public List<string> Parametros { get; private set; }
-
+        public List<Parametro> Parametros { get; private set; }
+        public LibraTipo TipoRetorno { get; private set; }
     }
 
     public class InstrucaoSe : Instrucao

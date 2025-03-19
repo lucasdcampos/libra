@@ -27,4 +27,19 @@ public static class LibraUtil
 
         return assembly.GetName().Version.ToString();
     }
+
+    public static LibraTipo PegarTipo(string tipo)
+    {
+        switch(tipo)
+        {
+            case "Int": return LibraTipo.Int;
+            case "Real": return LibraTipo.Real;
+            case "Texto": return LibraTipo.Texto;
+            case "Vetor": return LibraTipo.Vetor;
+            case "Objeto": return LibraTipo.Objeto;
+            default:
+                throw new Erro($"Tipo desconhecido `{tipo}`", Interpretador.LocalAtual);
+        }
+        return LibraTipo.Nulo;
+    }
 }

@@ -187,7 +187,7 @@ public class Interpretador
         if(_programa.FuncaoExiste(identificador))
             throw new ErroFuncaoJaDefinida(identificador, _local);
         
-        var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros);
+        var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
         _programa.Funcoes[identificador] = novaFuncao;
     }
@@ -240,8 +240,13 @@ public class Interpretador
             // Adicionando os argumentos ao Escopo
             for (int i = 0; i < chamada.Argumentos.Count; i++)
             {
-                string ident = funcao.Parametros[i];
-                _programa.PilhaEscopos.DefinirVariavel(ident, InterpretarExpressao(chamada.Argumentos[i]));
+                string ident = funcao.Parametros[i].Identificador;
+                var obj = InterpretarExpressao(chamada.Argumentos[i]);
+                
+                if(funcao.Parametros[i].Tipo != LibraTipo.Objeto && funcao.Parametros[i].Tipo != obj.Tipo)
+                    throw new ErroTipoIncompativel(ident);
+
+                _programa.PilhaEscopos.DefinirVariavel(ident, obj);
             }
 
             InterpretarInstrucoes(funcao.Instrucoes);
@@ -249,7 +254,8 @@ public class Interpretador
         catch(ExcecaoRetorno retorno)
         {
             var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
-
+            if(funcao.TipoRetorno != resultado.Tipo && funcao.TipoRetorno != LibraTipo.Objeto)
+                throw new ErroTipoIncompativel(funcao.Identificador + "()");
             return resultado;
         }
         finally

@@ -15,13 +15,13 @@ public class Parser
         { TokenTipo.OperadorDiv, 3 },
         { TokenTipo.OperadorSoma, 2 },
         { TokenTipo.OperadorSub, 2 },
-        { TokenTipo.OperadorMaiorQue, 1 },
-        { TokenTipo.OperadorMaiorIgualQue, 1 },
-        { TokenTipo.OperadorMenorQue, 1 },
-        { TokenTipo.OperadorMenorIgualQue, 1 },
-        { TokenTipo.OperadorComparacao, 1 },
-        { TokenTipo.OperadorDiferente, 1 },
         { TokenTipo.OperadorResto, 1},
+        { TokenTipo.OperadorComparacao, 0 },
+        { TokenTipo.OperadorDiferente, 0 },
+        { TokenTipo.OperadorMaiorQue, 0 },
+        { TokenTipo.OperadorMaiorIgualQue, 0 },
+        { TokenTipo.OperadorMenorQue, 0 },
+        { TokenTipo.OperadorMenorIgualQue, 0 },
         { TokenTipo.OperadorE, 0 },
         { TokenTipo.OperadorOu, 0 }
     };
@@ -104,19 +104,7 @@ public class Parser
         {
             ConsumirToken();
             string tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-            switch(tipo)
-            {
-                case "Int":
-                case "Real":
-                case "Texto":
-                case "Vetor":
-                    break;
-                case "Objeto":
-                    tipoModificavel = true;
-                    break;
-                default:
-                    throw new Erro($"Tipo desconhecido `{tipo}`", _local);
-            }
+            tipoModificavel = LibraUtil.PegarTipo(tipo) == LibraTipo.Objeto;
         }
 
         bool modificacaoVetor = false;
@@ -161,15 +149,20 @@ public class Parser
 
         ConsumirToken(TokenTipo.AbrirParen);
 
-        var parametros = new List<string>();
+        var parametros = new List<Parametro>();
 
         while(Atual().Tipo != TokenTipo.FecharParen)
         {
             if(Atual().Tipo != TokenTipo.Identificador)
                 ConsumirToken(TokenTipo.FecharParen); // tentar fechar paren (vai dar erro da msm forma)
             
-            var param = (string)ConsumirToken()?.Valor;
-            parametros.Add(param);
+            var ident = (string)ConsumirToken()?.Valor;
+            LibraTipo tipo = LibraTipo.Objeto;
+            if(TentarConsumirToken(TokenTipo.DoisPontos) != null)
+            {
+                tipo = LibraUtil.PegarTipo(ConsumirToken(TokenTipo.Identificador).Valor.ToString());
+            }
+            parametros.Add(new Parametro(ident, tipo));
 
             TentarConsumirToken(TokenTipo.Virgula);
         }
@@ -180,9 +173,16 @@ public class Parser
             
         ConsumirToken(TokenTipo.FecharParen);
 
+        LibraTipo tipoRetorno = LibraTipo.Objeto;
+        if(TentarConsumirSeta())
+        {
+            string tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+            tipoRetorno = LibraUtil.PegarTipo(tipo);
+        }
+
         var instrucoes = ParseInstrucoes();
 
-        return new InstrucaoFuncao(_local, identificador, instrucoes, parametros);
+        return new InstrucaoFuncao(_local, identificador, instrucoes, parametros, tipoRetorno);
     }
     
     private InstrucaoSe? ParseInstrucaoSe()
@@ -376,6 +376,17 @@ public class Parser
         return _precedenciaOperadores.TryGetValue(token.Tipo, out var prioridade) ? prioridade : null;
     }
 
+    private bool TentarConsumirSeta()
+    {
+        var seta = Atual().Tipo == TokenTipo.OperadorSub && Proximo(1).Tipo == TokenTipo.OperadorMaiorQue;
+        if(seta) 
+        {
+            ConsumirToken();
+            ConsumirToken();
+        }
+        return seta;
+    }
+    
     private Token Atual() 
     {
         return Proximo(0);

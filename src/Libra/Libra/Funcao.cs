@@ -2,17 +2,31 @@ using Libra.Arvore;
 
 namespace Libra
 {
+    public class Parametro
+    {
+        public string Identificador;
+        public LibraTipo Tipo;
+
+        public Parametro(string ident, LibraTipo tipo = LibraTipo.Objeto)
+        {
+            Identificador = ident;
+            Tipo = tipo;
+        }
+    }
+
     public class Funcao
     {
             public string Identificador;
             public Instrucao[] Instrucoes;
-            public List<string> Parametros;
+            public List<Parametro> Parametros;
+            public LibraTipo TipoRetorno;
 
-            public Funcao(string ident, Instrucao[] instrucoes, List<string> parametros)
+            public Funcao(string ident, Instrucao[] instrucoes, List<Parametro> parametros, LibraTipo tipoRetorno = LibraTipo.Objeto)
             {
                 Identificador = ident;
                 Instrucoes = instrucoes;
                 Parametros = parametros;
+                TipoRetorno = tipoRetorno;
             }
     }
 
