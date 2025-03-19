@@ -10,7 +10,7 @@ registrarCSharp("LibraSO", "ExecutarComando", SOCSharp)
 registrarCSharp("LibraSO", "CriarDiretorio", SOCSharp)
 registrarCSharp("LibraSO", "DeletarDiretorio", SOCSharp)
 
-funcao ler(caminho)
+funcao ler(caminho) -> Texto
     se tipo(caminho) != "Texto" entao
         erro("caminho deve ser Texto ao invés de " + tipo(caminho))
     fim
@@ -45,7 +45,7 @@ funcao listarArquivos(diretorio)
     retornar LibraSO_ListarArquivos(diretorio)
 fim
 
-funcao diretorioAtual()
+funcao diretorioAtual() -> Texto
     retornar LibraSO_DiretorioAtual()
 fim
 

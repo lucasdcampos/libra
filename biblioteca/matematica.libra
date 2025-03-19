@@ -38,7 +38,7 @@ const MB = 1024 * 1024
 const GB = 1024 * 1024 * 1024
 
 // Calcula e retorna a raiz enésima de um número
-funcao raiz(numero, indice)
+funcao raiz(numero, indice: Int)
     numero = real(numero)
     indice = real(numero)
     retornar __csraiz__(numero, indice)
@@ -91,7 +91,7 @@ funcao chao(a, b)
 fim
 
 // Retorna o inteiro mais próximo de um valor real
-funcao arrendondar(x)
+funcao arrendondar(x) -> Int
     x = real(x)
     se x > int(x) + 0.5 entao
         retornar int(x+1)

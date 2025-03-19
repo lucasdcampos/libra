@@ -3,7 +3,7 @@
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
 // Exibe todos os elementos de um Vetor
-funcao mostrarVetor(vetor)
+funcao mostrarVetor(vetor: Vetor) -> Vetor
     var n = 0
     exibir("{ ", "")
 
@@ -16,7 +16,7 @@ funcao mostrarVetor(vetor)
 fim
 
 // Retorna um novo Vetor com o elemento adicionado ao final
-funcao incluir(vetor, elemento)
+funcao incluir(vetor: Vetor, elemento) -> Vetor
     var temp = [tamanho(vetor)+1]
     var n = 0
 
@@ -30,7 +30,7 @@ funcao incluir(vetor, elemento)
 fim
 
 // Retorna um novo Vetor com o elemento do indice removido
-funcao remover(vetor, indice)
+funcao remover(vetor: Vetor, indice: Int) -> Vetor
     var temp = [tamanho(vetor) - 1]
     var n = 0
     var m = 0
@@ -47,12 +47,12 @@ funcao remover(vetor, indice)
 fim
 
 // Retorna se o Vetor está vazio
-funcao estaVazio(vetor)
+funcao estaVazio(vetor: Vetor) -> Int
     retornar tamanho(vetor) == 0
 fim
 
 // Retorna um novo Vetor com o elemento adicionado ao inicio
-funcao adicionarInicio(vetor, elemento)
+funcao adicionarInicio(vetor: Vetor, elemento) -> Vetor
     var temp = [tamanho(vetor) + 1]
     temp[0] = elemento
     var n = 0
@@ -66,7 +66,7 @@ funcao adicionarInicio(vetor, elemento)
 fim
 
 // Retorna o reverso de um Vetor
-funcao reverter(vetor)
+funcao reverter(vetor: Vetor) -> Vetor
     var temp = [tamanho(vetor)]
     var n = 0
     
@@ -79,7 +79,7 @@ funcao reverter(vetor)
 fim
 
 // Retorna o maior elemento de um Vetor
-funcao maiorElemento(vetor)
+funcao maiorElemento(vetor: Vetor)
     se tamanho(vetor) == 0 entao
         retornar nulo
     fim

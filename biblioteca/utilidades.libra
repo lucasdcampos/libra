@@ -3,7 +3,7 @@
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
 // Encerra o programa com uma mensagem de erro no console
-funcao panico(mensagem, codigo)
+funcao panico(mensagem: Texto, codigo: Int)
     erro(mensagem)
     sair(codigo)
 fim
