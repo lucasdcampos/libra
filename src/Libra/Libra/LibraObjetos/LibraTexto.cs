@@ -7,11 +7,13 @@ public class LibraTexto : LibraObjeto
     public LibraTexto(string valor)
     {
         Valor = valor;
+        Tipo = LibraTipo.Texto;
     }
 
     public override string ToString()
     {
         return "Texto";
+        
     }
 
     public override object ObterValor()

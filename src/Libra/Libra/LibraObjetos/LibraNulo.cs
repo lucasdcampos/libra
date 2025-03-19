@@ -2,6 +2,11 @@ namespace Libra;
 
 public class LibraNulo : LibraObjeto
 {
+    public LibraNulo()
+    {
+        Tipo = LibraTipo.Nulo;
+    }
+
     public override string ToString()
     {
         return "Nulo";

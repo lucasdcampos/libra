@@ -1,5 +1,5 @@
-var n = 0
-exibir("Calculando...")
-enquanto n < 1_000_000_000 faca
-    n = n+1
-fim
+var x = 10
+x = "a"
+
+var y: Int = 10
+y = "a"

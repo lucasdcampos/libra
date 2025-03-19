@@ -7,6 +7,7 @@ public class LibraInt : LibraObjeto
     public LibraInt(int valor)
     {
         Valor = valor;
+        Tipo = LibraTipo.Int;
     }
 
     public LibraInt(bool valor)

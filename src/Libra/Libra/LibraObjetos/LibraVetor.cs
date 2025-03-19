@@ -7,6 +7,7 @@ public class LibraVetor : LibraObjeto
     public LibraVetor(LibraObjeto[] vetor)
     {
         Valor = vetor;
+        Tipo = LibraTipo.Vetor;
     }
 
     public LibraVetor(int tamanho)

@@ -418,6 +418,10 @@ public class Tokenizador
                 AdicionarTokenALista(TokenTipo.Virgula);
                 ConsumirChar();
                 break;
+            case ':':
+                AdicionarTokenALista(TokenTipo.DoisPontos);
+                ConsumirChar();
+                break;
             case '\0':
                 throw new ErroAcessoNulo(" Chegou ao fim do arquivo de forma inesperada.");
                 break;

@@ -1,5 +1,10 @@
 namespace Libra;
 
+public enum LibraTipo 
+{
+    Nulo, Objeto, Int, Real, Texto, Vetor, Classe
+}
+
 public abstract class LibraObjeto
 {
     public static LibraObjeto ParaLibraObjeto(object valor)
@@ -26,6 +31,7 @@ public abstract class LibraObjeto
 
     public abstract object ObterValor();
     public abstract LibraInt ObterTamanhoEmBytes();
+    public LibraTipo Tipo { get; protected set; } = LibraTipo.Objeto;
 
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários
     public virtual LibraObjeto Soma(LibraObjeto outro)

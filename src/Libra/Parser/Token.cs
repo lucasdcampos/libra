@@ -57,6 +57,7 @@ public enum TokenTipo
     FecharChave,
     PontoEVirgula,
     Virgula,
+    DoisPontos,
     FimDoArquivo,
 
     // Palavras Reservadas

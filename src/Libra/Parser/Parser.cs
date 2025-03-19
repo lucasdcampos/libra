@@ -99,6 +99,26 @@ public class Parser
         var tokenIdentificador = ConsumirToken(TokenTipo.Identificador);
         string identificador = tokenIdentificador.Valor.ToString();
 
+        bool tipoModificavel = Atual().Tipo != TokenTipo.DoisPontos;
+        if(!tipoModificavel)
+        {
+            ConsumirToken();
+            string tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+            switch(tipo)
+            {
+                case "Int":
+                case "Real":
+                case "Texto":
+                case "Vetor":
+                    break;
+                case "Objeto":
+                    tipoModificavel = true;
+                    break;
+                default:
+                    throw new Erro($"Tipo desconhecido `{tipo}`", _local);
+            }
+        }
+
         bool modificacaoVetor = false;
         Expressao indiceExpr = null;
         
@@ -115,7 +135,7 @@ public class Parser
         
         if(modificacaoVetor) return new InstrucaoModificacaoVetor(_local, identificador, indiceExpr, expressao);
 
-        return new InstrucaoVar(_local, identificador, expressao, constante, declaracao || constante);
+        return new InstrucaoVar(_local, identificador, expressao, constante, declaracao || constante, tipoModificavel);
     }
 
     private ExpressaoDeclaracaoVetor? ParseVetor()

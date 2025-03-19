@@ -7,6 +7,7 @@ public class LibraReal : LibraObjeto
     public LibraReal(double valor)
     {
         Valor = valor;
+        Tipo = LibraTipo.Real;
     }
 
     public override string ToString()

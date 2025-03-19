@@ -269,7 +269,7 @@ public class Interpretador
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
   
         if(i.EhDeclaracao)
-            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante);
+            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoModificavel);
         else
             _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
