@@ -5,7 +5,6 @@ funcao mergeSort(primeiro, segundo)
         se primeiro[i] < segundo[j] entao
             exibir(primeiro[i], " ")
             i = i + 1
-        fim
         senao
             exibir(segundo[j], " ")
             j = j + 1
