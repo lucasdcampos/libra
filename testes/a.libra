@@ -1,2 +1,1 @@
-var x: Int = 10
-x = "20"
+exibir("oi")~

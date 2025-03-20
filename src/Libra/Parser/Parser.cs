@@ -37,6 +37,8 @@ public class Parser
         Resetar();
         _tokens = tokens;
 
+        if(tokens == null)
+            throw new Erro("Falha ao gerar Tokens");
         if(extra != null)
             _tokens.AddRange(extra);
 
