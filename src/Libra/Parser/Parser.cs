@@ -39,6 +39,7 @@ public class Parser
 
         if(tokens == null)
             throw new Erro("Falha ao gerar Tokens");
+
         if (extra != null)
         {
             _tokens = new Token[tokens.Length + extra.Length];
@@ -49,17 +50,7 @@ public class Parser
         return new Programa(ParseInstrucoes(TokenTipo.FimDoArquivo));
     }
 
-    public Instrucao[] ParseInstrucoes(Token[] tokens)
-    {
-        _tokens = tokens;
-
-        if(_tokens == null || _tokens.Length == 0)
-            return new Instrucao[0];
-
-        return ParseInstrucoes(TokenTipo.FimDoArquivo);
-    }
-
-    private Instrucao[] ParseInstrucoes(TokenTipo fim = TokenTipo.Fim)
+    public Instrucao[] ParseInstrucoes(TokenTipo fim = TokenTipo.Fim)
     {
         // Inicia uma lista com um pouco de espaço alocado
         var instrucoes = new List<Instrucao>(_tokens.Length / 3);
@@ -69,26 +60,27 @@ public class Parser
             if(TentarConsumirToken(TokenTipo.FimDoArquivo) != null)
                 break;
 
-            instrucoes.Add(ParseInstrucao());
+            instrucoes.Add(ParseInstrucaoAtual());
         }
         
         return instrucoes.ToArray();
     }
 
-    private Instrucao? ParseInstrucao()
+    private Instrucao? ParseInstrucaoAtual()
     {   
-        _local = Atual().Local;
+        var atual = Atual();
+        _local = atual.Local;
 
-        switch(Atual().Tipo)
+        switch(atual.Tipo)
         {
             case TokenTipo.Var: return ParseInstrucaoVar();
             case TokenTipo.Const: return ParseInstrucaoVar();
             case TokenTipo.Funcao: return ParseInstrucaoFuncao();
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
-            case TokenTipo.Romper: ConsumirToken(); return new InstrucaoRomper(_local);
-            case TokenTipo.Continuar: ConsumirToken(); return new InstrucaoContinuar(_local);
-            case TokenTipo.Retornar: ConsumirToken(); return new InstrucaoRetornar(_local, ParseExpressao());
+            case TokenTipo.Romper: Passar(); return new InstrucaoRomper(_local);
+            case TokenTipo.Continuar: Passar(); return new InstrucaoContinuar(_local);
+            case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, ParseExpressao());
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return new InstrucaoChamadaFuncao(_local, ParseExpressaoChamadaFuncao());
@@ -96,7 +88,7 @@ public class Parser
                     return ParseInstrucaoVar();
         }
             
-        throw new Erro($"Instrução inválida {Atual()}", _local);
+        throw new Erro($"Instrução inválida {atual}", _local);
     }
 
     private Instrucao? ParseInstrucaoVar()
@@ -110,7 +102,7 @@ public class Parser
         LibraTipo tipo = LibraTipo.Objeto;
         if(!tipoModificavel)
         {
-            ConsumirToken();
+            Passar();
             string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
             tipo = LibraUtil.PegarTipo(tipoStr);
         }
@@ -240,7 +232,7 @@ public class Parser
         Atual().Tipo != TokenTipo.Senao &&
         Atual().Tipo != TokenTipo.SenaoSe)
         {
-            corpoSe.Add(ParseInstrucao());
+            corpoSe.Add(ParseInstrucaoAtual());
         }
         return corpoSe.ToArray();
     }
@@ -338,7 +330,7 @@ public class Parser
                 return new ExpressaoVariavel(ConsumirToken());
 
             case TokenTipo.AbrirParen:
-                ConsumirToken();
+                Passar();
                 var exprDentroParenteses = ParseExpressao();
                 ConsumirToken(TokenTipo.FecharParen);
                 return exprDentroParenteses;

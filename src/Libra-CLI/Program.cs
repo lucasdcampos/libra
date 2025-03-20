@@ -1,159 +1,137 @@
-﻿// TODO: Necessita de refatoração
-// Está uma bagunça porque esse arquivo é só uma
-// ferramenta que serve de cli para rodar programas Libra
-// não dei muita atenção ao código
-using Libra;
+﻿using Libra;
 using Libra.Arvore;
 
 internal static class Program
 {
     private static bool _carregarBibliotecas = true;
-    // Incluindo as bibliotecas por padrão na Shell da Libra
-    private static string bibliotecas = 
-@"importar ""matematica.libra""
-importar ""so.libra""
-importar ""vetores.libra""
-importar ""utilidades.libra""
+    private static readonly string _bibliotecas = 
+@"importar matematica
+importar vetores
 ";
 
-    private static readonly Dictionary<string, Action> _comandos = new()
-    {
-        { "sair", () => Environment.Exit(0) },
-        { "limpar", Console.Clear },
-        { "licenca", MostrarLicenca },
-        { "creditos", MostrarCreditos },
-        { "autor", MostrarCreditos },
-        { "ajuda", MostrarAjuda },
-        { "versao", () => Console.WriteLine(LibraUtil.VersaoAtual()) },
-    };
+    private static bool _avisos = false;
+    private static bool _modoRigido = false;
+    private static bool _modoSeguro = false;
 
     internal static void Main(string[] args)
     {
-        if (args.Length == 1)
+        // Processar argumentos
+        foreach (var arg in args)
         {
-            string arg = args[0];
-            if(arg.StartsWith("--"))
-                arg = arg.Replace("--", "");
-
-            if (ExecutarComando(arg))
+            if (arg.StartsWith("--"))
             {
-                Interpretar(args[0]);
+                switch (arg.TrimStart('-'))
+                {
+                    case "avisos":
+                        _avisos = true;
+                        break;
+
+                    case "rigido":
+                        _modoRigido = true;
+                        break;
+                    
+                    case "seguro":
+                        _modoSeguro = true;
+                        break;
+
+                    case "vanilla":
+                        _carregarBibliotecas = false;
+                        break;
+
+                    default:
+                        Console.WriteLine($"Flag desconhecida: {arg}");
+                        break;
+                }
             }
-            
-            return;
+            else
+            {
+                Interpretar(arg, new InterpretadorFlags(_modoSeguro, _modoRigido, _avisos));
+            }
         }
 
         Console.WriteLine($"Bem-vindo à Libra {LibraUtil.VersaoAtual()}");
         Console.WriteLine("Digite \"ajuda\", \"licenca\" ou uma instrução.");
-        
-        List<Token> bibliotecaPreTokenizada = new();
-        Instrucao[] astBiblioteca = new Instrucao[0];
-        if(_carregarBibliotecas)
-        {
-            bibliotecaPreTokenizada = new Tokenizador().Tokenizar(bibliotecas);
-            astBiblioteca = new Parser().ParseInstrucoes(bibliotecaPreTokenizada.ToArray());
-        }
-        
+
+        var ASTBiblioteca = new Instrucao[0];
+        #if DEBUG
+        #else
+            if(_carregarBibliotecas)
+                ASTBiblioteca = GerarAst(_bibliotecas);
+        #endif
+
         while (true)
         {
             Console.Write(">>> ");
             var linha = Console.ReadLine();
 
-            if (!string.IsNullOrWhiteSpace(linha) && ExecutarComando(linha))
+            if(linha.EndsWith(".libra"))
             {
-                List<Token> tokens;
-                List<Instrucao> instrucoes = null;
-
-                try
-                {
-                    tokens = new Tokenizador().Tokenizar("exibir("+linha+")");
-                    instrucoes = new Parser().ParseInstrucoes(tokens.ToArray()).ToList<Instrucao>();
-
-                    // Haverá problemas se executar pelo botão do Visual Studio, pois ele não conseguirá
-                    // carregar as bibliotecas. Isso se certifica de não carregar em DEBUG mode.
-                    #if DEBUG
-                    #else
-                        if(_carregarBibliotecas && astBiblioteca != null && instrucoes != null)
-                            instrucoes.InsertRange(0, astBiblioteca);
-                    #endif
-
-                    new Interpretador().ExecutarPrograma(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
-                }
-                catch (Exception e)
-                {
-                    Erro.MensagemBug(e);
-                }
+                Interpretar(linha);
+                continue;
             }
-        }
-    }
 
-    private static bool ExecutarComando(string comando)
-    {
-        if(comando.EndsWith(".libra"))
-        {
+            if (string.IsNullOrWhiteSpace(linha) || Comandos.ExecutarComando(linha))
+                continue;
+
             try
             {
-                Interpretar(comando);
+                var instrucoes = GerarAst($"exibir({linha})").ToList<Instrucao>();
+                if(ASTBiblioteca != null && ASTBiblioteca.Length != 0)
+                    instrucoes.InsertRange(0, ASTBiblioteca);
+                
+                new Interpretador().ExecutarPrograma(
+                    new Programa(instrucoes.ToArray()),
+                    false,
+                    new ConsoleLogger(),
+                    true
+                );
             }
             catch (Exception e)
             {
-                Console.WriteLine($"Algo deu errado: {e.Message}");
+                Erro.MensagemBug(e);
             }
-            
-            return false;
         }
+    }
 
-        if (_comandos.TryGetValue(comando, out var acao))
+    private static Instrucao[] CarregarBibliotecas()
+    {
+        if (!_carregarBibliotecas)
+            return Array.Empty<Instrucao>();
+
+        return GerarAst(_bibliotecas);
+    }
+
+    private static Instrucao[] GerarAst(string codigo)
+    {
+        try
         {
-            acao.Invoke();
-            return false;
+            var tokenizador = new Tokenizador();
+            var tokens = tokenizador.Tokenizar(codigo) ?? throw new Exception("Erro ao tokenizar código.");
+
+            var parser = new Parser();
+            var resultadoParse = parser.Parse(tokens.ToArray()) ?? throw new Exception("Erro ao criar AST.");
+            return resultadoParse.Instrucoes;
         }
-        return true; // Comando não encontrado
+        catch
+        {
+            return new Instrucao[0];
+        }
     }
 
-    private static void MostrarLicenca()
+    private static void Interpretar(string arquivoInicial, InterpretadorFlags flags = null)
     {
-        Console.WriteLine("MIT License - Copyright 2024 - 2025 Lucas M. Campos");
-        Console.WriteLine("Acesse https://github.com/lucasdcampos/libra para mais detalhes");
-    }
-
-    private static void MostrarCreditos()
-    {
-        Console.WriteLine("  Creditos à Lucas Maciel de Campos, Criador da Libra.");
-        Console.WriteLine("  Roberto Fernandes de Paiva: Inventor do nome Libra.");
-        Console.WriteLine("  Contribuidores: Fábio de Souza Villaça Medeiros.");
-    }
-
-    private static void MostrarAjuda()
-    {
-        Console.WriteLine("Libra é uma linguagem de programação, você está no modo Interativo,");
-        Console.WriteLine("ou seja, pode digitar uma instrução diretamente por aqui.");
-        Console.WriteLine("Tente executar uma expressão. Exemplos: `1+1`, `2^10`, `raizq(64)`. Ou digite um comando.");
-        Console.WriteLine();
-        Console.WriteLine("Para interpretar um arquivo, use `nomeDoArquivo.libra`");
-        Console.WriteLine("Comandos disponíveis: " + string.Join(", ", _comandos.Keys));
-    }
-
-    private static void Interpretar(string arquivoInicial)
-    {
-        bool debug = true;
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
         if (!File.Exists(arquivoInicial))
         {
             Console.WriteLine($"Não foi possível localizar `{arquivoInicial}`");
             return;
         }
 
-        string codigoFonte = File.ReadAllText(arquivoInicial);
+        var codigoFonte = File.ReadAllText(arquivoInicial);
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        new Interpretador().Interpretar(codigoFonte, false, new ConsoleLogger(), false, arquivoInicial);
+        new Interpretador(flags).Interpretar(codigoFonte, false, new ConsoleLogger(), false, arquivoInicial);
 
         stopwatch.Stop();
-
-        if (debug)
-        {
-            Console.WriteLine($"Tempo de execução: {stopwatch.ElapsedMilliseconds} ms");
-        }
+        Console.WriteLine($"Tempo de execução: {stopwatch.ElapsedMilliseconds} ms");
     }
 }
