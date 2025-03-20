@@ -1,4 +1,4 @@
-importar "matematica.libra"
+importar matematica
 
 const MIN = 0
 const MAX = 100

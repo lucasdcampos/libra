@@ -1,4 +1,4 @@
-importar "vetores.libra"
+importar vetores
 
 funcao bubbleSort(vetor: Vetor)
     var i = 0

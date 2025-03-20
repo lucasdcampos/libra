@@ -1,4 +1,4 @@
-importar "matematica.libra"
+importar matematica
 
 funcao jogar()
     var opcoes = { "Pedra", "Papel", "Tesoura" }
