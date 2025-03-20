@@ -15,11 +15,6 @@ public class LibraInt : LibraObjeto
         Valor = valor ? 1 : 0;
     }
 
-    public override string ToString()
-    {
-        return "Int";
-    }
-
     public override object ObterValor()
     {
         return Valor;
@@ -28,6 +23,23 @@ public class LibraInt : LibraObjeto
     public override LibraInt ObterTamanhoEmBytes()
     {
         return new LibraInt(4);
+    }
+
+    public override string ToString()
+    {
+        return "Int";
+    }
+    
+    public override LibraObjeto Converter(LibraTipo novoTipo)
+    {
+        switch(novoTipo)
+        {
+            case LibraTipo.Real: return new LibraReal(Valor);
+        }
+
+        throw new ErroConversao(Tipo, novoTipo, Interpretador.LocalAtual);
+
+        return null;
     }
 
     public override LibraObjeto Soma(LibraObjeto outro)

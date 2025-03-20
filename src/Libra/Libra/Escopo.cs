@@ -4,12 +4,17 @@ public class Escopo
 {
     private Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
 
-    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, bool tipoModificavel = true)
+    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, LibraTipo tipo = LibraTipo.Objeto, bool tipoModificavel = true)
     {
         if(VariavelExiste(identificador))
             new ErroVariavelJaDeclarada(identificador).LancarErro();
 
-        _variaveis[identificador] = new Variavel(identificador, valor, constante, tipoModificavel);
+        if(tipo != valor.Tipo && tipo != LibraTipo.Objeto)
+        {
+            throw new ErroTipoIncompativel(identificador, Interpretador.LocalAtual);
+        }
+
+        _variaveis[identificador] = new Variavel(identificador, valor, constante, valor.Tipo, tipoModificavel);
     }
 
     public Variavel? ObterVariavel(string identificador)

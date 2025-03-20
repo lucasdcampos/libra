@@ -1,5 +1,2 @@
-funcao soma(a: Int, b: Int) -> Int
-    retornar a+b
-fim
-
-exibir(soma(1,2))
+var x: Int = 10
+x = "20"

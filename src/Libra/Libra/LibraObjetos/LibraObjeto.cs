@@ -33,6 +33,11 @@ public abstract class LibraObjeto
     public abstract LibraInt ObterTamanhoEmBytes();
     public LibraTipo Tipo { get; protected set; } = LibraTipo.Objeto;
 
+    public virtual LibraObjeto Converter(LibraTipo novoTipo)
+    {
+        throw new ErroConversao(Tipo, novoTipo, Interpretador.LocalAtual);
+    }
+
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários
     public virtual LibraObjeto Soma(LibraObjeto outro)
     {

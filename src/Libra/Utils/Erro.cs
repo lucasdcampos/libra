@@ -34,6 +34,11 @@ public class Erro : Exception
         LancarErro();
     }
 
+    protected virtual string ObterDica()
+    {
+        return "";
+    }
+
     internal void LancarErro()
     {
         Console.ForegroundColor = ConsoleColor.Red;
@@ -41,7 +46,10 @@ public class Erro : Exception
         Ambiente.Msg(this.ToString());
         
         Console.ResetColor();
-        
+
+        if(!String.IsNullOrEmpty(ObterDica()))
+            Ambiente.Msg("Dica: " + ObterDica());
+
         Ambiente.Encerrar(this.Codigo);
     }
 
@@ -78,11 +86,6 @@ public class Erro : Exception
         Ambiente.Msg($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
         Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
 
-    }
-
-    internal void Dica(string msg)
-    {
-        Ambiente.Msg($"Dica: {msg}");
     }
 
     private void AtribuirCategoria()
@@ -139,8 +142,12 @@ public class ErroVariavelNaoDeclarada : Erro
     public ErroVariavelNaoDeclarada(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
         : base(2002, $"Variável não declarada `{variavel}`.", local, coluna) 
         {
-            Dica($"Use `var {variavel}` para declarará-la, variáveis só são acessíveis no mesmo escopo.");
         }
+    
+    protected override string ObterDica()
+    {
+        return "Use `var {variavel}` para declarará-la, variáveis só são acessíveis no mesmo escopo.";
+    }
 }
 
 public class ErroVariavelJaDeclarada : Erro
@@ -148,8 +155,12 @@ public class ErroVariavelJaDeclarada : Erro
     public ErroVariavelJaDeclarada(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
         : base(2003, $"Variável já declarada `{variavel}`.", local, coluna) 
         { 
-            Dica("Não use 'var' caso queira apenas modificar o valor de uma variável.");
         }
+
+    protected override string ObterDica()
+    {
+        return "Não use 'var' caso queira apenas modificar o valor de uma variável.";
+    }
 }
 
 public class ErroFuncaoNaoDefinida : Erro
@@ -166,11 +177,18 @@ public class ErroFuncaoJaDefinida : Erro
 
 public class ErroModificacaoConstante : Erro
 {
+    
     public ErroModificacaoConstante(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
         : base(2006, $"Não é possível modificar a constante `{variavel}`.", local, coluna) 
         { 
-            Dica("Use 'var' ao invés de 'const' para declarar variáveis modificáveis.");
+           
         }
+
+    protected override string ObterDica()
+    {
+        return "Use 'var' ao invés de 'const' para declarar variáveis modificáveis.";
+    }
+    
 }
 
 public class ErroAcessoNulo : Erro
@@ -178,14 +196,22 @@ public class ErroAcessoNulo : Erro
     public ErroAcessoNulo(string msg = "", LocalToken local = new LocalToken(), int coluna = 0)
         : base(2007, $"Tentando acessar um valor Nulo.{msg}", local, coluna) 
         { 
-            Dica("Você tentou acessar um objeto sem referência (Nulo).");
         }
+    protected override string ObterDica()
+    {
+        return "Você tentou acessar um objeto sem referência (Nulo).";
+    }
 }
 
 public class ErroIndiceForaVetor : Erro
 {
     public ErroIndiceForaVetor(string msg = "", LocalToken local = new LocalToken(), int coluna = 0)
         : base(2008, $"O indice se encontra fora dos limites do Vetor. {msg}", local, coluna) { }
+
+    protected override string ObterDica()
+    {
+        return "Certifique-se de que o indice esteja entre 0 e tamanho(vetor) - 1.";
+    }
 }
 
 public class ErroTipoIncompativel : Erro
@@ -193,23 +219,41 @@ public class ErroTipoIncompativel : Erro
     public ErroTipoIncompativel(string identificador, LocalToken local = new LocalToken(), int coluna = 0)
         : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", local, coluna) 
         { 
-            Dica("Não é possível modificar o tipo de uma variável durante a execução.");
         }
+    protected override string ObterDica()
+    {
+        return "Não é possível modificar o tipo de uma variável durante a execução.";
+    }
+}
+
+public class ErroConversao : Erro
+{
+    public ErroConversao(LibraTipo tipo1, LibraTipo tipo2, LocalToken local = new LocalToken(), int coluna = 0)
+        : base(2010, $"Não é possível converter {tipo1} para {tipo2}.", local, coluna) 
+        { 
+        }
+    protected override string ObterDica()
+    {
+        return "Tente adicionar uma conversão explicita.";
+    }
 }
 
 public class ErroTransbordoDePilha : Erro
 {
     public ErroTransbordoDePilha(string causador = "", LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2010, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", local, coluna) 
+        : base(2011, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", local, coluna) 
         { 
-            Dica("Verifique se não há nenhuma recursão infinita.");
         }
+    protected override string ObterDica()
+    {
+        return "Verifique se não há nenhuma recursão infinita.";
+    }
 }
 
 public class ErroEsperadoNArgumentos : Erro
 {
     public ErroEsperadoNArgumentos(string ident, int esperado, int recebido, LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2010, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", local, coluna) 
+        : base(2012, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", local, coluna) 
         { 
         }
 }

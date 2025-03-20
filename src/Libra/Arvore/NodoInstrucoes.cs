@@ -12,7 +12,7 @@ namespace Libra.Arvore
 
     public class InstrucaoVar : Instrucao
     {
-        public InstrucaoVar(LocalToken local, string identificador, Expressao expressao, bool constante, bool declaracao, bool tipoModificavel)
+        public InstrucaoVar(LocalToken local, string identificador, Expressao expressao, bool constante, bool declaracao, LibraTipo tipo,bool tipoModificavel)
         {
             Identificador = identificador;
             EhDeclaracao = declaracao;
@@ -21,12 +21,14 @@ namespace Libra.Arvore
             TipoModificavel = tipoModificavel;
             TipoInstrucao = TokenTipo.Var;
             Local = local;
+            TipoVar = tipo;
         }
 
         public Expressao Expressao { get; private set; }
         public TokenTipo Tipo { get; private set; }
         public string Identificador {get; private set; }
         internal bool EhDeclaracao;
+        internal LibraTipo TipoVar;
         internal bool TipoModificavel;
         public bool Constante { get; private set; }
     }

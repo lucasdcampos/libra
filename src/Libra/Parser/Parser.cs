@@ -100,11 +100,12 @@ public class Parser
         string identificador = tokenIdentificador.Valor.ToString();
 
         bool tipoModificavel = Atual().Tipo != TokenTipo.DoisPontos;
+        LibraTipo tipo = LibraTipo.Objeto;
         if(!tipoModificavel)
         {
             ConsumirToken();
-            string tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-            tipoModificavel = LibraUtil.PegarTipo(tipo) == LibraTipo.Objeto;
+            string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+            tipo = LibraUtil.PegarTipo(tipoStr);
         }
 
         bool modificacaoVetor = false;
@@ -123,7 +124,7 @@ public class Parser
         
         if(modificacaoVetor) return new InstrucaoModificacaoVetor(_local, identificador, indiceExpr, expressao);
 
-        return new InstrucaoVar(_local, identificador, expressao, constante, declaracao || constante, tipoModificavel);
+        return new InstrucaoVar(_local, identificador, expressao, constante, declaracao || constante, tipo, tipoModificavel);
     }
 
     private ExpressaoDeclaracaoVetor? ParseVetor()

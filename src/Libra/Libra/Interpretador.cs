@@ -244,7 +244,7 @@ public class Interpretador
                 var obj = InterpretarExpressao(chamada.Argumentos[i]);
                 
                 if(funcao.Parametros[i].Tipo != LibraTipo.Objeto && funcao.Parametros[i].Tipo != obj.Tipo)
-                    throw new ErroTipoIncompativel(ident);
+                    obj = obj.Converter(funcao.Parametros[i].Tipo);
 
                 _programa.PilhaEscopos.DefinirVariavel(ident, obj);
             }
@@ -255,7 +255,10 @@ public class Interpretador
         {
             var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
             if(funcao.TipoRetorno != resultado.Tipo && funcao.TipoRetorno != LibraTipo.Objeto)
-                throw new ErroTipoIncompativel(funcao.Identificador + "()");
+            {
+                return resultado.Converter(funcao.TipoRetorno);
+            }
+                
             return resultado;
         }
         finally
@@ -275,7 +278,7 @@ public class Interpretador
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
   
         if(i.EhDeclaracao)
-            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoModificavel);
+            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
         else
             _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
