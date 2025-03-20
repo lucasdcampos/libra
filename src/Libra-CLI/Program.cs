@@ -46,6 +46,7 @@ importar vetores
             else
             {
                 Interpretar(arg, new InterpretadorFlags(_modoSeguro, _modoRigido, _avisos));
+                return;
             }
         }
 

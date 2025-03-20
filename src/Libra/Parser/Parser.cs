@@ -106,6 +106,11 @@ public class Parser
             string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
             tipo = LibraUtil.PegarTipo(tipoStr);
         }
+        else
+        {
+            if(Interpretador.Flags.ForcarTiposEstaticos && declaracao)
+                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
+        }
 
         bool modificacaoVetor = false;
         Expressao indiceExpr = null;
@@ -162,6 +167,11 @@ public class Parser
             {
                 tipo = LibraUtil.PegarTipo(ConsumirToken(TokenTipo.Identificador).Valor.ToString());
             }
+            else
+            {
+                if(Interpretador.Flags.ForcarTiposEstaticos)
+                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
+            }
             parametros.Add(new Parametro(ident, tipo));
 
             TentarConsumirToken(TokenTipo.Virgula);
@@ -178,6 +188,11 @@ public class Parser
         {
             string tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
             tipoRetorno = LibraUtil.PegarTipo(tipo);
+        }
+        else
+        {
+            if(Interpretador.Flags.ForcarTiposEstaticos)
+                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
         }
 
         var instrucoes = ParseInstrucoes();

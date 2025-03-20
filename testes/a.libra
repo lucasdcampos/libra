@@ -1,1 +1,2 @@
-exibir(1>0)
+var x: Int = 10
+var y = 10
