@@ -203,6 +203,18 @@ public class Tokenizador
             AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(buffer));
     }
 
+    private string TokenizarIdentificador()
+    {
+        string buffer = "";
+
+        while (char.IsLetterOrDigit(Atual()) || Atual() == '_')
+        {
+            buffer += ConsumirChar();
+        }
+
+        return buffer;
+    }
+
     private void TokenizarPalavra()
     {
         string buffer = "" + ConsumirChar();
@@ -217,7 +229,14 @@ public class Tokenizador
             ConsumirEspacos();
 
             if(Atual() != '"')
-                throw new Erro("Esperado `\"`", _local);
+            {
+                var arquivo = TokenizarIdentificador();
+                if(string.IsNullOrEmpty(arquivo))
+                    throw new Erro("Esperado `\"`", _local);
+                ImportarArquivo(arquivo + ".libra");
+                return;
+            }
+                
             
             ConsumirChar(); // Consumindo `"`
             string caminhoArquivo = "";
