@@ -1,3 +1,4 @@
+var x = 8
 se x > 10 entao
     exibir("x é maior que 10")
 senao se x == 10 entao
