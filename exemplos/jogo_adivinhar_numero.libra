@@ -1,7 +1,11 @@
-var num = aleatorio(100)
+importar "matematica.libra"
 
-exibir("> Digite um número:", " ")
-var escolha = ler_int()
+const MIN = 0
+const MAX = 100
+var num: Int = int(aleatorio(MIN, MAX))
+
+exibir("> Digite um número (" + texto(MIN) + ", " + texto(MAX) + "):", " ")
+var escolha: Int = int(entrada())
 
 enquanto escolha != num faca
     se escolha > num entao
@@ -13,7 +17,7 @@ enquanto escolha != num faca
     fim
 
     exibir("> Tente denovo:", " ")
-    escolha = ler_int()
+    escolha = int(entrada())
     exibir("")
 fim
 

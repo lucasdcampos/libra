@@ -1,4 +1,4 @@
-funcao buscaBinaria(vetor, alvo)
+funcao buscaBinaria(vetor: Vetor, alvo: Int)
     var inicio = 0
     var fimVetor = tamanho(vetor) - 1
     enquanto inicio <= fimVetor faca

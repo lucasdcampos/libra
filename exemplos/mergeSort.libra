@@ -1,4 +1,5 @@
-funcao mergeSort(primeiro, segundo)
+// Algoritmo mergeSort para ordenar dois vetores
+funcao mergeSort(primeiro: Vetor, segundo: Vetor)
     var i = 0
     var j = 0
     enquanto (i < tamanho(primeiro)) e (j < tamanho(segundo)) faca

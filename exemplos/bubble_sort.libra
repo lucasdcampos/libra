@@ -1,6 +1,6 @@
 importar "vetores.libra"
 
-funcao bubbleSort(vetor)
+funcao bubbleSort(vetor: Vetor)
     var i = 0
     enquanto i < tamanho(vetor) faca
         var j = 0

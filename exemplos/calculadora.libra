@@ -8,7 +8,7 @@ var operador = entrada()
 exibir("Segundo número:", " ")
 var y = real(entrada())
 
-funcao calcular(a, b, opr)
+funcao calcular(a: Real, b: Real, opr: Texto) -> Real
     se opr == "+" entao
         retornar a+b
     fim
