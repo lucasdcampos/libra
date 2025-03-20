@@ -77,7 +77,7 @@ importar ""utilidades.libra""
                             instrucoes.InsertRange(0, astBiblioteca);
                     #endif
 
-                    new Interpretador().Interpretar(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
+                    new Interpretador().ExecutarPrograma(new Programa(instrucoes.ToArray()), false, new ConsoleLogger(), true);
                 }
                 catch (Exception e)
                 {

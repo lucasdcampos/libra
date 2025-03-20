@@ -2,7 +2,7 @@ namespace Libra;
 
 public class Escopo
 {
-    private Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
+    internal Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
 
     public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, LibraTipo tipo = LibraTipo.Objeto, bool tipoModificavel = true)
     {
@@ -19,7 +19,9 @@ public class Escopo
 
     public Variavel? ObterVariavel(string identificador)
     {
-        return _variaveis.TryGetValue(identificador, out var variavel) ? variavel : null;
+        var var = _variaveis.TryGetValue(identificador, out var variavel) ? variavel : null;
+        var.Referenciada = true;
+        return var;
     }
 
     public int? ObterIndiceVariavel(string identificador)

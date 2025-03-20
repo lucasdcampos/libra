@@ -10,6 +10,8 @@ namespace Libra
         public LibraTipo Tipo { get; private set; }
         public bool TipoModificavel { get; }
 
+        public bool Referenciada { get; internal set; }
+
         public Variavel(string ident, LibraObjeto valor, bool constante = false, LibraTipo tipo = LibraTipo.Objeto, bool tipoModificavel = true)
         {
             Identificador = ident;
@@ -17,10 +19,13 @@ namespace Libra
             Constante = constante;
             TipoModificavel = tipoModificavel;
             Tipo = tipo;
+            Referenciada = false;
         }
 
         public void AtualizarValor(LibraObjeto novoValor)
         {
+            Referenciada = true;
+            
             if (Constante)
                 throw new ErroModificacaoConstante(Identificador, Interpretador.LocalAtual);
 

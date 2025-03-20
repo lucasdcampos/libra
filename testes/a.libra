@@ -1,8 +1,5 @@
-importar so
-importar matematica
-importar vetores
+funcao teste()
+    var a = 10
+fim
 
-exibir(PI)
-exibir(raizq(64))
-
-mostrarVetor(reverter({1,2,3}))
+teste()

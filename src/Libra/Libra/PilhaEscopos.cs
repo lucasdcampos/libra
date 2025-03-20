@@ -30,6 +30,15 @@ public class PilhaDeEscopos
     {
         if (escopos.Count > 1)
         {
+            for(int i = 0; i < escopos.Peek()._variaveis.Count; i++)
+            {
+                Variavel var = escopos.Peek()._variaveis.ElementAt(i).Value;
+                if(!var.Referenciada && Interpretador.Flags.MostrarAvisos)
+                {
+                    Ambiente.Msg($"Aviso: Variável `{var.Identificador}` foi declarada mas nunca foi usada.\n{Interpretador.LocalAtual}");
+                }
+            }
+
             escopos.Pop();
         }
     }

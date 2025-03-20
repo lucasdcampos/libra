@@ -6,22 +6,42 @@ using System.Reflection;
 
 namespace Libra;
 
+public class InterpretadorFlags
+{
+    public bool ModoSeguro { get; private set; }
+    public bool ForcarTiposEstaticos { get; private set; }
+    public bool MostrarAvisos { get; private set; }
+
+    public InterpretadorFlags(bool seguro, bool tiposEstaticos, bool avisos)
+    {
+        ModoSeguro = seguro;
+        ForcarTiposEstaticos = tiposEstaticos;
+        MostrarAvisos = avisos;
+    }
+
+    public static InterpretadorFlags Padrao()
+    {
+        return new InterpretadorFlags(true, false, true);
+    }
+}
+
 public class Interpretador
 {
     public static int NivelDebug = 0;
     public static LocalToken LocalAtual => ObterLocalAtual();
+    public static InterpretadorFlags Flags => _instancia == null ? InterpretadorFlags.Padrao() : _instancia._flags;
+    private InterpretadorFlags _flags;
     private Programa _programa => Ambiente.ProgramaAtual;
     private LocalToken _local = new LocalToken();
     private bool _shell = false;
-
     private VisitorExpressoes _visitorExpressoes;
-
     private static Interpretador _instancia;
 
-    public Interpretador()
+    public Interpretador(InterpretadorFlags flags = null)
     {
         _instancia = this;
         _visitorExpressoes = new VisitorExpressoes(this);
+        _flags = flags == null ? InterpretadorFlags.Padrao() : flags;
     }
 
     private static LocalToken ObterLocalAtual()
@@ -48,7 +68,7 @@ public class Interpretador
 
             programa.PilhaEscopos.DefinirVariavel("__ambienteSeguro__", new LibraInt(ambienteSeguro), true);
 
-            return Interpretar(programa, ambienteSeguro, logger, shell);
+            return ExecutarPrograma(programa, ambienteSeguro, logger, shell);
         }
         catch(Exception e)
         {
@@ -57,7 +77,7 @@ public class Interpretador
         }
     }
 
-    public int Interpretar(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
+    public int ExecutarPrograma(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
     {
         Resetar();
         _shell = shell;
