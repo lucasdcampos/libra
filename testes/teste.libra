@@ -3,7 +3,7 @@
 exibir("Iniciando teste de funcionalidades da Libra:")
 
 exibir("Testando Variáveis")
-var x = 1
+var x: Objeto = 1
 var texto = "Olá, Mundo!"
 var y = 2
 x = y

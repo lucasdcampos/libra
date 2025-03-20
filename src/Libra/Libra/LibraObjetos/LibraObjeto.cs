@@ -38,6 +38,20 @@ public abstract class LibraObjeto
         throw new ErroConversao(Tipo, novoTipo, Interpretador.LocalAtual);
     }
 
+    // Inicializa um novo Objeto de acordo com o tipo especificado
+    public static LibraObjeto Inicializar(LibraTipo tipo)
+    {
+        switch(tipo)
+        {
+            case LibraTipo.Int: return new LibraInt(0);
+            case LibraTipo.Real: return new LibraReal(0);
+            case LibraTipo.Texto: return new LibraTexto("");
+            case LibraTipo.Vetor: return new LibraVetor(0);
+        }
+        
+        return new LibraNulo();
+    }
+
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários
     public virtual LibraObjeto Soma(LibraObjeto outro)
     {

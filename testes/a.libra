@@ -1,2 +1,1 @@
-var x: Int = 10
-var y = 10
+var x = "a"

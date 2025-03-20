@@ -34,7 +34,16 @@ namespace Libra
                 novoValor = novoValor.Converter(Valor.Tipo);
 
                 if(Valor.Tipo != novoValor.Tipo)
-                    throw new ErroTipoIncompativel(Identificador, Interpretador.LocalAtual);
+                {
+                    if(Tipo == LibraTipo.Objeto)
+                        Tipo = Valor.Tipo;
+                    else
+                    {
+                        throw new ErroTipoIncompativel(Identificador, Interpretador.LocalAtual);
+                    }
+                        
+                }
+                    
             }
 
             Valor = novoValor;

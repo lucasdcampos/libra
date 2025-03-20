@@ -9,11 +9,17 @@ public class Escopo
         if(VariavelExiste(identificador))
             new ErroVariavelJaDeclarada(identificador).LancarErro();
 
-        if(tipo != valor.Tipo && tipo != LibraTipo.Objeto)
+        if(valor == null)
         {
-            throw new ErroTipoIncompativel(identificador, Interpretador.LocalAtual);
+            valor = LibraObjeto.Inicializar(tipo);
         }
 
+        if(tipo != LibraTipo.Objeto && valor.Tipo != tipo)
+        {
+            valor = valor.Converter(tipo);
+        }
+            //throw new ErroTipoIncompativel(identificador, Interpretador.LocalAtual);
+            
         _variaveis[identificador] = new Variavel(identificador, valor, constante, valor.Tipo, tipoModificavel);
     }
 

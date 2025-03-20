@@ -98,18 +98,17 @@ public class Parser
         var tokenIdentificador = ConsumirToken(TokenTipo.Identificador);
         string identificador = tokenIdentificador.Valor.ToString();
 
-        bool tipoModificavel = Atual().Tipo != TokenTipo.DoisPontos;
+        bool tipoModificavel = false;
         LibraTipo tipo = LibraTipo.Objeto;
-        if(!tipoModificavel)
+        if(Atual().Tipo == TokenTipo.DoisPontos)
         {
             Passar();
             string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
             tipo = LibraUtil.PegarTipo(tipoStr);
-        }
-        else
-        {
-            if(Interpretador.Flags.ForcarTiposEstaticos && declaracao)
-                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
+            tipoModificavel = tipo == LibraTipo.Objeto;
+
+            if(Atual().Tipo != TokenTipo.OperadorDefinir)
+                return new InstrucaoVar(_local, identificador, null, constante, declaracao || constante, tipo, tipoModificavel);
         }
 
         bool modificacaoVetor = false;
@@ -127,6 +126,9 @@ public class Parser
         var expressao = ParseExpressao();
         
         if(modificacaoVetor) return new InstrucaoModificacaoVetor(_local, identificador, indiceExpr, expressao);
+
+        if(Interpretador.Flags.ForcarTiposEstaticos && tipo == LibraTipo.Nulo)
+                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
 
         return new InstrucaoVar(_local, identificador, expressao, constante, declaracao || constante, tipo, tipoModificavel);
     }

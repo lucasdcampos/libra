@@ -326,6 +326,9 @@ public class Interpretador
 
     public LibraObjeto InterpretarExpressao(Expressao expressao)
     {
+        if(expressao == null)
+            return null;
+            
         return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(_visitorExpressoes));
     }
 
