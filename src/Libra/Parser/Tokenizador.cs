@@ -534,7 +534,6 @@ public class Tokenizador
         {
             _tokens.Add(novosTokens[i]);
         }
-
     }
 
     public void PrintarListaTokens()

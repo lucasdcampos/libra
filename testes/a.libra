@@ -1,5 +1,2 @@
-funcao teste()
-    var a = 10
-fim
-
-teste()
+importar matematica
+exibir(PI)

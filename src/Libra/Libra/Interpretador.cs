@@ -64,7 +64,7 @@ public class Interpretador
             var tokenizador = new Tokenizador();
             var tokens = tokenizador.Tokenizar(codigo, arquivo);
             var parser = new Parser();
-            var programa = parser.Parse(tokens);
+            var programa = parser.Parse(tokens.ToArray());
 
             programa.PilhaEscopos.DefinirVariavel("__ambienteSeguro__", new LibraInt(ambienteSeguro), true);
 

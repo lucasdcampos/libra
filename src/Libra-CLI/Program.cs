@@ -51,7 +51,7 @@ importar ""utilidades.libra""
         if(_carregarBibliotecas)
         {
             bibliotecaPreTokenizada = new Tokenizador().Tokenizar(bibliotecas);
-            astBiblioteca = new Parser().ParseInstrucoes(bibliotecaPreTokenizada);
+            astBiblioteca = new Parser().ParseInstrucoes(bibliotecaPreTokenizada.ToArray());
         }
         
         while (true)
@@ -67,7 +67,7 @@ importar ""utilidades.libra""
                 try
                 {
                     tokens = new Tokenizador().Tokenizar("exibir("+linha+")");
-                    instrucoes = new Parser().ParseInstrucoes(tokens).ToList<Instrucao>();
+                    instrucoes = new Parser().ParseInstrucoes(tokens.ToArray()).ToList<Instrucao>();
 
                     // Haverá problemas se executar pelo botão do Visual Studio, pois ele não conseguirá
                     // carregar as bibliotecas. Isso se certifica de não carregar em DEBUG mode.

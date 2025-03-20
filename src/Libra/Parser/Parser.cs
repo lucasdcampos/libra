@@ -4,7 +4,7 @@ namespace Libra;
 
 public class Parser
 {
-    private List<Token> _tokens;
+    private Token[] _tokens;
     private int _posicao;
     private LocalToken _local;
 
@@ -32,24 +32,28 @@ public class Parser
         _local = new LocalToken();
     }
 
-    public Programa Parse(List<Token> tokens, List<Token> extra = null)
+    public Programa Parse(Token[] tokens, Token[] extra = null)
     {
         Resetar();
         _tokens = tokens;
 
         if(tokens == null)
             throw new Erro("Falha ao gerar Tokens");
-        if(extra != null)
-            _tokens.AddRange(extra);
+        if (extra != null)
+        {
+            _tokens = new Token[tokens.Length + extra.Length];
+            Array.Copy(tokens, _tokens, tokens.Length);
+            Array.Copy(extra, 0, _tokens, tokens.Length, extra.Length);
+        }
 
         return new Programa(ParseInstrucoes(TokenTipo.FimDoArquivo));
     }
 
-    public Instrucao[] ParseInstrucoes(List<Token> tokens)
+    public Instrucao[] ParseInstrucoes(Token[] tokens)
     {
         _tokens = tokens;
 
-        if(_tokens == null || _tokens.Count == 0)
+        if(_tokens == null || _tokens.Length == 0)
             return new Instrucao[0];
 
         return ParseInstrucoes(TokenTipo.FimDoArquivo);
@@ -57,7 +61,8 @@ public class Parser
 
     private Instrucao[] ParseInstrucoes(TokenTipo fim = TokenTipo.Fim)
     {
-        var instrucoes = new List<Instrucao>();
+        // Inicia uma lista com um pouco de espaço alocado
+        var instrucoes = new List<Instrucao>(_tokens.Length / 3);
 
         while(TentarConsumirToken(fim) == null)
         {
@@ -397,7 +402,7 @@ public class Parser
 
     private Token Proximo(int offset)
     {
-        if (_posicao + offset >= _tokens.Count)
+        if (_posicao + offset >= _tokens.Length)
         {
             return new Token(TokenTipo.FimDoArquivo, _local);
         }
