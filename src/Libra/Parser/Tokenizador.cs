@@ -2,6 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.ComponentModel;
+using System.Text;
 
 namespace Libra;
 
@@ -10,7 +11,7 @@ public class Tokenizador
     private int _posicao;
     private string? _fonte;
     private List<Token>? _tokens;
-    private Dictionary<string, int> _arquivosImportados = new();
+    private HashSet<string> _arquivosImportados = new();
     private LocalToken _local;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
@@ -91,14 +92,14 @@ public class Tokenizador
 
     private void TokenizarBinario()
     {
-        string buffer = "";
+        var buffer = new StringBuilder();
         
         if(Atual() != '0' && Atual() != '1')
             throw new Erro("Esperado `0` ou `1`, recebido: " + Atual(), _local);
 
         while (Atual() == '0' || Atual() == '1')
         {
-            buffer += ConsumirChar();
+            buffer.Append(ConsumirChar());
             if(buffer.Length >= 31)
                 break;
         }
@@ -106,7 +107,7 @@ public class Tokenizador
         int resultado = 0;
         try 
         {
-            resultado = Convert.ToInt32(buffer, 2);
+            resultado = Convert.ToInt32(buffer.ToString(), 2);
         }
         catch
         {
@@ -145,17 +146,17 @@ public class Tokenizador
     }
     private void TokenizarHexa()
     {
-        string buffer = "";
+        var buffer = new StringBuilder();
         
         if(DigitoHexadecimal(Atual()))
-            buffer += ConsumirChar();
+            buffer.Append(ConsumirChar());
         else
             throw new Erro("Esperado digito Hexadecimal, recebido: " + Atual(), _local);
         
         
         while (DigitoHexadecimal(Atual()))
         {
-            buffer += ConsumirChar();
+            buffer.Append(ConsumirChar());
             if(buffer.Length >= 7)
                 break;
         }
@@ -163,7 +164,7 @@ public class Tokenizador
         int resultado = 0;
         try 
         {
-            resultado = Convert.ToInt32(buffer, 16);
+            resultado = Convert.ToInt32(buffer.ToString(), 16);
         }
         catch
         {
@@ -174,7 +175,7 @@ public class Tokenizador
 
     private void TokenizarNumero()
     {
-        string buffer = "";
+        var buffer = new StringBuilder();
         var ponto = false;
         while (char.IsDigit(Atual()) || Atual() == '_')
         {
@@ -186,45 +187,42 @@ public class Tokenizador
                 continue;
             }
                 
-            buffer += ConsumirChar();
+            buffer.Append(ConsumirChar());
             if (Atual() == '.')
             {
                 if (ponto)
                     throw new Erro("Número inválido!", _local);
 
-                buffer += ConsumirChar();
+                buffer.Append(ConsumirChar());
                 ponto = true;
             }
         }
 
         if (ponto)
-            AdicionarTokenALista(TokenTipo.NumeroLiteral, double.Parse(buffer));
+            AdicionarTokenALista(TokenTipo.NumeroLiteral, double.Parse(buffer.ToString()));
         else
-            AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(buffer));
+            AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(buffer.ToString()));
     }
 
     private string TokenizarIdentificador()
     {
-        string buffer = "";
+        var buffer = new StringBuilder();
 
         while (char.IsLetterOrDigit(Atual()) || Atual() == '_')
         {
-            buffer += ConsumirChar();
+            buffer.Append(ConsumirChar());
         }
 
-        return buffer;
+        return buffer.ToString();
     }
 
     private void TokenizarPalavra()
     {
-        string buffer = "" + ConsumirChar();
+        var buffer = new StringBuilder();
 
-        while (char.IsLetterOrDigit(Atual()) || Atual() == '_')
-        {
-            buffer += ConsumirChar();
-        }
+        buffer.Append(TokenizarIdentificador());
         
-        if(buffer == "importar")
+        if(buffer.ToString() == "importar")
         {
             ConsumirEspacos();
 
@@ -239,23 +237,23 @@ public class Tokenizador
                 
             
             ConsumirChar(); // Consumindo `"`
-            string caminhoArquivo = "";
+            var caminhoArquivo = new StringBuilder();
 
             while(Atual() != '"')
             {
                 if(Atual() == '\n' || ConsumirEspacos() != 0)
                     throw new Erro("Esperado `\"`", _local);
 
-                caminhoArquivo += ConsumirChar();
+                caminhoArquivo.Append(ConsumirChar());
             }
             ConsumirChar(); // Consumindo `"`
 
-            ImportarArquivo(caminhoArquivo);
+            ImportarArquivo(caminhoArquivo.ToString());
 
             return;
         }
 
-        if(buffer == "senao")
+        if(buffer.ToString() == "senao")
         {
             ConsumirEspacos();
 
@@ -267,20 +265,20 @@ public class Tokenizador
                 return;
             }
         }
-
-        if (_palavrasReservadas.ContainsKey(buffer))
+        
+        if (_palavrasReservadas.ContainsKey(buffer.ToString()))
         {
-            AdicionarTokenALista(_palavrasReservadas[buffer]);
+            AdicionarTokenALista(_palavrasReservadas[buffer.ToString()]);
         }
         else
         {
-            AdicionarTokenALista(TokenTipo.Identificador, buffer);
+            AdicionarTokenALista(TokenTipo.Identificador, buffer.ToString());
         }
     }
 
     private void TokenizarSimbolo()
     {
-        string buffer = "";
+        var buffer = new StringBuilder();
         switch (Atual())
         {
             case ' ':
@@ -415,18 +413,18 @@ public class Tokenizador
                     {
                         ConsumirChar();
                     }
-                    buffer += ConsumirChar();
+                    buffer.Append(ConsumirChar());
                 }
 
-                AdicionarTokenALista(TokenTipo.TextoLiteral, buffer);
-                buffer = "";
+                AdicionarTokenALista(TokenTipo.TextoLiteral, buffer.ToString());
+                buffer.Clear();
                 ConsumirChar();
                 break;
             case '\'':
                 ConsumirChar();
-                buffer += ConsumirChar();
-                AdicionarTokenALista(TokenTipo.CaractereLiteral, buffer);
-                buffer = "";
+                buffer.Append(ConsumirChar());
+                AdicionarTokenALista(TokenTipo.CaractereLiteral, buffer.ToString());
+                buffer.Clear();
                 if (Atual() != '\'')
                 {
                     throw new Erro("Esperado `'`", _local);
@@ -452,17 +450,17 @@ public class Tokenizador
 
     private string ConsumirAte(char caractere)
     {
-        string buffer = "";
+        var buffer = new StringBuilder();
         while(Atual() != caractere)
         {
-            buffer += ConsumirChar();
+            buffer.Append(ConsumirChar());
 
             if (Atual() == '\0')
                 throw new Erro($"Esperado `{caractere}`", _local);
         }
 
         ConsumirChar();
-        return buffer;
+        return buffer.ToString();
     }
 
     private int ConsumirEspacos()
@@ -515,10 +513,10 @@ public class Tokenizador
 
     private void ImportarArquivo(string caminho)
     {
-        if(_arquivosImportados.ContainsKey(caminho))
+        if(_arquivosImportados.Contains(caminho))
             return;
         
-        _arquivosImportados.Add(caminho, 1);
+        _arquivosImportados.Add(caminho);
 
         string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "biblioteca/" + caminho);
         string caminhoUsuario = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), caminho);
