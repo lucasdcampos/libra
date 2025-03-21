@@ -76,6 +76,7 @@ public class Parser
             case TokenTipo.Var: return ParseInstrucaoVar();
             case TokenTipo.Const: return ParseInstrucaoVar();
             case TokenTipo.Funcao: return ParseInstrucaoFuncao();
+            case TokenTipo.Tipo: return ParseInstrucaoTipo();
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
             case TokenTipo.Romper: Passar(); return new InstrucaoRomper(_local);
@@ -148,6 +149,25 @@ public class Parser
         return new ExpressaoDeclaracaoVetor(expr);
     }
 
+    private InstrucaoTipo? ParseInstrucaoTipo()
+    {
+        ConsumirToken(TokenTipo.Tipo);
+        
+        string? identificador = (string)ConsumirToken(TokenTipo.Identificador)?.Valor;
+
+        var variaveis = new List<Instrucao>();
+        while(Atual().Tipo != TokenTipo.Fim)
+        {
+            if(Atual().Tipo == TokenTipo.FimDoArquivo)
+                throw new ErroEsperado(TokenTipo.Fim, TokenTipo.FimDoArquivo, _local);
+
+            variaveis.Add(ParseInstrucaoVar());
+        }
+
+        Passar();
+        return new InstrucaoTipo(_local, identificador, variaveis.ToArray());
+    }
+
     private InstrucaoFuncao? ParseInstrucaoFuncao()
     {
         ConsumirToken(TokenTipo.Funcao);
@@ -181,7 +201,7 @@ public class Parser
 
         // Chamem um psiquiatra pra esse cidadão
         if(parametros.Count > 255)
-            throw new Erro($"Função {identificador} passou de 255 parâmetros", _local);
+            throw new Erro($"Função {identificador} passou de 255 parâmetros", _local, 255, "Procure ajuda.");
             
         ConsumirToken(TokenTipo.FecharParen);
 
@@ -320,6 +340,16 @@ public class Parser
         return new ExpressaoInicializacaoVetor(expressoes);
     }
 
+    // Identificador que possui ponto, ex: pessoa.nome
+    private Token ParseIdentificadorComposto()
+    {
+        var final = ConsumirToken(TokenTipo.Identificador).Valor.ToString() + ".";
+        ConsumirToken(TokenTipo.Ponto);
+        final += ConsumirToken(TokenTipo.Identificador).Valor;
+        
+        return new Token(TokenTipo.Identificador, _local, final);
+    }
+
     private Expressao ParseExpressaoTermo()
     {
         switch (Atual().Tipo)
@@ -344,6 +374,10 @@ public class Parser
                 else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
                 {
                     return ParseExpressaoAcessoVetor();
+                }
+                else if(Proximo(1).Tipo == TokenTipo.Ponto)
+                {
+                    return new ExpressaoVariavel(ParseIdentificadorComposto());
                 }
                 return new ExpressaoVariavel(ConsumirToken());
 
@@ -383,6 +417,9 @@ public class Parser
 
             TentarConsumirToken(TokenTipo.Virgula);
         }
+
+        if(argumentos.Count > 255)
+            throw new Erro($"Função {identificador} passou de 255 argumentos", _local, 255, "Procure ajuda.");
 
         ConsumirToken(TokenTipo.FecharParen);
         return new ExpressaoChamadaFuncao(identificador, argumentos);

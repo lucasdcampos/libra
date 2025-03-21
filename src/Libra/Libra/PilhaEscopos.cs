@@ -1,3 +1,4 @@
+using System.Text;
 using Libra.Arvore;
 
 namespace Libra; 
@@ -9,15 +10,15 @@ public class PilhaDeEscopos
     public PilhaDeEscopos()
     {
         // Adiciona o escopo global ao iniciar
-        EmpilharEscopo();
+        EmpilharEscopo("", new LocalToken());
     }
 
     // Adiciona um novo escopo à pilha (usado para blocos locais, funções, etc.)
-    public void EmpilharEscopo()
+    public void EmpilharEscopo(string nome = "", LocalToken local = new())
     {
         if (escopos.Count < 1000)
         {
-            escopos.Push(new Escopo());
+            escopos.Push(new Escopo(nome, local));
         }
             
         else
@@ -47,6 +48,21 @@ public class PilhaDeEscopos
     public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, LibraTipo tipo = LibraTipo.Objeto, bool tipoModificavel = true)
     {
         escopos.Peek().DefinirVariavel(identificador, valor, constante, tipo, tipoModificavel);
+    }
+
+    public string ObterCallStack()
+    {
+        if(escopos.Count == 0)
+            return "";
+    
+        var sb = new StringBuilder();
+        foreach(var e in escopos)
+        {
+            if(string.IsNullOrEmpty(e.Nome))
+                continue;
+            sb.Append($"    {e.Nome} ({e.Local})\n");
+        }
+        return sb.ToString();
     }
 
     // Busca uma variável, começando pelo escopo mais interno até o global

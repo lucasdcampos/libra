@@ -8,7 +8,7 @@ funcao garantir(condicao)
     fim
 fim
 
-funcao fatorial(n) -> Int
+funcao fatorial(n: Int) -> Int
     se n == 0 entao
         retornar 1
     fim
@@ -16,9 +16,7 @@ funcao fatorial(n) -> Int
     retornar n * fatorial(n - 1)
 fim
 
-garantir(fatorial(5) == 120)
-
-funcao soma_naturais(n) -> Int
+funcao soma_naturais(n: Int) -> Int
     se n == 0 entao
         retornar 0
     fim
@@ -26,9 +24,7 @@ funcao soma_naturais(n) -> Int
     retornar n + soma_naturais(n - 1)
 fim
 
-garantir(soma_naturais(5) == 15)
-
-funcao potencia(base, n) -> Int
+funcao potencia(base: Int, n: Int) -> Int
     se n == 0 entao
         retornar 1
     fim
@@ -36,9 +32,7 @@ funcao potencia(base, n) -> Int
     retornar base * potencia(base, n - 1)
 fim
 
-garantir(potencia(2, 10) == 1024)
-
-funcao mdc(a, b) -> Int
+funcao mdc(a: Int, b: Int) -> Int
     se b == 0 entao
         retornar a
     fim
@@ -48,4 +42,8 @@ funcao mdc(a, b) -> Int
     retornar mdc(a, b)
 fim
 
+// Garantindo que nenhum teste falhará
+garantir(fatorial(5) == 120)
+garantir(potencia(2, 10) == 1024)
+garantir(soma_naturais(5) == 15)
 garantir(mdc(48, 18) == 6)

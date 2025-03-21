@@ -119,6 +119,7 @@ public class Interpretador
             { TokenTipo.Se, () => InterpretarCondicional((InstrucaoSe)instrucao) },
             { TokenTipo.Enquanto, () => InterpretarCondicional((InstrucaoEnquanto)instrucao) },
             { TokenTipo.Funcao, () => InterpretarFuncao((InstrucaoFuncao)instrucao) },
+            { TokenTipo.Tipo, () => InterpretarInstrucaoTipo((InstrucaoTipo)instrucao) },
             { TokenTipo.Identificador, () => InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao) },
             { TokenTipo.Vetor, () => InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao) },
             { TokenTipo.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
@@ -239,7 +240,10 @@ public class Interpretador
         var argumentos = chamada.Argumentos;
 
         if (!_programa.FuncaoExiste(chamada.Identificador))
+        {
             throw new ErroFuncaoNaoDefinida(chamada.Identificador, _local);
+        }
+            
 
         var funcao = _programa.Funcoes[chamada.Identificador];
 
@@ -253,7 +257,7 @@ public class Interpretador
         if (argumentos.Count != qtdParametros)
             throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Count, _local);
 
-        _programa.PilhaEscopos.EmpilharEscopo(); // empurra o novo Escopo da função
+        _programa.PilhaEscopos.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
 
         try 
         {
@@ -288,6 +292,18 @@ public class Interpretador
 
         // Caso a função não tenha um retorno explicito
         return null;
+    }
+
+    public void InterpretarInstrucaoTipo(InstrucaoTipo i)
+    {
+       //_programa.Tipos[i.Identificador] = new Tipo(i.Identificador, );
+        foreach(var i2 in i.Instrucoes)
+        {
+            if(i2 is InstrucaoVar instVar)
+            {
+                InterpretarInstrucaoVar(new InstrucaoVar(instVar.Local, i.Identificador + "." + instVar.Identificador, instVar.Expressao, instVar.Constante, instVar.EhDeclaracao, instVar.TipoVar, instVar.TipoModificavel));
+            }
+        }
     }
 
     public LibraObjeto InterpretarInstrucaoVar(InstrucaoVar i)
@@ -328,7 +344,7 @@ public class Interpretador
     {
         if(expressao == null)
             return null;
-            
+
         return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(_visitorExpressoes));
     }
 

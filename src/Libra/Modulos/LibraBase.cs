@@ -23,7 +23,7 @@ public class LibraBase : IModulo
         // Usados em bytes(tipo) para obter a quantidade de memória em bytes usada por esses tipos
         _programa.PilhaEscopos.DefinirVariavel("int", new LibraInt(4), true);
         _programa.PilhaEscopos.DefinirVariavel("real", new LibraReal(8), true);
-
+        
         _programa.Funcoes["__ativarmodulo__"] = new FuncaoNativa(__ativarmodulo__);
 
         _programa.Funcoes["sair"] = new FuncaoNativa(sair);
@@ -265,6 +265,7 @@ public class LibraBase : IModulo
 
     public object entrada(object[] args)
     {
+        exibir(args);
         return Console.ReadLine();
     }
 

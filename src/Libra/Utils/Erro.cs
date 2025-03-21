@@ -13,43 +13,50 @@ public class Erro : Exception
     public string Mensagem { get; protected set; }
     public LocalToken Local { get; protected set; }
     public ErroCategoria Categoria { get; protected set; }
-
-    public Erro(string mensagem, LocalToken local = new LocalToken(), int codigo = 1)
+    protected string dica;
+    public Erro(string mensagem, LocalToken local = new LocalToken(), int codigo = 1, string dica = "")
     {
         Codigo = codigo;
         Local = local;
         Mensagem = mensagem;
+        this.dica = dica;
 
         AtribuirCategoria();
-        LancarErro();
+        ExibirErro();
     }
 
-    protected Erro(int codigo, string mensagem, LocalToken local = new LocalToken(), int coluna = 0)
+    protected Erro(int codigo, string mensagem, LocalToken local = new LocalToken(), string dica = "")
     {
         Codigo = codigo;
         Mensagem = mensagem;
         Local = local;
+        this.dica = dica;
 
         AtribuirCategoria();
-        LancarErro();
+        ExibirErro();
     }
 
-    protected virtual string ObterDica()
-    {
-        return "";
-    }
-
-    internal void LancarErro()
+    internal void ExibirErro()
     {
         Console.ForegroundColor = ConsoleColor.Red;
         
-        Ambiente.Msg(this.ToString());
-        
+        Ambiente.Msg(Categoria.ToString()+"", ": ");
         Console.ResetColor();
+        Ambiente.Msg(Mensagem);
+        Ambiente.Msg(string.IsNullOrEmpty(Local.Arquivo) ? "" : $"  Arquivo \"{Local.Arquivo}\", linha {Local.Linha}");
 
-        if(!String.IsNullOrEmpty(ObterDica()))
-            Ambiente.Msg("Dica: " + ObterDica());
 
+        string callStack = Ambiente.ProgramaAtual == null ? "" : Ambiente.ProgramaAtual.PilhaEscopos.ObterCallStack();
+        Ambiente.Msg(string.IsNullOrEmpty(callStack) ? "\n": $"  Pilha de Chamadas:\n{callStack}", "");
+
+        if(!String.IsNullOrEmpty(dica))
+        {
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Ambiente.Msg("Dica:", " ");
+            Console.ResetColor();
+            Ambiente.Msg(dica+"\n");
+        }
+        
         Ambiente.Encerrar(this.Codigo);
     }
 
@@ -121,139 +128,101 @@ public class Erro : Exception
 
 public class ErroTokenInvalido : Erro
 {
-    public ErroTokenInvalido(string token, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(1001, $"Token inválido `{token}`", local, coluna) { }
+    public ErroTokenInvalido(string token, LocalToken local = new LocalToken(), string dica = "") 
+        : base(1001, $"Token inválido `{token}`", local, dica) { }
 }
 
 public class ErroEsperado : Erro
 {
-    public ErroEsperado(TokenTipo esperado, TokenTipo recebido, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(1002, $"Esperado Token {Token.TipoParaString(esperado)}, recebido {Token.TipoParaString(recebido)}", local, coluna) { }
+    public ErroEsperado(TokenTipo esperado, TokenTipo recebido, LocalToken local = new LocalToken(), string dica = "") 
+        : base(1002, $"Esperado Token {Token.TipoParaString(esperado)}, recebido {Token.TipoParaString(recebido)}", local, dica) { }
 }
 
 public class ErroDivisaoPorZero : Erro
 {
-    public ErroDivisaoPorZero(LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(2001, "Divisão por zero.", local, coluna) { }
+    public ErroDivisaoPorZero(LocalToken local = new LocalToken(), string dica = "") 
+        : base(2001, "Divisão por zero.", local, dica) { }
 }
 
 public class ErroVariavelNaoDeclarada : Erro
 {
-    public ErroVariavelNaoDeclarada(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(2002, $"Variável não declarada `{variavel}`.", local, coluna) 
+    public ErroVariavelNaoDeclarada(string variavel, LocalToken local = new LocalToken(), string dica = "Use `var {variavel}` para declarará-la, variáveis só são acessíveis no mesmo escopo.") 
+        : base(2002, $"Variável não declarada `{variavel}`.", local, dica) 
         {
         }
-    
-    protected override string ObterDica()
-    {
-        return "Use `var {variavel}` para declarará-la, variáveis só são acessíveis no mesmo escopo.";
-    }
 }
 
 public class ErroVariavelJaDeclarada : Erro
 {
-    public ErroVariavelJaDeclarada(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(2003, $"Variável já declarada `{variavel}`.", local, coluna) 
+    public ErroVariavelJaDeclarada(string variavel, LocalToken local = new LocalToken(), string dica = "Não use 'var' caso queira apenas modificar o valor de uma variável.") 
+        : base(2003, $"Variável já declarada `{variavel}`.", local, dica) 
         { 
         }
-
-    protected override string ObterDica()
-    {
-        return "Não use 'var' caso queira apenas modificar o valor de uma variável.";
-    }
 }
 
 public class ErroFuncaoNaoDefinida : Erro
 {
-    public ErroFuncaoNaoDefinida(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(2004, $"Função não definida `{variavel}`.", local, coluna) { }
+    public ErroFuncaoNaoDefinida(string variavel, LocalToken local = new LocalToken(), string dica = "") 
+        : base(2004, $"Função não definida `{variavel}`.", local, dica) { }
 }
 
 public class ErroFuncaoJaDefinida : Erro
 {
-    public ErroFuncaoJaDefinida(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(2005, $"Função já definida `{variavel}`.", local, coluna) { }
+    public ErroFuncaoJaDefinida(string variavel, LocalToken local = new LocalToken(), string dica = "") 
+        : base(2005, $"Função já definida `{variavel}`.", local, dica) { }
 }
 
 public class ErroModificacaoConstante : Erro
 {
     
-    public ErroModificacaoConstante(string variavel, LocalToken local = new LocalToken(), int coluna = 0) 
-        : base(2006, $"Não é possível modificar a constante `{variavel}`.", local, coluna) 
+    public ErroModificacaoConstante(string variavel, LocalToken local = new LocalToken(), string dica = "Use 'var' ao invés de 'const' para declarar variáveis modificáveis.") 
+        : base(2006, $"Não é possível modificar a constante `{variavel}`.", local, dica) 
         { 
-           
         }
-
-    protected override string ObterDica()
-    {
-        return "Use 'var' ao invés de 'const' para declarar variáveis modificáveis.";
-    }
-    
 }
 
 public class ErroAcessoNulo : Erro
 {
-    public ErroAcessoNulo(string msg = "", LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2007, $"Tentando acessar um valor Nulo.{msg}", local, coluna) 
+    public ErroAcessoNulo(string msg = "", LocalToken local = new LocalToken(), string dica = "Você tentou acessar um objeto sem valor (Nulo).")
+        : base(2007, $"Tentando acessar um valor Nulo.{msg}", local, dica) 
         { 
         }
-    protected override string ObterDica()
-    {
-        return "Você tentou acessar um objeto sem referência (Nulo).";
-    }
 }
 
 public class ErroIndiceForaVetor : Erro
 {
-    public ErroIndiceForaVetor(string msg = "", LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2008, $"O indice se encontra fora dos limites do Vetor. {msg}", local, coluna) { }
-
-    protected override string ObterDica()
-    {
-        return "Certifique-se de que o indice esteja entre 0 e tamanho(vetor) - 1.";
-    }
+    public ErroIndiceForaVetor(string msg = "", LocalToken local = new LocalToken(), string dica = "Certifique-se de que o indice esteja entre 0 e tamanho(vetor) - 1.")
+        : base(2008, $"O indice se encontra fora dos limites do Vetor. {msg}", local, dica) { }
 }
 
 public class ErroTipoIncompativel : Erro
 {
-    public ErroTipoIncompativel(string identificador, LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", local, coluna) 
+    public ErroTipoIncompativel(string identificador, LocalToken local = new LocalToken(), string dica = "Não é possível modificar o tipo de uma variável durante a execução.")
+        : base(2009, $"Atribuindo um tipo incompatível à `{identificador}`.", local, dica) 
         { 
         }
-    protected override string ObterDica()
-    {
-        return "Não é possível modificar o tipo de uma variável durante a execução.";
-    }
 }
 
 public class ErroConversao : Erro
 {
-    public ErroConversao(LibraTipo tipo1, LibraTipo tipo2, LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2010, $"Não é possível converter {tipo1} para {tipo2}.", local, coluna) 
+    public ErroConversao(LibraTipo tipo1, LibraTipo tipo2, LocalToken local = new LocalToken(), string dica = "Tente adicionar uma conversão explicita.")
+        : base(2010, $"Não é possível converter {tipo1} para {tipo2}.", local, dica) 
         { 
         }
-    protected override string ObterDica()
-    {
-        return "Tente adicionar uma conversão explicita.";
-    }
 }
 
 public class ErroTransbordoDePilha : Erro
 {
-    public ErroTransbordoDePilha(string causador = "", LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2011, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", local, coluna) 
+    public ErroTransbordoDePilha(string causador = "", LocalToken local = new LocalToken(), string dica = "Verifique se não há nenhuma recursão infinita.")
+        : base(2011, $"Transbordo de Pilha (StackOverflow) causado por: {causador}()", local, dica) 
         { 
         }
-    protected override string ObterDica()
-    {
-        return "Verifique se não há nenhuma recursão infinita.";
-    }
 }
 
 public class ErroEsperadoNArgumentos : Erro
 {
-    public ErroEsperadoNArgumentos(string ident, int esperado, int recebido, LocalToken local = new LocalToken(), int coluna = 0)
-        : base(2012, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", local, coluna) 
+    public ErroEsperadoNArgumentos(string ident, int esperado, int recebido, LocalToken local = new LocalToken(), string dica = "")
+        : base(2012, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", local, dica) 
         { 
         }
 }

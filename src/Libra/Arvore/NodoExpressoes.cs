@@ -65,7 +65,6 @@ namespace Libra.Arvore
         }
 
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoVariavel(this);
-
     }
 
     public class ExpressaoChamadaFuncao : Expressao

@@ -3,11 +3,19 @@ namespace Libra;
 public class Escopo
 {
     internal Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
+    public string Nome { get; private set; }
+    public LocalToken Local { get; private set; }
+
+    public Escopo(string nome, LocalToken local)
+    {
+        Nome = nome;
+        Local = local;
+    }
 
     public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, LibraTipo tipo = LibraTipo.Objeto, bool tipoModificavel = true)
     {
         if(VariavelExiste(identificador))
-            new ErroVariavelJaDeclarada(identificador).LancarErro();
+            throw new ErroVariavelJaDeclarada(identificador);
 
         if(valor == null)
         {

@@ -18,6 +18,7 @@ public class Tokenizador
         { "var", TokenTipo.Var },
         { "const", TokenTipo.Const },
         { "funcao", TokenTipo.Funcao },
+        { "tipo", TokenTipo.Tipo },
         { "se", TokenTipo.Se },
         { "senao", TokenTipo.Senao },
         { "enquanto", TokenTipo.Enquanto },
@@ -433,6 +434,10 @@ public class Tokenizador
                 break;
             case ',':
                 AdicionarTokenALista(TokenTipo.Virgula);
+                ConsumirChar();
+                break;
+            case '.':
+                AdicionarTokenALista(TokenTipo.Ponto);
                 ConsumirChar();
                 break;
             case ':':

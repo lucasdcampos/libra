@@ -51,6 +51,20 @@ namespace Libra.Arvore
         public LibraTipo TipoRetorno { get; private set; }
     }
 
+    public class InstrucaoTipo : Instrucao
+    {
+        public InstrucaoTipo(LocalToken local, string identificador, Instrucao[] instrucoes)
+        {
+            Instrucoes = instrucoes;
+            Identificador = identificador;
+            TipoInstrucao = TokenTipo.Tipo;
+            Local = local;
+        }
+
+        public Instrucao[] Instrucoes { get; private set; }
+        public string Identificador {get; private set; }
+    }
+
     public class InstrucaoSe : Instrucao
     {
         public InstrucaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)

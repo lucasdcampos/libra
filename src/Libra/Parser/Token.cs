@@ -57,6 +57,7 @@ public enum TokenTipo
     FecharChave,
     PontoEVirgula,
     Virgula,
+    Ponto,
     DoisPontos,
     FimDoArquivo,
 
@@ -64,6 +65,7 @@ public enum TokenTipo
     Var,
     Const,
     Funcao,
+    Tipo,
     Se,
     Senao,
     SenaoSe,
