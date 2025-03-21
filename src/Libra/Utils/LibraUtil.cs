@@ -37,6 +37,8 @@ public static class LibraUtil
             case "Texto": return LibraTipo.Texto;
             case "Vetor": return LibraTipo.Vetor;
             case "Objeto": return LibraTipo.Objeto;
+            case "Nulo": return LibraTipo.Nulo;
+            case "Vazio": return LibraTipo.Nulo;
             default:
                 throw new Erro($"Tipo desconhecido `{tipo}`", Interpretador.LocalAtual);
         }

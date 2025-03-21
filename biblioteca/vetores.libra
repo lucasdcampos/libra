@@ -3,7 +3,7 @@
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
 // Exibe todos os elementos de um Vetor
-funcao mostrarVetor(vetor: Vetor) -> Vetor
+funcao mostrarVetor(vetor: Vetor)
     var n = 0
     exibir("{ ", "")
 
@@ -16,7 +16,7 @@ funcao mostrarVetor(vetor: Vetor) -> Vetor
 fim
 
 // Retorna um novo Vetor com o elemento adicionado ao final
-funcao incluir(vetor: Vetor, elemento) -> Vetor
+funcao incluir(vetor: Vetor, elemento: Objeto) -> Vetor
     var temp = [tamanho(vetor)+1]
     var n = 0
 
@@ -52,7 +52,7 @@ funcao estaVazio(vetor: Vetor) -> Int
 fim
 
 // Retorna um novo Vetor com o elemento adicionado ao inicio
-funcao adicionarInicio(vetor: Vetor, elemento) -> Vetor
+funcao adicionarInicio(vetor: Vetor, elemento: Objeto) -> Vetor
     var temp = [tamanho(vetor) + 1]
     temp[0] = elemento
     var n = 0

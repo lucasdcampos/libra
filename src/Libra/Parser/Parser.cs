@@ -193,8 +193,9 @@ public class Parser
         }
         else
         {
-            if(Interpretador.Flags.ForcarTiposEstaticos)
-                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
+            // Quando tipos estáticos são forçados, se não especificar o tipo de retorno, ele será interpretado como nulo
+            // Em casos normais, o tipo de retorno poderá ser qualquer objeto
+            tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? LibraTipo.Nulo : LibraTipo.Objeto;
         }
 
         var instrucoes = ParseInstrucoes();

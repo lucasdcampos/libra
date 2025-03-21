@@ -17,6 +17,11 @@ public class LibraNulo : LibraObjeto
         return null;
     }
 
+    public override LibraObjeto Converter(LibraTipo novoTipo)
+    {
+        return LibraObjeto.Inicializar(novoTipo);
+    }
+    
     public override LibraInt ObterTamanhoEmBytes()
     {
         return new LibraInt(0);

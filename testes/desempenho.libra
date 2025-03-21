@@ -1,11 +1,17 @@
-// Testando desempenho e otimização
-// Tempo esperado: 90 segundos (ainda seria lento)
-funcao fib(n)
-    se n < 2 entao
-        retornar n
+funcao fib(n) -> Int
+    exibir("n: " + n)
+    exibir(tipo(n))
+    se n == 0 entao
+        retornar 0
+    fim
+    se n == 1 entao
+        retornar 1
+    fim
+    se n < 0 entao
+        erro("Não era pra cair aqui..")
     fim
 
-    retornar fib(n - 1 ) + fib(n - 2)
+    retornar fib(n - 1) + fib(n - 2)
 fim
 
-fib(40)
+exibir(fib(5))

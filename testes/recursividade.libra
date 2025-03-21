@@ -1,0 +1,51 @@
+/*
+Testando funções recursivas para verificar se tudo
+está correndo como esperado
+*/
+funcao garantir(condicao)
+    se condicao == 0 entao
+        erro("Teste falhou")
+    fim
+fim
+
+funcao fatorial(n) -> Int
+    se n == 0 entao
+        retornar 1
+    fim
+
+    retornar n * fatorial(n - 1)
+fim
+
+garantir(fatorial(5) == 120)
+
+funcao soma_naturais(n) -> Int
+    se n == 0 entao
+        retornar 0
+    fim
+
+    retornar n + soma_naturais(n - 1)
+fim
+
+garantir(soma_naturais(5) == 15)
+
+funcao potencia(base, n) -> Int
+    se n == 0 entao
+        retornar 1
+    fim
+
+    retornar base * potencia(base, n - 1)
+fim
+
+garantir(potencia(2, 10) == 1024)
+
+funcao mdc(a, b) -> Int
+    se b == 0 entao
+        retornar a
+    fim
+    var resto = a % b
+    a = b
+    b = resto
+    retornar mdc(a, b)
+fim
+
+garantir(mdc(48, 18) == 6)

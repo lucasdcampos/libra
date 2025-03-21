@@ -38,20 +38,17 @@ const MB = 1024 * 1024
 const GB = 1024 * 1024 * 1024
 
 // Calcula e retorna a raiz enésima de um número
-funcao raiz(numero, indice: Int)
-    numero = real(numero)
-    indice = real(numero)
+funcao raiz(numero: Real, indice: Int) -> Real
     retornar __csraiz__(numero, indice)
 fim
 
 // Calcula e retorna a raiz quadrada de um número
-funcao raizq(x)
-    x = real(x)
+funcao raizq(x: Real) -> Real
     retornar __csraizq__(x)
 fim
 
 // Calcula e retorna a o fatorial de um número
-funcao fatorial(n)
+funcao fatorial(n: Int) -> Real
     var resultado = 1
     var contador = n
     enquanto contador > 0 faca
@@ -63,17 +60,16 @@ funcao fatorial(n)
 fim
 
 // Retorna o valor absoluto (módulo) de um número
-funcao abs(x)
+funcao abs(x: Real) -> Real
     se x > 0 entao
         retornar x
     fim
 
     retornar -x
-
 fim
 
 // Retorna o maior valor dentro de um intervalo
-funcao topo(a, b)
+funcao topo(a: Real, b: Real) -> Real
     se a > b entao
         retornar a
     fim
@@ -82,7 +78,7 @@ funcao topo(a, b)
 fim
 
 // Retorna o menor valor dentro de um intervalo
-funcao chao(a, b)
+funcao chao(a: Real, b: Real) -> Real
     se a < b entao
         retornar a
     fim
@@ -91,76 +87,70 @@ funcao chao(a, b)
 fim
 
 // Retorna o inteiro mais próximo de um valor real
-funcao arrendondar(x) -> Int
-    x = real(x)
-    se x > int(x) + 0.5 entao
+funcao arrendondar(x: Real) -> Int
+    se x > real(int(x)) + 0.5 entao
         retornar int(x+1)
     fim
     retornar int(x)
 fim
 
 // Retorna a hipotenusa de dois lados
-funcao hipotenusa(a, b)
+funcao hipotenusa(a: Real, b: Real) -> Real
     retornar raizq(a*a + b*b)
 fim
 
 // Retorna o seno de um ângulo x
-funcao sen(x)
+funcao sen(x: Real) -> Real
     retornar __cssen__(x)
 fim
 
 // Retorna o cosseno de um ângulo x
-funcao cos(x)
+funcao cos(x: Real) -> Real
     retornar __cscos__(x)
 fim
 
 // Retorna a tangente de um ângulo x
-funcao tan(x)
+funcao tan(x: Real) -> Real
     retornar __cstan__(x)
 fim
 
 // Retorna o arco-seno de um ângulo x
-funcao arcsen(x)
+funcao arcsen(x: Real) -> Real
     retornar sen(x)^-1
 fim
 
 // Retorna o arco-cosseno de um ângulo x
-funcao arccos(x)
+funcao arccos(x: Real) -> Real
     retornar cos(x)^-1
 fim
 
 // Retorna a arco-tangente de um ângulo x
-funcao arctan(x)
+funcao arctan(x: Real) -> Real
     retornar tan(x)^-1
 fim
 
 // Retorna o logaritmo de x na base n
-funcao log(x, n)
-    var xReal = real(x)
-    var baseReal = real(n)
-    se tipo(xReal) == "Nulo" ou tipo(baseReal) == "Nulo" entao
-        erro("log(x, base) deve receber números reais!")
-    fim
+funcao log(x: Real, n: Real) -> Real
     retornar __cslog__(x, n)
 fim
 
-funcao ln(x)
+funcao ln(x: Real) -> Real
     retornar log(x, E)
 fim
 
-funcao log2(x)
+funcao log2(x: Real) -> Real
     retornar log(x, 2)
 fim
 
-funcao exp(x)
+funcao exp(x: Real) -> Real
     retornar E^x
 fim
 
-funcao exp2(x)
+funcao exp2(x: Real) -> Real
     retornar 2^x
 fim
 
-funcao aleatorio(min, max)
+funcao aleatorio(min: Real, max: Real) -> Real
     min = real(min)
     max = real(max)
 

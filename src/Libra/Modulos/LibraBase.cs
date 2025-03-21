@@ -28,7 +28,7 @@ public class LibraBase : IModulo
 
         _programa.Funcoes["sair"] = new FuncaoNativa(sair);
         _programa.Funcoes["exibir"] = new FuncaoNativa(exibir);
-        _programa.Funcoes["tipo"] = new FuncaoNativa(tipo);
+        _programa.Funcoes["obterTipo"] = new FuncaoNativa(tipo);
         _programa.Funcoes["tamanho"] = new FuncaoNativa(tamanho);
         _programa.Funcoes["entrada"] = new FuncaoNativa(entrada);
         _programa.Funcoes["concat"] = new FuncaoNativa(concat);
