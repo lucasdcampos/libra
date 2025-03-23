@@ -13,7 +13,7 @@ instrucao               ::= inst_decl_var
 
 bloco                   ::= instrucao* "fim"
 
-inst_decl_var          ::= ("var" | "const") ident (":" tipo)? "=" expr
+inst_decl_var           ::= ("var" | "const") ident (":" tipo)? "=" expr
 
 inst_decl_tipo          ::= "tipo" ident (inst_decl_var | inst_decl_func)* "fim"
 
