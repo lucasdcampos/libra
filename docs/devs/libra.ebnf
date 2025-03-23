@@ -11,13 +11,15 @@ instrucao               ::= inst_decl_var
                           | inst_retornar
                           | expr
 
-inst_decl_func          ::= ("var" | "const") ident (":" tipo)? "=" expr
+bloco                   ::= instrucao* "fim"
+
+inst_decl_var          ::= ("var" | "const") ident (":" tipo)? "=" expr
 
 inst_decl_tipo          ::= "tipo" ident (inst_decl_var | inst_decl_func)* "fim"
 
-tipo                    ::= "Objeto" | "Int" | "Real" | "Texto" | "Vetor" | ident
+inst_decl_func          ::= "funcao" ident "(" (ident ("," ident)*)? ")" ("-->" tipo)? bloco
 
-inst_decl_func          ::= "funcao" ident "(" (ident ("," ident)*)? ")"
+tipo                    ::= "Objeto" | "Int" | "Real" | "Texto" | "Vetor" | ident
 
 inst_atrib_var          ::= ident "=" expr
 
@@ -25,11 +27,11 @@ inst_se                 ::= "se" expr "entao" instrucao* (senao_se*)? "fim"
 
 senao_se                ::= "senao" "se" expr "entao" instrucao*
 
-inst_enquanto           ::= "enquanto" expr "faca" instrucao* "fim"
+inst_enquanto           ::= "enquanto" expr "faca" bloco
 
 expr                    ::= expr_lit | expr_var | expr_chamada | expr_unaria | expr_bin | construir_vetor
 
-expr_lit                ::= INT | DOUBLE | STRING
+expr_lit                ::= int | real | texto
 
 expr_var                ::= ident
 
@@ -44,3 +46,18 @@ expr_paren              ::= "(" expr ")"
 construir_vetor         ::= ("{" (expr ("," expr)*)? "}") | "[" expr? "]"
 
 op_bin                  ::= "+" | "-" | "*" | "/" | "^" | "%" | "e" | "ou" | ">" | ">=" | "<" | "<=" | "==" | "!="
+
+ident                   ::= letra (letra | digito | "_")*
+
+int                     ::= digito+
+
+real                    ::= digito+ "." digito+
+
+texto                   ::= "\"" (caractere | escape)* "\""
+
+letra                   ::= "a"..."z" | "A"..."Z"
+
+digito                  ::= "0"..."9"
+caractere               ::= qualquer caractere visível exceto "\"" e "\\"
+
+escape                  ::= "\\" ( "\"" | "\\" | "n" | "t" | "r" )
