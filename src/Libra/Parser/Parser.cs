@@ -85,11 +85,24 @@ public class Parser
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return new InstrucaoChamadaFuncao(_local, ParseExpressaoChamadaFuncao());
+                else if(Proximo(1).Tipo == TokenTipo.Ponto)
+                    return ParseInstrucaoModificacaoPropriedade();
                 else
                     return ParseInstrucaoVar();
         }
             
         throw new Erro($"Instrução inválida {atual}", _local);
+    }
+
+    private Instrucao? ParseInstrucaoModificacaoPropriedade()
+    {
+        string ident = ConsumirToken().Valor.ToString();
+        Passar(); // .
+        string prop = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+        ConsumirToken(TokenTipo.OperadorDefinir);
+        var expr = ParseExpressao();
+
+        return new InstrucaoModificacaoPropriedade(_local, ident, prop, expr);
     }
 
     private Instrucao? ParseInstrucaoVar()
@@ -377,7 +390,10 @@ public class Parser
                 }
                 else if(Proximo(1).Tipo == TokenTipo.Ponto)
                 {
-                    return new ExpressaoVariavel(ParseIdentificadorComposto());
+                    var ident = ConsumirToken().Valor.ToString();
+                    Passar();
+                    var prop = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+                    return new ExpressaoPropriedade(ident, prop);
                 }
                 return new ExpressaoVariavel(ConsumirToken());
 

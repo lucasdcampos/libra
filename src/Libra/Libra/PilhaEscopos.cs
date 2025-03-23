@@ -74,6 +74,11 @@ public class PilhaDeEscopos
                 return escopos.ElementAt(i)?.ObterVariavel(identificador);
         }
 
+        if(identificador.Length > 20)
+        {
+            throw new Erro($"Parece que você dormiu e bateu no teclado.\n\n      {identificador}\n      {new String('^',identificador.Length)} você dormiu por aqui.", Interpretador.LocalAtual, 1, $"Tente melhorar sua qualidade de sono e evitar estresse,\nou declare `{identificador}`.");
+        }
+            
         throw new ErroVariavelNaoDeclarada(identificador);
         
         return null;

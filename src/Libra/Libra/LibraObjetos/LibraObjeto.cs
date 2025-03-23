@@ -52,6 +52,11 @@ public abstract class LibraObjeto
         return new LibraNulo();
     }
 
+    public virtual LibraObjeto AcessarPropriedade(string prop)
+    {
+        return new LibraNulo();
+    }
+
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários
     public virtual LibraObjeto Soma(LibraObjeto outro)
     {

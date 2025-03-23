@@ -17,6 +17,11 @@ public class LibraNulo : LibraObjeto
         return null;
     }
 
+    public override LibraInt Igual(LibraObjeto outro)
+    {
+        return new LibraInt(outro is LibraNulo);
+    }
+    
     public override LibraObjeto Converter(LibraTipo novoTipo)
     {
         return LibraObjeto.Inicializar(novoTipo);

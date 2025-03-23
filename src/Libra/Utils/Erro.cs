@@ -54,7 +54,7 @@ public class Erro : Exception
             Console.ForegroundColor = ConsoleColor.DarkCyan;
             Ambiente.Msg("Dica:", " ");
             Console.ResetColor();
-            Ambiente.Msg(dica+"\n");
+            Ambiente.Msg(dica.Replace("\n", "\n      ")+"\n");
         }
         
         Ambiente.Encerrar(this.Codigo);

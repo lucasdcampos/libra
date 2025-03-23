@@ -27,7 +27,7 @@ namespace Libra.Arvore
             return Tipos.ContainsKey(ident);
         }
 
-        public object ObterVariavel(string identificador)
+        public Variavel ObterVariavel(string identificador)
         {
             return PilhaEscopos.ObterVariavel(identificador);
         }

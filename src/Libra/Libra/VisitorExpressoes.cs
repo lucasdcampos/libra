@@ -103,4 +103,15 @@ public class VisitorExpressoes : IVisitor
     {
         return _interpretador.InterpretarChamadaFuncao(expressao);
     }
+
+    public LibraObjeto VisitarExpressaoPropriedade(ExpressaoPropriedade expressao)
+    {
+        var obj = LibraObjeto.ParaLibraObjeto(_programa.ObterVariavel(expressao.Identificador));
+        if(obj is not LibraClasse classe)
+        {
+            throw new ErroAcessoNulo(expressao.Identificador);
+        }
+
+        return classe.AcessarPropriedade(expressao.Propriedade);
+    }
 }

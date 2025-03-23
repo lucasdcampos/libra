@@ -168,4 +168,20 @@ namespace Libra.Arvore
         public Expressao ExpressaoIndice { get; private set; }
         public Expressao Expressao { get; private set; }
     }
+
+    public class InstrucaoModificacaoPropriedade : Instrucao
+    {
+        public InstrucaoModificacaoPropriedade(LocalToken local, string identificador, string propriedade, Expressao expressao)
+        {
+            Local = local;
+            Expressao = expressao;
+            Identificador = identificador;
+            Propriedade = propriedade;
+            TipoInstrucao = TokenTipo.TokenInvalido;
+        }
+
+        public string Identificador { get; private set; }
+        public string Propriedade { get; private set; }
+        public Expressao Expressao { get; private set; }
+    }
 }

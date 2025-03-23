@@ -1,14 +1,16 @@
+using Libra.Arvore;
+
 namespace Libra;
 
 public class Tipo
 {
     public string Identificador { get; private set; }
 
-    public Variavel[] Variaveis { get; private set; }
+    public Instrucao[] Instrucoes { get; private set; }
 
-    public Tipo(string ident, Variavel[] variaveis)
+    public Tipo(string ident, Instrucao[] instrucoes)
     {
         Identificador = ident;
-        Variaveis = variaveis;
+        Instrucoes = instrucoes;
     }
 }

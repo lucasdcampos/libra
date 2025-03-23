@@ -4,6 +4,7 @@ namespace Libra.Arvore
     {
         ExpressaoLiteral,
         ExpressaoVariavel,
+        ExpressaoPropriedade,
         ExpressaoChamadaFuncao,
         ExpressaoDeclaracaoVetor,
         ExpressaoInicializacaoVetor,
@@ -12,7 +13,7 @@ namespace Libra.Arvore
         ExpressaoBinaria
     }
 
-    public abstract class Expressao 
+    public abstract class Expressao : Instrucao
     {
         public TipoExpressao Tipo { get; protected set ;}
         public abstract object Aceitar(IVisitor visitor);
@@ -65,6 +66,20 @@ namespace Libra.Arvore
         }
 
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoVariavel(this);
+    }
+
+    public class ExpressaoPropriedade : Expressao
+    {
+        public string Identificador { get; private set ;}
+        public string Propriedade { get; private set ;}
+        public ExpressaoPropriedade(string identificador, string prop)
+        {
+            Identificador = identificador;
+            Propriedade = prop;
+            Tipo = TipoExpressao.ExpressaoPropriedade;
+        }
+
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoPropriedade(this);
     }
 
     public class ExpressaoChamadaFuncao : Expressao

@@ -129,6 +129,21 @@ public class Interpretador
         // Executa a ação associada ao tipo, se existir.
         if (acoes.TryGetValue(instrucao.TipoInstrucao, out var acao))
             acao();
+
+        if(instrucao is InstrucaoModificacaoPropriedade ip)
+        {
+            InterpretarModificacaoPropriedade(ip);
+        }
+    }
+
+    public void InterpretarModificacaoPropriedade(InstrucaoModificacaoPropriedade instrucao)
+    {
+        var obj = _programa.ObterVariavel(instrucao.Identificador).Valor;
+
+        if(obj is not LibraClasse classe)
+            throw new ErroAcessoNulo(instrucao.Identificador, _local);
+        
+        classe.ModificarVariavel(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
     }
 
     public void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
@@ -234,16 +249,41 @@ public class Interpretador
         return objeto;
     }
 
+    public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes)
+    {
+        var tipo = _programa.Tipos[nome];
+
+        if(tipo.Instrucoes.Length != expressoes.Length && expressoes.Length > 0)
+            throw new ErroEsperadoNArgumentos(nome, tipo.Instrucoes.Length, expressoes.Length, _local);
+
+        List<Variavel> vars = new();
+        foreach(var i in tipo.Instrucoes)
+        {
+            if(i is InstrucaoVar iv)
+            {
+                vars.Add(new Variavel(iv.Identificador, InterpretarExpressao(iv.Expressao), iv.Constante, iv.TipoVar, iv.TipoModificavel));
+            }
+        }
+
+        return new LibraClasse(nome, vars.ToArray());
+    }
+
     public LibraObjeto InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
     {
         var chamada = instrucaoChamada.Chamada;
         var argumentos = chamada.Argumentos;
 
+        // Verificando se estamos chamando uma nova instancia de uma classe
+        if(_programa.TipoExiste(chamada.Identificador))
+        {
+            return InterpretarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
+        }
+
         if (!_programa.FuncaoExiste(chamada.Identificador))
         {
             throw new ErroFuncaoNaoDefinida(chamada.Identificador, _local);
         }
-            
+        
 
         var funcao = _programa.Funcoes[chamada.Identificador];
 
@@ -296,14 +336,7 @@ public class Interpretador
 
     public void InterpretarInstrucaoTipo(InstrucaoTipo i)
     {
-       //_programa.Tipos[i.Identificador] = new Tipo(i.Identificador, );
-        foreach(var i2 in i.Instrucoes)
-        {
-            if(i2 is InstrucaoVar instVar)
-            {
-                InterpretarInstrucaoVar(new InstrucaoVar(instVar.Local, i.Identificador + "." + instVar.Identificador, instVar.Expressao, instVar.Constante, instVar.EhDeclaracao, instVar.TipoVar, instVar.TipoModificavel));
-            }
-        }
+       _programa.Tipos[i.Identificador] = new Tipo(i.Identificador, i.Instrucoes);
     }
 
     public LibraObjeto InterpretarInstrucaoVar(InstrucaoVar i)
@@ -312,7 +345,7 @@ public class Interpretador
             throw new Erro("Identificador inválido!", _local);
 
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
-  
+
         if(i.EhDeclaracao)
             _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
         else
@@ -343,7 +376,7 @@ public class Interpretador
     public LibraObjeto InterpretarExpressao(Expressao expressao)
     {
         if(expressao == null)
-            return null;
+            return new LibraNulo();
 
         return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(_visitorExpressoes));
     }

@@ -96,3 +96,20 @@ funcao maiorElemento(vetor: Vetor)
 
     retornar maior
 fim
+
+funcao ordenar(vetor: Vetor) -> Vetor
+    var i = 0
+    enquanto i < tamanho(vetor) faca
+        var j = 0
+        enquanto j < tamanho(vetor) - 1 faca
+            se vetor[j] > vetor[j + 1] entao
+                var temp = vetor[j]
+                vetor[j] = vetor[j + 1]
+                vetor[j + 1] = temp
+            fim
+            j = j + 1
+        fim
+        i = i + 1
+    fim
+    retornar vetor
+fim
