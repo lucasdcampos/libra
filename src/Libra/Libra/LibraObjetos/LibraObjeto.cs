@@ -54,7 +54,12 @@ public abstract class LibraObjeto
 
     public virtual LibraObjeto AcessarPropriedade(string prop)
     {
-        return new LibraNulo();
+        throw new ErroVariavelNaoDeclarada(prop);
+    }
+
+    public virtual LibraObjeto ChamarMetodo(string ident, Parametro[] parametros)
+    {
+        throw new ErroFuncaoNaoDefinida(ident);
     }
 
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários

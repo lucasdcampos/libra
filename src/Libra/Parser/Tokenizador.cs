@@ -18,7 +18,7 @@ public class Tokenizador
         { "var", TokenTipo.Var },
         { "const", TokenTipo.Const },
         { "funcao", TokenTipo.Funcao },
-        { "tipo", TokenTipo.Tipo },
+        { "classe", TokenTipo.Classe },
         { "se", TokenTipo.Se },
         { "senao", TokenTipo.Senao },
         { "enquanto", TokenTipo.Enquanto },

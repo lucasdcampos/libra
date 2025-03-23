@@ -3,13 +3,14 @@ namespace Libra;
 public class LibraClasse : LibraObjeto
 {
     public string Nome { get; private set; }
-
-    public Variavel[] Variaveis { get; private set; }
-    public LibraClasse(string nome, Variavel[] variavels)
+    public Variavel[] Propriedades { get; private set; }
+    public Funcao[] Metodos { get; private set; }
+    public LibraClasse(string nome, Variavel[] propriedades, Funcao[] metodos)
     {
-        Nome = nome;
         Tipo = LibraTipo.Objeto;
-        Variaveis = variavels;
+        Nome = nome;
+        Propriedades = propriedades;
+        Metodos = metodos;
     }
 
     public override string ToString()
@@ -24,7 +25,7 @@ public class LibraClasse : LibraObjeto
 
     public override LibraObjeto AcessarPropriedade(string prop)
     {
-        foreach(var v in Variaveis)
+        foreach(var v in Propriedades)
         {
             if(v.Identificador == prop)
             {
@@ -37,7 +38,7 @@ public class LibraClasse : LibraObjeto
 
     public void ModificarVariavel(string ident, LibraObjeto novoValor)
     {
-        foreach(var v in Variaveis)
+        foreach(var v in Propriedades)
         {
             if(v.Identificador == ident)
             {

@@ -76,7 +76,7 @@ public class Parser
             case TokenTipo.Var: return ParseDeclVar();
             case TokenTipo.Const: return ParseDeclVar();
             case TokenTipo.Funcao: return ParseDeclFuncao();
-            case TokenTipo.Tipo: return ParseDeclTipo();
+            case TokenTipo.Classe: return ParseDeclClasse();
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
             case TokenTipo.Romper: Passar(); return new InstrucaoRomper();
@@ -182,23 +182,31 @@ public class Parser
         return new ExpressaoNovoVetor(expr);
     }
 
-    private DefinicaoTipo? ParseDeclTipo()
+    private DefinicaoTipo? ParseDeclClasse()
     {
-        ConsumirToken(TokenTipo.Tipo);
+        ConsumirToken(TokenTipo.Classe);
         
         string? identificador = (string)ConsumirToken(TokenTipo.Identificador)?.Valor;
 
-        var variaveis = new List<Instrucao>();
+        var variaveis = new List<DeclaracaoVar>();
+        var funcoes = new List<DefinicaoFuncao>();
+
         while(Atual().Tipo != TokenTipo.Fim)
         {
             if(Atual().Tipo == TokenTipo.FimDoArquivo)
                 throw new ErroEsperado(TokenTipo.Fim, TokenTipo.FimDoArquivo, _local);
 
-            variaveis.Add(ParseDeclVar());
+            var atual = ParseInstrucaoAtual();
+            if(atual.Tipo == TipoInstrucao.DeclVar)
+                variaveis.Add((DeclaracaoVar)atual);
+            else if(atual.Tipo == TipoInstrucao.DeclFunc)
+                funcoes.Add((DefinicaoFuncao)atual);
+            else
+                throw new Erro("Instruções esperadas: Declaração de Variável e Definição de Função.", _local);
         }
-
         Passar();
-        return new DefinicaoTipo(identificador, variaveis.ToArray());
+
+        return new DefinicaoTipo(identificador, variaveis.ToArray(), funcoes.ToArray());
     }
 
     private Parametro[] ParseParametros()

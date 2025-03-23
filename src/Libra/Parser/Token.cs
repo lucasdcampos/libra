@@ -65,7 +65,7 @@ public enum TokenTipo
     Var,
     Const,
     Funcao,
-    Tipo,
+    Classe,
     Se,
     Senao,
     SenaoSe,

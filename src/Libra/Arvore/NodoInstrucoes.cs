@@ -7,7 +7,7 @@ namespace Libra.Arvore
     {
         DeclVar,
         DeclFunc,
-        DeclTipo,
+        DeclClasse,
         AtribVar,
         AtribIndice,
         AtribProp,
@@ -86,14 +86,16 @@ namespace Libra.Arvore
 
     public class DefinicaoTipo : Instrucao
     {
-        public DefinicaoTipo(string identificador, Instrucao[] instrucoes)
+        public DefinicaoTipo(string identificador, DeclaracaoVar[] variaveis, DefinicaoFuncao[] funcoes)
         {
-            Tipo = TipoInstrucao.DeclTipo;
-            Instrucoes = instrucoes;
+            Tipo = TipoInstrucao.DeclClasse;
+            Variaveis = variaveis;
+            Funcoes = funcoes;
             Identificador = identificador;
         }
 
-        public Instrucao[] Instrucoes { get; private set; }
+        public DeclaracaoVar[] Variaveis { get; private set; }
+        public DefinicaoFuncao[] Funcoes { get; private set; }
         public string Identificador {get; private set; }
     }
 

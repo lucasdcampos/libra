@@ -116,7 +116,7 @@ public class Interpretador
         {
             { TipoInstrucao.DeclVar, () => InterpretarDeclVar((DeclaracaoVar)instrucao) },
             { TipoInstrucao.DeclFunc, () => InterpretarFuncao((DefinicaoFuncao)instrucao) },
-            { TipoInstrucao.DeclTipo, () => InterpretarInstrucaoTipo((DefinicaoTipo)instrucao) },
+            { TipoInstrucao.DeclClasse, () => InterpretarInstrucaoClasse((DefinicaoTipo)instrucao) },
             { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
             { TipoInstrucao.Enquanto, () => InterpretarEnquanto((InstrucaoEnquanto)instrucao) },
             { TipoInstrucao.Se, () => InterpretarSe((InstrucaoSe)instrucao) },
@@ -246,21 +246,26 @@ public class Interpretador
 
     public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes)
     {
-        var tipo = _programa.Tipos[nome];
+        if(!_programa.ClasseExiste(nome))
+            throw new ErroFuncaoNaoDefinida(nome, _local);
 
-        if(tipo.Instrucoes.Length != expressoes.Length && expressoes.Length > 0)
-            throw new ErroEsperadoNArgumentos(nome, tipo.Instrucoes.Length, expressoes.Length, _local);
+        var tipo = _programa.Classes[nome];
+        
+        if(tipo.Variaveis.Length != expressoes.Length && expressoes.Length > 0)
+            throw new ErroEsperadoNArgumentos(nome, tipo.Variaveis.Length, expressoes.Length, _local);
 
         List<Variavel> vars = new();
-        foreach(var i in tipo.Instrucoes)
+        foreach(var i in tipo.Variaveis)
         {
-            if(i is DeclaracaoVar iv)
-            {
-                vars.Add(new Variavel(iv.Identificador, InterpretarExpressao(iv.Expressao), iv.Constante, iv.TipoVar, iv.TipoModificavel));
-            }
+            vars.Add(new Variavel(i.Identificador, InterpretarExpressao(i.Expressao), i.Constante, i.TipoVar, i.TipoModificavel));
+        }
+        List<Funcao> funcs = new();
+        foreach(var i in tipo.Funcoes)
+        {
+            funcs.Add(new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno));
         }
 
-        return new LibraClasse(nome, vars.ToArray());
+        return new LibraClasse(nome, vars.ToArray(), funcs.ToArray());
     }
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
@@ -268,7 +273,7 @@ public class Interpretador
         var argumentos = chamada.Argumentos;
 
         // Verificando se estamos chamando uma nova instancia de uma classe
-        if(_programa.TipoExiste(chamada.Identificador))
+        if(_programa.ClasseExiste(chamada.Identificador))
         {
             return InterpretarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
         }
@@ -327,9 +332,12 @@ public class Interpretador
         return null;
     }
 
-    public void InterpretarInstrucaoTipo(DefinicaoTipo i)
+    public void InterpretarInstrucaoClasse(DefinicaoTipo i)
     {
-       _programa.Tipos[i.Identificador] = new Tipo(i.Identificador, i.Instrucoes);
+        if(_programa.ClasseExiste(i.Identificador))
+            throw new Erro($"Classe já existe: {i.Identificador}", _local);
+
+       _programa.Classes.Add(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
     }
 
     public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)

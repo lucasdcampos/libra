@@ -1,5 +1,9 @@
-var vetor = { 1, 2, 3 }
-vetor = [10]
-vetor[0] = 1
-vetor = {}
-vetor = []
+classe Pessoa
+    var nome = "Pedro"
+    funcao construtor()
+        exibir("Olá")
+    fim
+fim
+
+var p = Pessoa()
+exibir(p.batata)
