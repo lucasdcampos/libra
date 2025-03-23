@@ -84,7 +84,7 @@ public class Parser
             case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, ParseExpressao());
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
-                    return new InstrucaoChamadaFuncao(_local, ParseExpressaoChamadaFuncao());
+                    return ParseExpressaoChamadaFuncao();
                 else if(Proximo(1).Tipo == TokenTipo.Ponto)
                     return ParseInstrucaoModificacaoPropriedade();
                 else

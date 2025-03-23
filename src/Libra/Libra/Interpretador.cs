@@ -112,22 +112,21 @@ public class Interpretador
 
         _local = instrucao.Local;
         
-        var acoes = new Dictionary<TokenTipo, Action>
+        var acoes = new Dictionary<TipoInstrucao, Action>
         {
-            { TokenTipo.Var, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
-            { TokenTipo.Const, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
-            { TokenTipo.Se, () => InterpretarCondicional((InstrucaoSe)instrucao) },
-            { TokenTipo.Enquanto, () => InterpretarCondicional((InstrucaoEnquanto)instrucao) },
-            { TokenTipo.Funcao, () => InterpretarFuncao((InstrucaoFuncao)instrucao) },
-            { TokenTipo.Tipo, () => InterpretarInstrucaoTipo((InstrucaoTipo)instrucao) },
-            { TokenTipo.Identificador, () => InterpretarChamadaFuncao((InstrucaoChamadaFuncao)instrucao) },
-            { TokenTipo.Vetor, () => InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao) },
-            { TokenTipo.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
-            { TokenTipo.Romper, () => throw new ExcecaoRomper() }
+            { TipoInstrucao.DeclVar, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
+            { TipoInstrucao.DeclFunc, () => InterpretarFuncao((InstrucaoFuncao)instrucao) },
+            { TipoInstrucao.DeclTipo, () => InterpretarInstrucaoTipo((InstrucaoTipo)instrucao) },
+            { TipoInstrucao.Enquanto, () => InterpretarCondicional((InstrucaoEnquanto)instrucao) },
+            { TipoInstrucao.Se, () => InterpretarCondicional((InstrucaoSe)instrucao) },
+            { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
+            //{ TipoInstrucao.Vetor, () => InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao) },
+            { TipoInstrucao.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
+            { TipoInstrucao.Romper, () => throw new ExcecaoRomper() }
         };
 
         // Executa a ação associada ao tipo, se existir.
-        if (acoes.TryGetValue(instrucao.TipoInstrucao, out var acao))
+        if (acoes.TryGetValue(instrucao.Tipo, out var acao))
             acao();
 
         if(instrucao is InstrucaoModificacaoPropriedade ip)
@@ -228,11 +227,6 @@ public class Interpretador
         _programa.Funcoes[identificador] = novaFuncao;
     }
 
-    public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao expressaoChamadaFuncao)
-    {
-        return InterpretarChamadaFuncao(new InstrucaoChamadaFuncao(_local, expressaoChamadaFuncao));
-    }
-
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, ExpressaoChamadaFuncao chamada) 
     {
         var f = (FuncaoNativa)_programa.Funcoes[chamada.Identificador];
@@ -268,9 +262,8 @@ public class Interpretador
         return new LibraClasse(nome, vars.ToArray());
     }
 
-    public LibraObjeto InterpretarChamadaFuncao(InstrucaoChamadaFuncao instrucaoChamada)
+    public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
     {
-        var chamada = instrucaoChamada.Chamada;
         var argumentos = chamada.Argumentos;
 
         // Verificando se estamos chamando uma nova instancia de uma classe
@@ -283,7 +276,6 @@ public class Interpretador
         {
             throw new ErroFuncaoNaoDefinida(chamada.Identificador, _local);
         }
-        
 
         var funcao = _programa.Funcoes[chamada.Identificador];
 

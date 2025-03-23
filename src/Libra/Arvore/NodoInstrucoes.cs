@@ -3,9 +3,23 @@ using System;
 
 namespace Libra.Arvore
 {
+    public enum TipoInstrucao
+    {
+        DeclVar,
+        DeclFunc,
+        DeclTipo,
+        AtribVar,
+        Chamada,
+        Se,
+        SenaoSe,
+        Enquanto,
+        Romper,
+        Continuar,
+        Retornar
+    }
     public abstract class Instrucao 
     { 
-        public TokenTipo TipoInstrucao { get; protected set; }
+        public TipoInstrucao Tipo { get; protected set; }
 
         public LocalToken Local {get; protected set; }
     }
@@ -19,13 +33,12 @@ namespace Libra.Arvore
             Constante = constante;
             Expressao = expressao; 
             TipoModificavel = tipoModificavel;
-            TipoInstrucao = TokenTipo.Var;
+            Tipo = TipoInstrucao.DeclVar;
             Local = local;
             TipoVar = tipo;
         }
 
         public Expressao Expressao { get; private set; }
-        public TokenTipo Tipo { get; private set; }
         public string Identificador {get; private set; }
         internal bool EhDeclaracao;
         internal LibraTipo TipoVar;
@@ -33,14 +46,25 @@ namespace Libra.Arvore
         public bool Constante { get; private set; }
     }
 
+    public class AtribuicaoVariavel : Instrucao
+    {
+        public Expressao Identificador { get; }
+        public Expressao Expressao { get; }
+        public AtribuicaoVariavel(Expressao expr)
+        {
+            Expressao = expr;
+            Tipo = TipoInstrucao.AtribVar;
+        }
+    }
+
     public class InstrucaoFuncao : Instrucao
     {
         public InstrucaoFuncao(LocalToken local, string identificador, Instrucao[] instrucoes, List<Parametro> parametros = null, LibraTipo tipoRetorno = LibraTipo.Objeto)
         {
+            Tipo = TipoInstrucao.DeclFunc;
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
-            TipoInstrucao = TokenTipo.Funcao;
             Local = local;
             TipoRetorno = tipoRetorno;
         }
@@ -55,9 +79,9 @@ namespace Libra.Arvore
     {
         public InstrucaoTipo(LocalToken local, string identificador, Instrucao[] instrucoes)
         {
+            Tipo = TipoInstrucao.DeclTipo;
             Instrucoes = instrucoes;
             Identificador = identificador;
-            TipoInstrucao = TokenTipo.Tipo;
             Local = local;
         }
 
@@ -69,10 +93,10 @@ namespace Libra.Arvore
     {
         public InstrucaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)
         {
+            Tipo = TipoInstrucao.Se;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
             ListaSenaoSe = listaSenaoSe;
-            TipoInstrucao = TokenTipo.Se;
             Local = local;
         }
 
@@ -85,9 +109,9 @@ namespace Libra.Arvore
     {
         public InstrucaoSenaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo)
         {
+            Tipo = TipoInstrucao.SenaoSe;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
-            TipoInstrucao = TokenTipo.SenaoSe;
             Local = local;
         }
 
@@ -95,14 +119,13 @@ namespace Libra.Arvore
         public IReadOnlyList<Instrucao> Corpo { get; private set; }
     }
 
-
     public class InstrucaoEnquanto : Instrucao
     {
         public InstrucaoEnquanto(LocalToken local, Expressao expressao, Instrucao[] instrucoes)
         {
+            Tipo = TipoInstrucao.Enquanto;
             Expressao = expressao;
             Instrucoes = instrucoes;
-            TipoInstrucao = TokenTipo.Enquanto;
             Local = local;
         }
 
@@ -116,15 +139,16 @@ namespace Libra.Arvore
     {
         public InstrucaoRomper(LocalToken local)
         {
-            TipoInstrucao = TokenTipo.Romper;
+            Tipo = TipoInstrucao.Romper;
             Local = local;
         }
     }
+
     public class InstrucaoContinuar : Instrucao
     {
         public InstrucaoContinuar(LocalToken local)
         {
-            TipoInstrucao = TokenTipo.Continuar;
+            Tipo = TipoInstrucao.Continuar;
             Local = local;
         }
     }
@@ -135,22 +159,10 @@ namespace Libra.Arvore
 
         public InstrucaoRetornar(LocalToken local, Expressao expressao)
         {
+            Tipo = TipoInstrucao.Retornar;
             Expressao = expressao;
-            TipoInstrucao = TokenTipo.Retornar;
             Local = local;
         }
-    }
-
-    public class InstrucaoChamadaFuncao : Instrucao
-    {
-        public InstrucaoChamadaFuncao(LocalToken local, ExpressaoChamadaFuncao chamada)
-        {
-            Chamada = chamada;
-            TipoInstrucao = TokenTipo.Identificador;
-            Local = local;
-        }
-
-        public ExpressaoChamadaFuncao Chamada { get; private set; }
     }
 
     public class InstrucaoModificacaoVetor : Instrucao
@@ -161,7 +173,6 @@ namespace Libra.Arvore
             Expressao = expressao;
             Identificador = identificador;
             ExpressaoIndice = indiceExpr;
-            TipoInstrucao = TokenTipo.Vetor;
         }
 
         public string Identificador { get; private set; }
@@ -177,7 +188,6 @@ namespace Libra.Arvore
             Expressao = expressao;
             Identificador = identificador;
             Propriedade = propriedade;
-            TipoInstrucao = TokenTipo.TokenInvalido;
         }
 
         public string Identificador { get; private set; }
