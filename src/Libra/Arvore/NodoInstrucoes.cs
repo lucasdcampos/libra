@@ -9,6 +9,8 @@ namespace Libra.Arvore
         DeclFunc,
         DeclTipo,
         AtribVar,
+        AtribIndice,
+        AtribProp,
         Chamada,
         Se,
         SenaoSe,
@@ -17,72 +19,78 @@ namespace Libra.Arvore
         Continuar,
         Retornar
     }
+
     public abstract class Instrucao 
     { 
         public TipoInstrucao Tipo { get; protected set; }
-
         public LocalToken Local {get; protected set; }
     }
 
-    public class InstrucaoVar : Instrucao
+    public class DeclaracaoConst : Instrucao
     {
-        public InstrucaoVar(LocalToken local, string identificador, Expressao expressao, bool constante, bool declaracao, LibraTipo tipo,bool tipoModificavel)
+        public DeclaracaoConst(string identificador, Expressao expressao)
         {
             Identificador = identificador;
-            EhDeclaracao = declaracao;
-            Constante = constante;
+            Expressao = expressao;
+        }
+        
+        public string Identificador { get; }
+        public Expressao Expressao { get; }
+    }
+    public class DeclaracaoVar : Instrucao
+    {
+        public DeclaracaoVar(string identificador, Expressao expressao, LibraTipo tipo, bool tipoModificavel, bool constante)
+        {
+            Tipo = TipoInstrucao.DeclVar;
+            Identificador = identificador;
             Expressao = expressao; 
             TipoModificavel = tipoModificavel;
-            Tipo = TipoInstrucao.DeclVar;
-            Local = local;
             TipoVar = tipo;
         }
 
         public Expressao Expressao { get; private set; }
         public string Identificador {get; private set; }
-        internal bool EhDeclaracao;
         internal LibraTipo TipoVar;
         internal bool TipoModificavel;
         public bool Constante { get; private set; }
     }
 
-    public class AtribuicaoVariavel : Instrucao
+    public class AtribuicaoVar : Instrucao
     {
-        public Expressao Identificador { get; }
+        public string Identificador { get; }
         public Expressao Expressao { get; }
-        public AtribuicaoVariavel(Expressao expr)
+        public AtribuicaoVar(string identificador, Expressao expr)
         {
+            Identificador = identificador;
             Expressao = expr;
             Tipo = TipoInstrucao.AtribVar;
         }
     }
 
-    public class InstrucaoFuncao : Instrucao
+    public class DefinicaoFuncao : Instrucao
     {
-        public InstrucaoFuncao(LocalToken local, string identificador, Instrucao[] instrucoes, List<Parametro> parametros = null, LibraTipo tipoRetorno = LibraTipo.Objeto)
+        public DefinicaoFuncao(string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, LibraTipo tipoRetorno = LibraTipo.Objeto)
         {
             Tipo = TipoInstrucao.DeclFunc;
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
-            Local = local;
             TipoRetorno = tipoRetorno;
         }
 
         public Instrucao[] Instrucoes { get; private set; }
         public string Identificador {get; private set; }
-        public List<Parametro> Parametros { get; private set; }
+        public Parametro[] Parametros { get; private set; }
         public LibraTipo TipoRetorno { get; private set; }
     }
 
-    public class InstrucaoTipo : Instrucao
+    public class DefinicaoTipo : Instrucao
     {
-        public InstrucaoTipo(LocalToken local, string identificador, Instrucao[] instrucoes)
+        public DefinicaoTipo(string identificador, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.DeclTipo;
             Instrucoes = instrucoes;
             Identificador = identificador;
-            Local = local;
         }
 
         public Instrucao[] Instrucoes { get; private set; }
@@ -91,13 +99,12 @@ namespace Libra.Arvore
 
     public class InstrucaoSe : Instrucao
     {
-        public InstrucaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)
+        public InstrucaoSe(Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)
         {
             Tipo = TipoInstrucao.Se;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
             ListaSenaoSe = listaSenaoSe;
-            Local = local;
         }
 
         public Expressao Condicao { get; private set; }
@@ -107,12 +114,12 @@ namespace Libra.Arvore
 
     public class InstrucaoSenaoSe : Instrucao
     {
-        public InstrucaoSenaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo)
+        public InstrucaoSenaoSe(Expressao condicao, Instrucao[] corpo)
         {
             Tipo = TipoInstrucao.SenaoSe;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
-            Local = local;
+            
         }
 
         public Expressao Condicao { get; private set; }
@@ -121,12 +128,12 @@ namespace Libra.Arvore
 
     public class InstrucaoEnquanto : Instrucao
     {
-        public InstrucaoEnquanto(LocalToken local, Expressao expressao, Instrucao[] instrucoes)
+        public InstrucaoEnquanto( Expressao expressao, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.Enquanto;
             Expressao = expressao;
             Instrucoes = instrucoes;
-            Local = local;
+            
         }
 
         public Expressao Expressao { get; private set; }
@@ -137,19 +144,17 @@ namespace Libra.Arvore
     // Não necessitam de implementação
     public class InstrucaoRomper : Instrucao
     {
-        public InstrucaoRomper(LocalToken local)
+        public InstrucaoRomper()
         {
             Tipo = TipoInstrucao.Romper;
-            Local = local;
         }
     }
 
     public class InstrucaoContinuar : Instrucao
     {
-        public InstrucaoContinuar(LocalToken local)
+        public InstrucaoContinuar()
         {
             Tipo = TipoInstrucao.Continuar;
-            Local = local;
         }
     }
 
@@ -157,19 +162,19 @@ namespace Libra.Arvore
     {
         public Expressao Expressao { get; private set; }
 
-        public InstrucaoRetornar(LocalToken local, Expressao expressao)
+        public InstrucaoRetornar( Expressao expressao)
         {
             Tipo = TipoInstrucao.Retornar;
             Expressao = expressao;
-            Local = local;
+            
         }
     }
 
-    public class InstrucaoModificacaoVetor : Instrucao
+    public class AtribuicaoIndice : Instrucao
     {
-        public InstrucaoModificacaoVetor(LocalToken local, string identificador, Expressao indiceExpr, Expressao expressao)
+        public AtribuicaoIndice(string identificador, Expressao indiceExpr, Expressao expressao)
         {
-            Local = local;
+            Tipo = TipoInstrucao.AtribIndice;
             Expressao = expressao;
             Identificador = identificador;
             ExpressaoIndice = indiceExpr;
@@ -182,9 +187,8 @@ namespace Libra.Arvore
 
     public class InstrucaoModificacaoPropriedade : Instrucao
     {
-        public InstrucaoModificacaoPropriedade(LocalToken local, string identificador, string propriedade, Expressao expressao)
+        public InstrucaoModificacaoPropriedade(string identificador, string propriedade, Expressao expressao)
         {
-            Local = local;
             Expressao = expressao;
             Identificador = identificador;
             Propriedade = propriedade;

@@ -6,7 +6,7 @@ public interface IVisitor
     LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao);
     LibraObjeto VisitarExpressaoPropriedade(ExpressaoPropriedade expressao);
     LibraObjeto VisitarExpressaoBinaria(ExpressaoBinaria expressao);
-    LibraObjeto VisitarExpressaoDeclaracaoVetor(ExpressaoDeclaracaoVetor expressao);
+    LibraObjeto VisitarExpressaoNovoVetor(ExpressaoNovoVetor expressao);
     LibraObjeto VisitarExpressaoInicializacaoVetor(ExpressaoInicializacaoVetor expressao);
     LibraObjeto VisitarExpressaoUnaria(ExpressaoUnaria expressao);
     LibraObjeto VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao);

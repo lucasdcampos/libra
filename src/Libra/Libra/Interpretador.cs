@@ -114,13 +114,14 @@ public class Interpretador
         
         var acoes = new Dictionary<TipoInstrucao, Action>
         {
-            { TipoInstrucao.DeclVar, () => InterpretarInstrucaoVar((InstrucaoVar)instrucao) },
-            { TipoInstrucao.DeclFunc, () => InterpretarFuncao((InstrucaoFuncao)instrucao) },
-            { TipoInstrucao.DeclTipo, () => InterpretarInstrucaoTipo((InstrucaoTipo)instrucao) },
-            { TipoInstrucao.Enquanto, () => InterpretarCondicional((InstrucaoEnquanto)instrucao) },
-            { TipoInstrucao.Se, () => InterpretarCondicional((InstrucaoSe)instrucao) },
+            { TipoInstrucao.DeclVar, () => InterpretarDeclVar((DeclaracaoVar)instrucao) },
+            { TipoInstrucao.DeclFunc, () => InterpretarFuncao((DefinicaoFuncao)instrucao) },
+            { TipoInstrucao.DeclTipo, () => InterpretarInstrucaoTipo((DefinicaoTipo)instrucao) },
+            { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
+            { TipoInstrucao.Enquanto, () => InterpretarEnquanto((InstrucaoEnquanto)instrucao) },
+            { TipoInstrucao.Se, () => InterpretarSe((InstrucaoSe)instrucao) },
             { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
-            //{ TipoInstrucao.Vetor, () => InterpretarModificacaoVetor((InstrucaoModificacaoVetor)instrucao) },
+            { TipoInstrucao.AtribIndice, () => InterpretarAtribIndice((AtribuicaoIndice)instrucao) },
             { TipoInstrucao.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
             { TipoInstrucao.Romper, () => throw new ExcecaoRomper() }
         };
@@ -145,7 +146,7 @@ public class Interpretador
         classe.ModificarVariavel(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
     }
 
-    public void InterpretarModificacaoVetor(InstrucaoModificacaoVetor instrucao)
+    public void InterpretarAtribIndice(AtribuicaoIndice instrucao)
     {
         string identificador = instrucao.Identificador;
         int indice = InterpretarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
@@ -160,36 +161,36 @@ public class Interpretador
         throw new ExcecaoRetorno(resultadoExpressao);
     }
 
-    public void InterpretarCondicional(Instrucao instrucao)
+    public void InterpretarSe(InstrucaoSe se)
     {
-        if (instrucao is InstrucaoSe instrucaoSe)
-        {
-            if(InterpretarExpressao<LibraInt>(instrucaoSe.Condicao).Valor != 0)
+        if(InterpretarExpressao<LibraInt>(se.Condicao).Valor != 0)
             {
                 _programa.PilhaEscopos.EmpilharEscopo();
-                InterpretarInstrucoes(instrucaoSe.Corpo.ToArray());
+                InterpretarInstrucoes(se.Corpo.ToArray());
                 _programa.PilhaEscopos.DesempilharEscopo();
                 return;
             }
 
-            if(instrucaoSe.ListaSenaoSe == null || instrucaoSe.ListaSenaoSe.Count == 0)
-                return;
-
-            foreach(var inst in instrucaoSe.ListaSenaoSe)
-            {
-                if(InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
-                {
-                    _programa.PilhaEscopos.EmpilharEscopo();
-                    InterpretarInstrucoes(inst.Corpo.ToArray());
-                    _programa.PilhaEscopos.DesempilharEscopo();
-                    
-                    return;
-                }
-            }
+        if(se.ListaSenaoSe == null || se.ListaSenaoSe.Count == 0)
             return;
-        }
 
-        var enquanto = (InstrucaoEnquanto)instrucao;
+        foreach(var inst in se.ListaSenaoSe)
+        {
+            if(InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
+            {
+                _programa.PilhaEscopos.EmpilharEscopo();
+                InterpretarInstrucoes(inst.Corpo.ToArray());
+                _programa.PilhaEscopos.DesempilharEscopo();
+                
+                return;
+            }
+        }
+    }
+
+    public void InterpretarEnquanto(InstrucaoEnquanto enquanto)
+    {
+        // TODO: Otimizar casos em que não é necessário calcular a expressão toda vez,
+        // como em "enquanto 1", por exemplo.
         while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
             _programa.PilhaEscopos.EmpilharEscopo();
@@ -212,7 +213,7 @@ public class Interpretador
         }
     }
 
-    public void InterpretarFuncao(InstrucaoFuncao funcao)
+    public void InterpretarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
 
@@ -253,7 +254,7 @@ public class Interpretador
         List<Variavel> vars = new();
         foreach(var i in tipo.Instrucoes)
         {
-            if(i is InstrucaoVar iv)
+            if(i is DeclaracaoVar iv)
             {
                 vars.Add(new Variavel(iv.Identificador, InterpretarExpressao(iv.Expressao), iv.Constante, iv.TipoVar, iv.TipoModificavel));
             }
@@ -284,7 +285,7 @@ public class Interpretador
             return ExecutarFuncaoEmbutida(nativa, chamada);
         }
             
-        var qtdParametros = funcao.Parametros.Count;
+        var qtdParametros = funcao.Parametros.Length;
 
         if (argumentos.Count != qtdParametros)
             throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Count, _local);
@@ -314,7 +315,7 @@ public class Interpretador
             {
                 return resultado.Converter(funcao.TipoRetorno);
             }
-                
+            
             return resultado;
         }
         finally
@@ -326,27 +327,36 @@ public class Interpretador
         return null;
     }
 
-    public void InterpretarInstrucaoTipo(InstrucaoTipo i)
+    public void InterpretarInstrucaoTipo(DefinicaoTipo i)
     {
        _programa.Tipos[i.Identificador] = new Tipo(i.Identificador, i.Instrucoes);
     }
 
-    public LibraObjeto InterpretarInstrucaoVar(InstrucaoVar i)
+    public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
             throw new Erro("Identificador inválido!", _local);
 
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
 
-        if(i.EhDeclaracao)
-            _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
-        else
-            _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
+        _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
         return resultado;
     }
 
-    public object[] InterpretarVetor(ExpressaoDeclaracaoVetor expressao)
+    public LibraObjeto InterpretarDeclVar(DeclaracaoVar i)
+    {
+        if(string.IsNullOrWhiteSpace(i.Identificador))
+            throw new Erro("Identificador inválido!", _local);
+
+        LibraObjeto resultado = InterpretarExpressao(i.Expressao);
+
+        _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
+
+        return resultado;
+    }
+
+    public object[] InterpretarVetor(ExpressaoNovoVetor expressao)
     {
         int indice = InterpretarExpressao<LibraInt>(expressao.Expressao).Valor;
         return new LibraObjeto[indice];

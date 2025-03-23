@@ -45,7 +45,7 @@ public class VisitorExpressoes : IVisitor
         return LibraObjeto.ParaLibraObjeto(_programa.ObterVariavel(expressao.Identificador.Valor.ToString()));
     }
 
-    public LibraObjeto VisitarExpressaoDeclaracaoVetor(ExpressaoDeclaracaoVetor expressao)
+    public LibraObjeto VisitarExpressaoNovoVetor(ExpressaoNovoVetor expressao)
     {
         var vetor = new LibraObjeto[_interpretador.InterpretarExpressao<LibraInt>(expressao.Expressao).Valor];
         return LibraObjeto.ParaLibraObjeto(vetor); // Converte para LibraVetor

@@ -117,9 +117,6 @@ x = testarPot(2,3)
 
 exibir("Testando Importação de Arquivos e Biblioteca Padrão")
 
-exibir("    Importando so.libra")
-importar "so.libra"
-
 exibir("    Importando matematica.libra")
 importar "matematica.libra"
 

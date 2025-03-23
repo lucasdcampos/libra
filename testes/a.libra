@@ -1,36 +1,5 @@
-// Estatistica.libra
-importar vetores
-
-// Calcula a média aritimética de um Vetor
-funcao media(dados: Vetor<Real>) -> Real
-    var total: Real
-    var i: Int
-    const qtd = tamanho(dados)
-    enquanto i < qtd faca
-        total = total + dados[i]
-        i = i+1
-    fim
-    retornar total/tamanho(dados)
-fim
-
-funcao mediana(dados: Vetor) -> Objeto
-    dados = ordenar(dados)
-    const meio = tamanho(dados)/2
-    se int(meio) != meio entao // meio não é inteiro
-        retornar dados[int(meio)] + dados[int(meio)+1]
-    fim
-    retornar dados(meio)
-fim
-
-// não sei implementar isso, linguagem merda, não tem HASHMAP (vou implementar hashmaps em breve..)
-funcao moda(dados: Vetor) -> Objeto
-    const qtd = tamanho(dados)
-    const dic = [qtd*2]
-    var i = 0
-    enquanto i < qtd faca
-        var atual = qtd[i+1]
-        qtd[i+1] = qtd[i+1]
-        // esquece...
-    fim
-fim
-
+var vetor = { 1, 2, 3 }
+vetor = [10]
+vetor[0] = 1
+vetor = {}
+vetor = []

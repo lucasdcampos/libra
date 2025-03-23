@@ -16,18 +16,18 @@ namespace Libra
 
     public class Funcao
     {
-            public string Identificador;
-            public Instrucao[] Instrucoes;
-            public List<Parametro> Parametros;
-            public LibraTipo TipoRetorno;
+        public string Identificador;
+        public Instrucao[] Instrucoes;
+        public Parametro[] Parametros;
+        public LibraTipo TipoRetorno;
 
-            public Funcao(string ident, Instrucao[] instrucoes, List<Parametro> parametros, LibraTipo tipoRetorno = LibraTipo.Objeto)
-            {
-                Identificador = ident;
-                Instrucoes = instrucoes;
-                Parametros = parametros;
-                TipoRetorno = tipoRetorno;
-            }
+        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, LibraTipo tipoRetorno = LibraTipo.Objeto)
+        {
+            Identificador = ident;
+            Instrucoes = instrucoes;
+            Parametros = parametros;
+            TipoRetorno = tipoRetorno;
+        }
     }
 
     // Definidas em Modulos/

@@ -6,7 +6,7 @@ namespace Libra.Arvore
         ExpressaoVariavel,
         ExpressaoPropriedade,
         ExpressaoChamadaFuncao,
-        ExpressaoDeclaracaoVetor,
+        ExpressaoNovoVetor,
         ExpressaoInicializacaoVetor,
         ExpressaoAcessoVetor,
         ExpressaoUnaria,
@@ -118,17 +118,17 @@ namespace Libra.Arvore
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoAcessoVetor(this);
     }
 
-    public class ExpressaoDeclaracaoVetor : Expressao
+    public class ExpressaoNovoVetor : Expressao
     {
-        public ExpressaoDeclaracaoVetor(Expressao expr)
+        public ExpressaoNovoVetor(Expressao expr)
         {
             Expressao = expr;
-            TipoExpr = TipoExpressao.ExpressaoDeclaracaoVetor;
+            TipoExpr = TipoExpressao.ExpressaoNovoVetor;
         }
 
         public Expressao Expressao { get; private set; }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoDeclaracaoVetor(this);
+        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoNovoVetor(this);
     }
 
     public class ExpressaoInicializacaoVetor : Expressao
