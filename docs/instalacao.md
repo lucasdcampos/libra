@@ -9,7 +9,7 @@ extraída, **libra.exe** no caso de Windows e **libra** em Linux.
 **Importante:**<br>
 Antes de executar o programa, verifique se você possui o Runtime do dotnet instalado. Em Windows, instale-o com:
 ```ps1
-winget install Microsoft.DotNet.SDK.8
+winget install Microsoft.DotNet.SDK.9
 ```
 Caso não queira usar WinGet, baixe diretamente do site oficial da Microsoft https://dotnet.microsoft.com/pt-br/download/dotnet/8.0
 
