@@ -4,15 +4,9 @@ public class LibraReal : LibraObjeto
 {
     public double Valor { get; private set; }
 
-    public LibraReal(double valor)
+    public LibraReal(double valor) : base("Real", new Variavel[0], new Funcao[0])
     {
         Valor = valor;
-        Tipo = LibraTipo.Real;
-    }
-
-    public override string ToString()
-    {
-        return "Real";
     }
 
     public override object ObterValor()

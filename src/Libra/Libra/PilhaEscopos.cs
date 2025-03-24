@@ -45,7 +45,7 @@ public class PilhaDeEscopos
     }
 
     // Define uma variável no escopo atual
-    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, LibraTipo tipo = LibraTipo.Objeto, bool tipoModificavel = true)
+    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, string tipo = "Objeto", bool tipoModificavel = true)
     {
         escopos.Peek().DefinirVariavel(identificador, valor, constante, tipo, tipoModificavel);
     }

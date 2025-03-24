@@ -5,9 +5,9 @@ namespace Libra
     public class Parametro
     {
         public string Identificador;
-        public LibraTipo Tipo;
+        public string Tipo;
 
-        public Parametro(string ident, LibraTipo tipo = LibraTipo.Objeto)
+        public Parametro(string ident, string tipo = "Objeto")
         {
             Identificador = ident;
             Tipo = tipo;
@@ -19,9 +19,9 @@ namespace Libra
         public string Identificador;
         public Instrucao[] Instrucoes;
         public Parametro[] Parametros;
-        public LibraTipo TipoRetorno;
+        public string TipoRetorno;
 
-        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, LibraTipo tipoRetorno = LibraTipo.Objeto)
+        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto")
         {
             Identificador = ident;
             Instrucoes = instrucoes;
@@ -35,8 +35,9 @@ namespace Libra
     {
         private readonly Func<object[], object> _implementacao;
 
-        public FuncaoNativa(Func<object[], object> implementacao) : base("", null, null)
+        public FuncaoNativa(Func<object[], object> implementacao, string ident = "") : base("", null, null)
         {
+            Identificador = ident;
             _implementacao = implementacao;
         }
 

@@ -12,6 +12,7 @@ namespace Libra.Arvore
         AtribIndice,
         AtribProp,
         Chamada,
+        ChamadaMetodo,
         Se,
         SenaoSe,
         Enquanto,
@@ -26,20 +27,9 @@ namespace Libra.Arvore
         public LocalToken Local {get; protected set; }
     }
 
-    public class DeclaracaoConst : Instrucao
-    {
-        public DeclaracaoConst(string identificador, Expressao expressao)
-        {
-            Identificador = identificador;
-            Expressao = expressao;
-        }
-        
-        public string Identificador { get; }
-        public Expressao Expressao { get; }
-    }
     public class DeclaracaoVar : Instrucao
     {
-        public DeclaracaoVar(string identificador, Expressao expressao, LibraTipo tipo, bool tipoModificavel, bool constante)
+        public DeclaracaoVar(string identificador, Expressao expressao, string tipo, bool tipoModificavel, bool constante)
         {
             Tipo = TipoInstrucao.DeclVar;
             Identificador = identificador;
@@ -50,7 +40,7 @@ namespace Libra.Arvore
 
         public Expressao Expressao { get; private set; }
         public string Identificador {get; private set; }
-        internal LibraTipo TipoVar;
+        internal string TipoVar;
         internal bool TipoModificavel;
         public bool Constante { get; private set; }
     }
@@ -69,7 +59,7 @@ namespace Libra.Arvore
 
     public class DefinicaoFuncao : Instrucao
     {
-        public DefinicaoFuncao(string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, LibraTipo tipoRetorno = LibraTipo.Objeto)
+        public DefinicaoFuncao(string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, string tipoRetorno = "Objeto")
         {
             Tipo = TipoInstrucao.DeclFunc;
             Instrucoes = instrucoes;
@@ -81,7 +71,7 @@ namespace Libra.Arvore
         public Instrucao[] Instrucoes { get; private set; }
         public string Identificador {get; private set; }
         public Parametro[] Parametros { get; private set; }
-        public LibraTipo TipoRetorno { get; private set; }
+        public string TipoRetorno { get; private set; }
     }
 
     public class DefinicaoTipo : Instrucao
@@ -187,10 +177,11 @@ namespace Libra.Arvore
         public Expressao Expressao { get; private set; }
     }
 
-    public class InstrucaoModificacaoPropriedade : Instrucao
+    public class AtribuicaoPropriedade : Instrucao
     {
-        public InstrucaoModificacaoPropriedade(string identificador, string propriedade, Expressao expressao)
+        public AtribuicaoPropriedade(string identificador, string propriedade, Expressao expressao)
         {
+            Tipo = TipoInstrucao.AtribProp;
             Expressao = expressao;
             Identificador = identificador;
             Propriedade = propriedade;

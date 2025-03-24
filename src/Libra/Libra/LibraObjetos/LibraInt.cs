@@ -4,13 +4,12 @@ public class LibraInt : LibraObjeto
 {
     public int Valor { get; private set; }
 
-    public LibraInt(int valor)
+    public LibraInt(int valor) : base("Int", new Variavel[0], new Funcao[0])
     {
         Valor = valor;
-        Tipo = LibraTipo.Int;
     }
 
-    public LibraInt(bool valor)
+    public LibraInt(bool valor) : base("Int", new Variavel[0], new Funcao[0])
     {
         Valor = valor ? 1 : 0;
     }
@@ -30,14 +29,14 @@ public class LibraInt : LibraObjeto
         return "Int";
     }
     
-    public override LibraObjeto Converter(LibraTipo novoTipo)
+    public override LibraObjeto Converter(string novoTipo)
     {
         switch(novoTipo)
         {
-            case LibraTipo.Real: return new LibraReal(Valor);
+            case "Real": return new LibraReal(Valor);
         }
 
-        throw new ErroConversao(Tipo, novoTipo, Interpretador.LocalAtual);
+        throw new ErroConversao(Nome, novoTipo, Interpretador.LocalAtual);
 
         return null;
     }

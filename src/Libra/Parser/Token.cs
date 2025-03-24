@@ -25,6 +25,7 @@ public enum TokenTipo
     CaractereLiteral,
     TextoLiteral,
     Identificador,
+    Anotacao,
     Vetor,
     Nulo,
     TokenInvalido,

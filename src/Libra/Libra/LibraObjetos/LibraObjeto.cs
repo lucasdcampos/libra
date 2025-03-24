@@ -1,12 +1,102 @@
+using Libra.Arvore;
+
 namespace Libra;
 
-public enum LibraTipo 
+public class LibraObjeto
 {
-    Nulo, Objeto, Int, Real, Texto, Vetor, Classe
-}
+    public LibraObjeto(string nome, Variavel[] propriedades, Funcao[] metodos)
+    {
+        Nome = nome;
+        Propriedades = new();
+        Metodos = new();
 
-public abstract class LibraObjeto
-{
+        for(int i = 0; i < propriedades.Length; i++)
+        {
+            DeclararPropriedade(propriedades[i]);
+        }
+        for(int i = 0; i < metodos.Length; i++)
+        {
+            DefinirMetodo(metodos[i]);
+        }
+    }
+
+    public virtual string Nome { get; protected set; }
+    public virtual Dictionary<string, Variavel> Propriedades { get; protected set; }
+    public virtual Dictionary<string, Funcao> Metodos { get; protected set; }
+
+    public virtual LibraObjeto Converter(string novoTipo)
+    {
+        throw new ErroConversao(Nome, novoTipo, Interpretador.LocalAtual);
+    }
+
+    protected void DeclararPropriedade(Variavel prop)
+    {
+        if(Propriedades.ContainsKey(prop.Identificador))
+            throw new ErroVariavelJaDeclarada(prop.Identificador);
+        
+        Propriedades.Add(prop.Identificador, prop);
+    }
+
+    protected void DefinirMetodo(Funcao metodo)
+    {
+        if(Metodos.ContainsKey(metodo.Identificador))
+            throw new ErroFuncaoJaDefinida(metodo.Identificador);
+        
+        Metodos.Add(metodo.Identificador, metodo);
+    }
+
+    public virtual object ObterValor() 
+    {
+        throw new Erro($"Não foi possível obter o valor de {Nome}");
+    }
+
+    public virtual LibraInt ObterTamanhoEmBytes() 
+    {
+        throw new Erro($"Não é possível calcular tamanho em bytes de {Nome}");
+    }
+
+    public object paraTexto(object[] args)
+    {
+        return ObterValor().ToString();
+    }
+
+    public LibraObjeto AcessarPropriedade(string prop)
+    {
+        if(!Propriedades.ContainsKey(prop))
+            throw new ErroVariavelNaoDeclarada(prop);
+        return Propriedades[prop].Valor;
+    }
+
+    public void AtribuirPropriedade(string ident, LibraObjeto novoValor)
+    {
+        if(!Propriedades.ContainsKey(ident))
+            throw new ErroVariavelNaoDeclarada(ident);
+        Propriedades[ident].AtualizarValor(novoValor);
+    }
+
+    public virtual LibraObjeto ChamarMetodo(ExpressaoChamadaFuncao chamada, string quemChamou = "")
+    {
+        if(!Metodos.ContainsKey(chamada.Identificador))
+            throw new ErroFuncaoNaoDefinida(chamada.Identificador);
+        var args = chamada.Argumentos.ToList<Expressao>();
+        args.Insert(0, new ExpressaoVariavel(new Token(TokenTipo.Identificador, new LocalToken(), quemChamou)));
+        return new Interpretador().ExecutarFuncao(Metodos[chamada.Identificador], args.ToArray());
+    }
+
+    // Inicializa um novo Objeto de acordo com o tipo especificado
+    public static LibraObjeto Inicializar(string tipo)
+    {
+        switch(tipo)
+        {
+            case "Int": return new LibraInt(0);
+            case "Real": return new LibraReal(0);
+            case "Texto": return new LibraTexto("");
+            case "Vetor": return new LibraVetor(0);
+        }
+        
+        return new LibraNulo();
+    }
+
     public static LibraObjeto ParaLibraObjeto(object valor)
     {
         if(valor == null)
@@ -27,39 +117,6 @@ public abstract class LibraObjeto
 
         Ambiente.Msg($"Tipo: {valor.GetType()}");
         throw new ErroAcessoNulo($" Causa: Impossível converter {valor.ToString()} para Objeto");
-    }
-
-    public abstract object ObterValor();
-    public abstract LibraInt ObterTamanhoEmBytes();
-    public LibraTipo Tipo { get; protected set; } = LibraTipo.Objeto;
-
-    public virtual LibraObjeto Converter(LibraTipo novoTipo)
-    {
-        throw new ErroConversao(Tipo, novoTipo, Interpretador.LocalAtual);
-    }
-
-    // Inicializa um novo Objeto de acordo com o tipo especificado
-    public static LibraObjeto Inicializar(LibraTipo tipo)
-    {
-        switch(tipo)
-        {
-            case LibraTipo.Int: return new LibraInt(0);
-            case LibraTipo.Real: return new LibraReal(0);
-            case LibraTipo.Texto: return new LibraTexto("");
-            case LibraTipo.Vetor: return new LibraVetor(0);
-        }
-        
-        return new LibraNulo();
-    }
-
-    public virtual LibraObjeto AcessarPropriedade(string prop)
-    {
-        throw new ErroVariavelNaoDeclarada(prop);
-    }
-
-    public virtual LibraObjeto ChamarMetodo(string ident, Parametro[] parametros)
-    {
-        throw new ErroFuncaoNaoDefinida(ident);
     }
 
     // Cabe aos objetos que herdam essa classe implementar os operadores necessários

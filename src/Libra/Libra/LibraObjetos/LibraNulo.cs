@@ -2,14 +2,9 @@ namespace Libra;
 
 public class LibraNulo : LibraObjeto
 {
-    public LibraNulo()
+    public LibraNulo() : base("Nulo", new Variavel[0], new Funcao[0])
     {
-        Tipo = LibraTipo.Nulo;
-    }
-
-    public override string ToString()
-    {
-        return "Nulo";
+        
     }
 
     public override object ObterValor()
@@ -22,7 +17,7 @@ public class LibraNulo : LibraObjeto
         return new LibraInt(outro is LibraNulo);
     }
     
-    public override LibraObjeto Converter(LibraTipo novoTipo)
+    public override LibraObjeto Converter(string novoTipo)
     {
         return LibraObjeto.Inicializar(novoTipo);
     }

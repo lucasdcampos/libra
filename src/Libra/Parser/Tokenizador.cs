@@ -444,6 +444,9 @@ public class Tokenizador
                 AdicionarTokenALista(TokenTipo.DoisPontos);
                 ConsumirChar();
                 break;
+            case '@':
+                TokenizarAnotacao();
+                break;
             case '\0':
                 throw new ErroAcessoNulo(" Chegou ao fim do arquivo de forma inesperada.");
                 break;
@@ -451,6 +454,15 @@ public class Tokenizador
                 throw new ErroTokenInvalido($"{Atual()} ASCII = {(int)Atual()}", _local);
                 break;
         }
+    }
+
+    private void TokenizarAnotacao()
+    {
+        ConsumirChar();
+
+        var ident = TokenizarIdentificador();
+
+        AdicionarTokenALista(TokenTipo.Anotacao, ident);
     }
 
     private string ConsumirAte(char caractere)

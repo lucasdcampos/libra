@@ -4,16 +4,15 @@ public class LibraTexto : LibraObjeto
 {
     public string Valor { get; private set; }
 
-    public LibraTexto(string valor)
+    public LibraTexto(string valor) : base("Texto", new Variavel[0], new Funcao[0])
     {
         Valor = valor;
-        Tipo = LibraTipo.Texto;
+        Metodos.Add("tamanho", new FuncaoNativa(tamanho));
     }
 
-    public override string ToString()
+    public object tamanho(object[] args)
     {
-        return "Texto";
-        
+        return Valor.Length;
     }
 
     public override object ObterValor()

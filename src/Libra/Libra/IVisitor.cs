@@ -11,4 +11,5 @@ public interface IVisitor
     LibraObjeto VisitarExpressaoUnaria(ExpressaoUnaria expressao);
     LibraObjeto VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao);
     LibraObjeto VisitarExpressaoChamadaFuncao(ExpressaoChamadaFuncao expressao);
+    LibraObjeto VisitarExpressaoChamadaMetodo(ExpressaoChamadaMetodo expressao);
 }

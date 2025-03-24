@@ -205,7 +205,7 @@ public class ErroTipoIncompativel : Erro
 
 public class ErroConversao : Erro
 {
-    public ErroConversao(LibraTipo tipo1, LibraTipo tipo2, LocalToken local = new LocalToken(), string dica = "Tente adicionar uma conversão explicita.")
+    public ErroConversao(string tipo1, string tipo2, LocalToken local = new LocalToken(), string dica = "Tente adicionar uma conversão explicita.")
         : base(2010, $"Não é possível converter {tipo1} para {tipo2}.", local, dica) 
         { 
         }

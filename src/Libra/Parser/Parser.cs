@@ -86,7 +86,7 @@ public class Parser
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return ParseExpressaoChamadaFuncao();
                 else if(Proximo(1).Tipo == TokenTipo.Ponto)
-                    return ParseInstrucaoModificacaoPropriedade();
+                    return ParseAtribProp();
                 else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
                     return ParseAtribIndice();
                 else
@@ -96,15 +96,24 @@ public class Parser
         throw new Erro($"Instrução inválida {atual}", _local);
     }
 
-    private Instrucao? ParseInstrucaoModificacaoPropriedade()
+    private Instrucao? ParseAtribProp()
     {
         string ident = ConsumirToken().Valor.ToString();
         Passar(); // .
         string prop = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+
+        // Não é uma atribuição de propriedade, mas sim chamada de método
+        if(TentarConsumirToken(TokenTipo.AbrirParen))
+        {
+            var args = ParseArgumentos();
+            ConsumirToken(TokenTipo.FecharParen);
+            return new ExpressaoChamadaMetodo(ident, new ExpressaoChamadaFuncao(prop, args));
+        }
+
         ConsumirToken(TokenTipo.OperadorDefinir);
         var expr = ParseExpressao();
 
-        return new InstrucaoModificacaoPropriedade(ident, prop, expr);
+        return new AtribuicaoPropriedade(ident, prop, expr);
     }
 
     private Instrucao? ParseAtribVar()
@@ -139,13 +148,12 @@ public class Parser
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
         bool tipoModificavel = false;
-        LibraTipo tipo = LibraTipo.Objeto;
+        string tipo = "Objeto";
 
         if(TentarConsumirToken(TokenTipo.DoisPontos))
         {
             string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-            tipo = LibraUtil.PegarTipo(tipoStr);
-            tipoModificavel = tipo == LibraTipo.Objeto;
+            tipoModificavel = tipo == "Objeto";
 
             // "var n: T" (Declara uma variável de tipo T nula)
             if(Atual().Tipo != TokenTipo.OperadorDefinir)
@@ -161,7 +169,7 @@ public class Parser
         
         var expressao = ParseExpressao();
 
-        if(Interpretador.Flags.ForcarTiposEstaticos && tipo == LibraTipo.Nulo)
+        if(Interpretador.Flags.ForcarTiposEstaticos && tipo == "Objeto")
             throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
 
         return new DeclaracaoVar(identificador, expressao, tipo, tipoModificavel, constante);
@@ -185,7 +193,7 @@ public class Parser
     private DefinicaoTipo? ParseDeclClasse()
     {
         ConsumirToken(TokenTipo.Classe);
-        
+        bool estatica = TentarConsumirToken(TokenTipo.Anotacao);
         string? identificador = (string)ConsumirToken(TokenTipo.Identificador)?.Valor;
 
         var variaveis = new List<DeclaracaoVar>();
@@ -196,6 +204,7 @@ public class Parser
             if(Atual().Tipo == TokenTipo.FimDoArquivo)
                 throw new ErroEsperado(TokenTipo.Fim, TokenTipo.FimDoArquivo, _local);
 
+            TentarConsumirToken(TokenTipo.Anotacao);
             var atual = ParseInstrucaoAtual();
             if(atual.Tipo == TipoInstrucao.DeclVar)
                 variaveis.Add((DeclaracaoVar)atual);
@@ -218,10 +227,10 @@ public class Parser
                 ConsumirToken(TokenTipo.FecharParen); // tentar fechar paren (vai dar erro da msm forma)
             
             var ident = (string)ConsumirToken()?.Valor;
-            LibraTipo tipo = LibraTipo.Objeto;
+            string tipo = "Objeto";
             if(TentarConsumirToken(TokenTipo.DoisPontos))
             {
-                tipo = LibraUtil.PegarTipo(ConsumirToken(TokenTipo.Identificador).Valor.ToString());
+                tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
             }
             else
             {
@@ -248,17 +257,16 @@ public class Parser
         if(parametros.Length > 255)
             throw new Erro($"Função {identificador} passou de 255 parâmetros", _local, 255, "Procure ajuda.");
 
-        LibraTipo tipoRetorno = LibraTipo.Objeto;
+        string tipoRetorno = "Objeto";
         if(TentarConsumirSeta())
         {
-            string tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-            tipoRetorno = LibraUtil.PegarTipo(tipo);
+            tipoRetorno = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
         }
         else
         {
             // Quando tipos estáticos são forçados, se não especificar o tipo de retorno, ele será interpretado como nulo.
             // Em casos normais, o tipo de retorno poderá ser qualquer objeto
-            tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? LibraTipo.Nulo : LibraTipo.Objeto;
+            tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? "Nulo" : "Objeto";
         }
 
         var instrucoes = ParseInstrucoes();
@@ -423,6 +431,12 @@ public class Parser
                     var ident = ConsumirToken().Valor.ToString();
                     Passar();
                     var prop = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+                    if(TentarConsumirToken(TokenTipo.AbrirParen))
+                    {
+                        var args = ParseArgumentos();
+                        ConsumirToken(TokenTipo.FecharParen);
+                        return new ExpressaoChamadaMetodo(ident, new ExpressaoChamadaFuncao(prop, args));
+                    }
                     return new ExpressaoPropriedade(ident, prop);
                 }
                 return new ExpressaoVariavel(ConsumirToken());
@@ -437,6 +451,21 @@ public class Parser
         throw new ErroAcessoNulo($" Não foi possível parsear a expressão: {Atual().Tipo}", _local);
     }
 
+    private Expressao[] ParseArgumentos()
+    {
+        var argumentos = new List<Expressao>();
+        while(Atual().Tipo != TokenTipo.FecharParen)
+        {
+            var expr = ParseExpressao();
+            argumentos.Add(expr);
+
+            if(expr == null)
+                ConsumirToken(TokenTipo.FecharParen);
+
+            TentarConsumirToken(TokenTipo.Virgula);
+        }
+        return argumentos.ToArray();
+    }
     private Expressao? ParseExpressaoAcessoVetor()
     {
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
@@ -452,19 +481,9 @@ public class Parser
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
         ConsumirToken(TokenTipo.AbrirParen);
 
-        var argumentos = new List<Expressao>();
-        while(Atual().Tipo != TokenTipo.FecharParen)
-        {
-            var expr = ParseExpressao();
-            argumentos.Add(expr);
-
-            if(expr == null)
-                ConsumirToken(TokenTipo.FecharParen);
-
-            TentarConsumirToken(TokenTipo.Virgula);
-        }
-
-        if(argumentos.Count > 255)
+        var argumentos = ParseArgumentos();
+        
+        if(argumentos.Length > 255)
             throw new Erro($"Função {identificador} passou de 255 argumentos", _local, 255, "Procure ajuda.");
 
         ConsumirToken(TokenTipo.FecharParen);

@@ -118,6 +118,7 @@ public class Interpretador
             { TipoInstrucao.DeclFunc, () => InterpretarFuncao((DefinicaoFuncao)instrucao) },
             { TipoInstrucao.DeclClasse, () => InterpretarInstrucaoClasse((DefinicaoTipo)instrucao) },
             { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
+            { TipoInstrucao.AtribProp, () => InterpretarAtribProp((AtribuicaoPropriedade)instrucao) },
             { TipoInstrucao.Enquanto, () => InterpretarEnquanto((InstrucaoEnquanto)instrucao) },
             { TipoInstrucao.Se, () => InterpretarSe((InstrucaoSe)instrucao) },
             { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
@@ -129,21 +130,13 @@ public class Interpretador
         // Executa a ação associada ao tipo, se existir.
         if (acoes.TryGetValue(instrucao.Tipo, out var acao))
             acao();
-
-        if(instrucao is InstrucaoModificacaoPropriedade ip)
-        {
-            InterpretarModificacaoPropriedade(ip);
-        }
     }
 
-    public void InterpretarModificacaoPropriedade(InstrucaoModificacaoPropriedade instrucao)
+    public void InterpretarAtribProp(AtribuicaoPropriedade instrucao)
     {
         var obj = _programa.ObterVariavel(instrucao.Identificador).Valor;
-
-        if(obj is not LibraClasse classe)
-            throw new ErroAcessoNulo(instrucao.Identificador, _local);
         
-        classe.ModificarVariavel(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
+        obj.AtribuirPropriedade(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
     }
 
     public void InterpretarAtribIndice(AtribuicaoIndice instrucao)
@@ -228,17 +221,16 @@ public class Interpretador
         _programa.Funcoes[identificador] = novaFuncao;
     }
 
-    public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, ExpressaoChamadaFuncao chamada) 
+    public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, Expressao[] argumentos) 
     {
-        var f = (FuncaoNativa)_programa.Funcoes[chamada.Identificador];
         List<object> valoresArgumentos = new List<object>();
 
-        for(int i = 0; i < chamada.Argumentos.Count; i++)
+        for(int i = 0; i < argumentos.Length; i++)
         {
-            valoresArgumentos.Add(InterpretarExpressao(chamada.Argumentos[i]).ObterValor());
+            valoresArgumentos.Add(InterpretarExpressao(argumentos[i]).ObterValor());
         }
 
-        var resultadoFuncao = f.Executar(valoresArgumentos.ToArray());
+        var resultadoFuncao = funcao.Executar(valoresArgumentos.ToArray());
         var objeto = LibraObjeto.ParaLibraObjeto(resultadoFuncao);
 
         return objeto;
@@ -265,7 +257,56 @@ public class Interpretador
             funcs.Add(new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno));
         }
 
-        return new LibraClasse(nome, vars.ToArray(), funcs.ToArray());
+        return new LibraObjeto(nome, vars.ToArray(), funcs.ToArray());
+    }
+
+    public LibraObjeto ExecutarFuncao(Funcao funcao, Expressao[] argumentos)
+    {
+        if(funcao is FuncaoNativa nativa)
+        {
+            return ExecutarFuncaoEmbutida(nativa, argumentos);
+        }
+        
+        var qtdParametros = funcao.Parametros.Length;
+
+        if (argumentos.Length != qtdParametros)
+            throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Length, _local);
+
+        _programa.PilhaEscopos.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
+
+        try 
+        {
+            // Adicionando os argumentos ao Escopo
+            for (int i = 0; i < argumentos.Length; i++)
+            {
+                string ident = funcao.Parametros[i].Identificador;
+                var obj = InterpretarExpressao(argumentos[i]);
+                
+                if(funcao.Parametros[i].Tipo != "Objeto" && funcao.Parametros[i].Tipo != obj.Nome)
+                    obj = obj.Converter(funcao.Parametros[i].Tipo);
+
+                _programa.PilhaEscopos.DefinirVariavel(ident, obj);
+            }
+
+            InterpretarInstrucoes(funcao.Instrucoes);
+        }
+        catch(ExcecaoRetorno retorno)
+        {
+            var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
+            if(funcao.TipoRetorno != resultado.Nome && funcao.TipoRetorno != "Objeto")
+            {
+                return resultado.Converter(funcao.TipoRetorno);
+            }
+            
+            return resultado;
+        }
+        finally
+        {
+            _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
+        }
+
+        // Caso a função não tenha um retorno explicito
+        return null;
     }
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
@@ -285,51 +326,7 @@ public class Interpretador
 
         var funcao = _programa.Funcoes[chamada.Identificador];
 
-        if(_programa.Funcoes[chamada.Identificador] is FuncaoNativa nativa)
-        {
-            return ExecutarFuncaoEmbutida(nativa, chamada);
-        }
-            
-        var qtdParametros = funcao.Parametros.Length;
-
-        if (argumentos.Count != qtdParametros)
-            throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Count, _local);
-
-        _programa.PilhaEscopos.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
-
-        try 
-        {
-            // Adicionando os argumentos ao Escopo
-            for (int i = 0; i < chamada.Argumentos.Count; i++)
-            {
-                string ident = funcao.Parametros[i].Identificador;
-                var obj = InterpretarExpressao(chamada.Argumentos[i]);
-                
-                if(funcao.Parametros[i].Tipo != LibraTipo.Objeto && funcao.Parametros[i].Tipo != obj.Tipo)
-                    obj = obj.Converter(funcao.Parametros[i].Tipo);
-
-                _programa.PilhaEscopos.DefinirVariavel(ident, obj);
-            }
-
-            InterpretarInstrucoes(funcao.Instrucoes);
-        }
-        catch(ExcecaoRetorno retorno)
-        {
-            var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
-            if(funcao.TipoRetorno != resultado.Tipo && funcao.TipoRetorno != LibraTipo.Objeto)
-            {
-                return resultado.Converter(funcao.TipoRetorno);
-            }
-            
-            return resultado;
-        }
-        finally
-        {
-            _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
-        }
-
-        // Caso a função não tenha um retorno explicito
-        return null;
+        return ExecutarFuncao(funcao, chamada.Argumentos);
     }
 
     public void InterpretarInstrucaoClasse(DefinicaoTipo i)
