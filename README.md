@@ -1,30 +1,55 @@
-# Libra
+<div align=center>
+    <img src="https://avatars.githubusercontent.com/u/170988597?s=400&u=1aa68e42fb32ade404e8312e7b765d74578a57e3&v=4" width=180px>
+</div>
+
+# Libra, uma Linguagem de Programação simples em Português
 &copy; 2024 - 2025 Lucas M. Campos
 
-Libra é uma linguagem de programação simples com a sintaxe em **português**! 
+-   [Libra, uma Linguagem de Programação simples em Português](#libra-uma-linguagem-de-programacão-simples-em-português)
+    -   [O que é a Libra](#o-que-é-a-libra)
+    -   [O que eu consigo criar com a Libra?](#o-que-eu-consigo-criar-com-a-libra)
+    -   [Exemplo de Código](#exemplo-de-código)
+    -   [Compilando a Libra](#compilando-a-libra)
+    -   [Executando um Programa Libra](#executando-um-programa-libra)
+    -   [Mais exemplos](#mais-exemplos)
+    -   [Como contribuir?](#como-contribuir)
 
-Libra foi projetada para ser fácil de entender e utilizar, especialmente para iniciantes. A sintaxe da linguagem é inspirada em linguagens populares, mas com um diferencial: as palavras-chave e comandos estão em português, facilitando ainda mais o aprendizado para falantes da língua portuguesa.
+
+## O que é a Libra?
+
+Libra é uma linguagem de programação interpretada simples em português, ideal para quem está aprendendo.
+
+## O que eu consigo criar com a Libra?
+
+Essencialmente, qualquer programa pode ser escrito em Libra, mas ela foi projetada para servir de aprendizado para estudantes de programação
+e pequenas automações, Libra não foi feita para grandes aplicações.
 
 ## Exemplo de Código
 
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
-// Declarando uma função
-funcao fibonacci(n)
-    var a = 0
-    var b = 1
-    var contador = 0
-    enquanto contador < n faca
-        exibir(a)
-        var temp = a
-        a = b
-        b = temp + b
-        contador = contador+1
+importar matematica
+
+const num = int(aleatorio(0, 100))
+
+exibir("Digite um número entre 0 e 100:)
+var escolha = int(entrada()) // Pedir um número ao usuário
+
+// Enquanto o usuário não acertar o número
+enquanto escolha != num faca
+    se escolha > num entao
+        exibir("Número maior que o aleatório!")
+    senao se escolha < num entao
+        exibir("Número menor que o aleatório!")
     fim
+
+    exibir("Tente denovo:")
+    escolha = int(entrada() // Pedindo outro número ao usuário
 fim
-// Exibir os 10 primeiros números de Fibonacci
-fibonacci(10)
+
+// Loop terminou, o usuário acertou o número
+exibir("Parabéns, o número era " + num)
 ```
 
 ## Compilando a Libra
@@ -52,6 +77,32 @@ Para isso, use o seguinte comando:
 Para facilitar a vida do desenvolvedor, há uma extensão no Visual Studio Code que adiciona Suporte à Libra, adicionando Syntax Highlighting e outras melhorias. 
 Baixe-a em https://marketplace.visualstudio.com/items?itemName=LucasMCampos.libra.
 
+## Mais exemplos
+Olá Mundo?
+```js
+exibir("Olá, Mundo!")
+```
+Classes
+```js
+classe Pessoa
+    var nome: Texto
+    var idade: Int
+    funcao Pessoa(auto, nome, idade)
+        auto.nome = nome
+        auto.idade = idade
+    fim
+fim
+const p = Pessoa("John Doe", 30)
+exibir(p.nome)
+```
+Vetores
+```js
+importar vetores
+var x = {1, 2, 3}
+x = incluir(4) // x agora é {1, 2, 3, 4}
+
+exibir(x[0]) // 1
+```
 ## Como contribuir?
 
 Se você deseja contribuir para o projeto, pode fazer um *fork* do repositório, depois cloná-lo para sua máquina local com o seguinte comando:
