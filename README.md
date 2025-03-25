@@ -102,7 +102,7 @@ Vetores
 ```js
 importar vetores
 var x = {1, 2, 3}
-x = incluir(4) // x agora é {1, 2, 3, 4}
+x = incluir(x, 4) // x agora é {1, 2, 3, 4}
 
 exibir(x[0]) // 1
 ```
