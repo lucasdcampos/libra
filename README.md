@@ -29,6 +29,9 @@ e pequenas automações, Libra não foi feita para grandes aplicações.
 Aqui está um exemplo simples de um programa em Libra:
 
 ```js
+// Jogo de adivinhar o número escolhido, enquanto o usuário não acertar, dar
+// dicas se o número que ele tentou é maior ou menor do número escolihdo
+
 importar matematica
 
 const num = int(aleatorio(0, 100))
