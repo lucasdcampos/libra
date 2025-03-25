@@ -106,6 +106,14 @@ x = incluir(4) // x agora é {1, 2, 3, 4}
 
 exibir(x[0]) // 1
 ```
+Tipos
+```ts
+var nome: Texto            // Um Texto de tamanho qualquer
+var idade: Int             // Número inteiro de 32 bits
+var saldo: Real            // Número flutuante de 64 bits
+var opcoes: Vetor          // Lista de tamanho fixo
+var desconhecido: Objeto   // Aceita qualquer valor
+```
 ## Como contribuir?
 
 Se você deseja contribuir para o projeto, pode fazer um *fork* do repositório, depois cloná-lo para sua máquina local com o seguinte comando:
