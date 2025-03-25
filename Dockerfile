@@ -1,17 +1,26 @@
+# Etapa 1: Build
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+
+# Definir o diretório de trabalho
 WORKDIR /app
 
-COPY *.csproj ./
-RUN dotnet restore
+# Copiar todos os arquivos para o contêiner
+COPY . .
 
-COPY . ./
-COPY biblioteca/ ./biblioteca/
+# Tornar o script shell executável
+RUN chmod +x scripts/publicar.sh
 
-RUN dotnet publish -c Release -o /out
+# Executar o script de publicação
+RUN ./scripts/publicar.sh
 
-FROM mcr.microsoft.com/dotnet/aspnet:9.0
+# Etapa 2: Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+
+# Definir o diretório de trabalho
 WORKDIR /app
 
-COPY --from=build /out .
+# Copiar todos os arquivos do contêiner de build para o contêiner de execução
+COPY --from=build /app .
 
-ENTRYPOINT ["dotnet", "SeuAplicativo.dll"]
+# Definir o comando para executar o programa, permitindo argumentos
+ENTRYPOINT ["./bin/linux-x64/libra"]
