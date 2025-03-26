@@ -2,8 +2,9 @@ programa                ::= instrucao*
 
 instrucao               ::= inst_decl_var
                           | inst_decl_func
-                          | inst_decl_tipo
+                          | inst_decl_classe
                           | inst_atrib_var
+                          | inst_atrib_indice
                           | inst_se
                           | inst_enquanto
                           | inst_romper
@@ -15,7 +16,7 @@ bloco                   ::= instrucao* "fim"
 
 inst_decl_var           ::= ("var" | "const") ident (":" tipo)? "=" expr
 
-inst_decl_tipo          ::= "tipo" ident (inst_decl_var | inst_decl_func)* "fim"
+inst_decl_classe        ::= "classe" ident (inst_decl_var | inst_decl_func)* "fim"
 
 inst_decl_func          ::= "funcao" ident "(" (ident ("," ident)*)? ")" ("-->" tipo)? bloco
 
@@ -23,17 +24,21 @@ tipo                    ::= "Objeto" | "Int" | "Real" | "Texto" | "Vetor" | iden
 
 inst_atrib_var          ::= ident "=" expr
 
+inst_atrib_indice       ::= ident "[" expr "]" "=" expr
+
 inst_se                 ::= "se" expr "entao" instrucao* (senao_se*)? "fim"
 
 senao_se                ::= "senao" "se" expr "entao" instrucao*
 
 inst_enquanto           ::= "enquanto" expr "faca" bloco
 
-expr                    ::= expr_lit | expr_var | expr_chamada | expr_unaria | expr_bin | construir_vetor
+expr                    ::= expr_lit | expr_var | expr_indice | expr_chamada | expr_unaria | expr_bin | construir_vetor
 
 expr_lit                ::= int | real | texto
 
 expr_var                ::= ident
+
+expr_indice             ::= ident "[" expr "]"
 
 expr_chamada            ::= ident "(" (expr ("," expr)*)? ")"
 
