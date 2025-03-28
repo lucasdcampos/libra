@@ -14,16 +14,14 @@ namespace Libra
         }
     }
 
-    public class Funcao
+    public class Funcao : Variavel, IChamavel
     {
-        public string Identificador;
         public Instrucao[] Instrucoes;
         public Parametro[] Parametros;
         public string TipoRetorno;
 
-        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto")
+        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto") : base(ident, null, true, "Funcao", false)
         {
-            Identificador = ident;
             Instrucoes = instrucoes;
             Parametros = parametros;
             TipoRetorno = tipoRetorno;
@@ -37,7 +35,6 @@ namespace Libra
 
         public FuncaoNativa(Func<object[], object> implementacao, string ident = "") : base("", null, null)
         {
-            Identificador = ident;
             _implementacao = implementacao;
         }
 

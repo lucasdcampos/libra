@@ -2,7 +2,7 @@ using Libra.Arvore;
 
 namespace Libra;
 
-public class Classe
+public class Classe : IChamavel
 {
     public string Identificador { get; private set; }
 
