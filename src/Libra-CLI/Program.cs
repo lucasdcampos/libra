@@ -63,7 +63,14 @@ importar vetores
         while (true)
         {
             Console.Write(">>> ");
-            var linha = Console.ReadLine();
+            string? linha = Console.ReadLine();
+
+            if(linha == null)
+            {
+                Console.WriteLine("Ocorreu um erro, não foi possível ler do terminal.");
+                Console.WriteLine("Dica: Se você estiver rodando via Docker, use a flag -it.");
+            }
+                
 
             if(linha.EndsWith(".libra"))
             {

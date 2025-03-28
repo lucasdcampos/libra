@@ -25,8 +25,9 @@ namespace Libra.Arvore
         public Token Operador { get; private set; }
         public Expressao Operando { get; private set; }
 
-        public ExpressaoUnaria(Token operador, Expressao operando)
+        public ExpressaoUnaria(LocalToken local, Token operador, Expressao operando)
         {
+            Local = local;
             Operador = operador;
             Operando = operando;
 
@@ -39,8 +40,9 @@ namespace Libra.Arvore
 
     public class ExpressaoLiteral : Expressao
     {
-        public ExpressaoLiteral(Token token)
+        public ExpressaoLiteral(LocalToken local, Token token)
         {
+            Local = local;
             Token = token;
             TipoExpr = TipoExpressao.ExpressaoLiteral;
         }
@@ -52,7 +54,7 @@ namespace Libra.Arvore
 
         public static ExpressaoLiteral CriarInt(LocalToken local, int valor)
         {
-            return new ExpressaoLiteral(new Token(TokenTipo.NumeroLiteral, local, valor));
+            return new ExpressaoLiteral(local, new Token(TokenTipo.NumeroLiteral, local, valor));
         }
     }
 
@@ -60,8 +62,9 @@ namespace Libra.Arvore
     {
         public Token Identificador { get; private set ;}
 
-        public ExpressaoVariavel(Token identificador)
+        public ExpressaoVariavel(LocalToken local, Token identificador)
         {
+            Local = local;
             Identificador = identificador;
             TipoExpr = TipoExpressao.ExpressaoVariavel;
         }
@@ -73,8 +76,9 @@ namespace Libra.Arvore
     {
         public string Identificador { get; private set ;}
         public string Propriedade { get; private set ;}
-        public ExpressaoPropriedade(string identificador, string prop)
+        public ExpressaoPropriedade(LocalToken local, string identificador, string prop)
         {
+            Local = local;
             Identificador = identificador;
             Propriedade = prop;
             TipoExpr = TipoExpressao.ExpressaoPropriedade;
@@ -88,8 +92,9 @@ namespace Libra.Arvore
         public string Identificador { get; private set; }
         public Expressao[] Argumentos { get; private set; }
 
-        public ExpressaoChamadaFuncao(string ident, Expressao[] argumentos = null)
+        public ExpressaoChamadaFuncao(LocalToken local, string ident, Expressao[] argumentos = null)
         {
+            Local = local;
             Tipo = TipoInstrucao.Chamada;
             Identificador = ident;
             Argumentos = argumentos;
@@ -110,8 +115,9 @@ namespace Libra.Arvore
         public string Identificador { get; private set; }
         public ExpressaoChamadaFuncao Chamada { get; private set ;}
 
-        public ExpressaoChamadaMetodo(string ident, ExpressaoChamadaFuncao chamada)
+        public ExpressaoChamadaMetodo(LocalToken local, string ident, ExpressaoChamadaFuncao chamada)
         {
+            Local = local;
             Tipo = TipoInstrucao.ChamadaMetodo;
             TipoExpr = TipoExpressao.ExpressaoChamadaMetodo;
             Identificador = ident;
@@ -123,8 +129,9 @@ namespace Libra.Arvore
 
     public class ExpressaoAcessoVetor : Expressao
     {
-        public ExpressaoAcessoVetor(string ident, Expressao expr)
+        public ExpressaoAcessoVetor(LocalToken local, string ident, Expressao expr)
         {
+            Local = local;
             Identificador = ident;
             Expressao = expr;
             TipoExpr = TipoExpressao.ExpressaoAcessoVetor;
@@ -137,8 +144,9 @@ namespace Libra.Arvore
 
     public class ExpressaoNovoVetor : Expressao
     {
-        public ExpressaoNovoVetor(Expressao expr)
+        public ExpressaoNovoVetor(LocalToken local, Expressao expr)
         {
+            Local = local;
             Expressao = expr;
             TipoExpr = TipoExpressao.ExpressaoNovoVetor;
         }
@@ -150,8 +158,9 @@ namespace Libra.Arvore
 
     public class ExpressaoInicializacaoVetor : Expressao
     {
-        public ExpressaoInicializacaoVetor(List<Expressao> expressoes)
+        public ExpressaoInicializacaoVetor(LocalToken local, List<Expressao> expressoes)
         {
+            Local = local;
             Expressoes = expressoes;
             TipoExpr = TipoExpressao.ExpressaoInicializacaoVetor;
         }
@@ -167,8 +176,9 @@ namespace Libra.Arvore
         public Token Operador { get; private set; }
         public Expressao Direita { get; private set; }
 
-        public ExpressaoBinaria(Expressao esquerda, Token operador, Expressao direita)
+        public ExpressaoBinaria(LocalToken local, Expressao esquerda, Token operador, Expressao direita)
         {
+            Local = local;
             Esquerda = esquerda;
             Operador = operador;
             Direita = direita;

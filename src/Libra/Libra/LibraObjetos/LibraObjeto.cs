@@ -4,11 +4,12 @@ namespace Libra;
 
 public class LibraObjeto
 {
-    public LibraObjeto(string nome, Variavel[] propriedades, Funcao[] metodos)
+    public LibraObjeto(string nome, Variavel[] propriedades, Funcao[] metodos, Expressao[] args = null) 
     {
         Nome = nome;
         Propriedades = new();
         Metodos = new();
+        _argsConstrutor = args;
 
         for(int i = 0; i < propriedades.Length; i++)
         {
@@ -23,10 +24,17 @@ public class LibraObjeto
     public virtual string Nome { get; protected set; }
     public virtual Dictionary<string, Variavel> Propriedades { get; protected set; }
     public virtual Dictionary<string, Funcao> Metodos { get; protected set; }
+    protected Expressao[] _argsConstrutor;
 
     public virtual LibraObjeto Converter(string novoTipo)
     {
         throw new ErroConversao(Nome, novoTipo, Interpretador.LocalAtual);
+    }
+
+    internal void Construtor(string ident)
+    {
+        if(Metodos.ContainsKey(Nome))
+            ChamarMetodo(new ExpressaoChamadaFuncao(Interpretador.LocalAtual, Nome, _argsConstrutor), ident);
     }
 
     protected void DeclararPropriedade(Variavel prop)
@@ -79,7 +87,9 @@ public class LibraObjeto
         if(!Metodos.ContainsKey(chamada.Identificador))
             throw new ErroFuncaoNaoDefinida(chamada.Identificador);
         var args = chamada.Argumentos.ToList<Expressao>();
-        args.Insert(0, new ExpressaoVariavel(new Token(TokenTipo.Identificador, new LocalToken(), quemChamou)));
+        if(!string.IsNullOrEmpty(quemChamou))
+            args.Insert(0, new ExpressaoVariavel(chamada.Local, new Token(TokenTipo.Identificador, new LocalToken(), quemChamou)));
+        
         return new Interpretador().ExecutarFuncao(Metodos[chamada.Identificador], args.ToArray());
     }
 

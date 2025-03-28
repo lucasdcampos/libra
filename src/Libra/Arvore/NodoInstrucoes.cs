@@ -29,13 +29,14 @@ namespace Libra.Arvore
 
     public class DeclaracaoVar : Instrucao
     {
-        public DeclaracaoVar(string identificador, Expressao expressao, string tipo, bool tipoModificavel, bool constante)
+        public DeclaracaoVar(LocalToken local, string identificador, Expressao expressao, string tipo, bool tipoModificavel, bool constante)
         {
             Tipo = TipoInstrucao.DeclVar;
             Identificador = identificador;
             Expressao = expressao; 
             TipoModificavel = tipoModificavel;
             TipoVar = tipo;
+            Local = local;
         }
 
         public Expressao Expressao { get; private set; }
@@ -49,23 +50,25 @@ namespace Libra.Arvore
     {
         public string Identificador { get; }
         public Expressao Expressao { get; }
-        public AtribuicaoVar(string identificador, Expressao expr)
+        public AtribuicaoVar(LocalToken local, string identificador, Expressao expr)
         {
             Identificador = identificador;
             Expressao = expr;
             Tipo = TipoInstrucao.AtribVar;
+            Local = local;
         }
     }
 
     public class DefinicaoFuncao : Instrucao
     {
-        public DefinicaoFuncao(string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, string tipoRetorno = "Objeto")
+        public DefinicaoFuncao(LocalToken local, string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, string tipoRetorno = "Objeto")
         {
             Tipo = TipoInstrucao.DeclFunc;
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
             TipoRetorno = tipoRetorno;
+            Local = local;
         }
 
         public Instrucao[] Instrucoes { get; private set; }
@@ -76,12 +79,13 @@ namespace Libra.Arvore
 
     public class DefinicaoTipo : Instrucao
     {
-        public DefinicaoTipo(string identificador, DeclaracaoVar[] variaveis, DefinicaoFuncao[] funcoes)
+        public DefinicaoTipo(LocalToken local, string identificador, DeclaracaoVar[] variaveis, DefinicaoFuncao[] funcoes)
         {
             Tipo = TipoInstrucao.DeclClasse;
             Variaveis = variaveis;
             Funcoes = funcoes;
             Identificador = identificador;
+            Local = local;
         }
 
         public DeclaracaoVar[] Variaveis { get; private set; }
@@ -91,12 +95,13 @@ namespace Libra.Arvore
 
     public class InstrucaoSe : Instrucao
     {
-        public InstrucaoSe(Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)
+        public InstrucaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)
         {
             Tipo = TipoInstrucao.Se;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
             ListaSenaoSe = listaSenaoSe;
+            Local = local;
         }
 
         public Expressao Condicao { get; private set; }
@@ -106,12 +111,12 @@ namespace Libra.Arvore
 
     public class InstrucaoSenaoSe : Instrucao
     {
-        public InstrucaoSenaoSe(Expressao condicao, Instrucao[] corpo)
+        public InstrucaoSenaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo)
         {
             Tipo = TipoInstrucao.SenaoSe;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
-            
+            Local = local;
         }
 
         public Expressao Condicao { get; private set; }
@@ -120,12 +125,12 @@ namespace Libra.Arvore
 
     public class InstrucaoEnquanto : Instrucao
     {
-        public InstrucaoEnquanto( Expressao expressao, Instrucao[] instrucoes)
+        public InstrucaoEnquanto(LocalToken local, Expressao expressao, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.Enquanto;
             Expressao = expressao;
             Instrucoes = instrucoes;
-            
+            Local = local;
         }
 
         public Expressao Expressao { get; private set; }
@@ -136,16 +141,18 @@ namespace Libra.Arvore
     // Não necessitam de implementação
     public class InstrucaoRomper : Instrucao
     {
-        public InstrucaoRomper()
+        public InstrucaoRomper(LocalToken local)
         {
+            Local = local;
             Tipo = TipoInstrucao.Romper;
         }
     }
 
     public class InstrucaoContinuar : Instrucao
     {
-        public InstrucaoContinuar()
+        public InstrucaoContinuar(LocalToken local)
         {
+            Local = local;
             Tipo = TipoInstrucao.Continuar;
         }
     }
@@ -154,22 +161,23 @@ namespace Libra.Arvore
     {
         public Expressao Expressao { get; private set; }
 
-        public InstrucaoRetornar( Expressao expressao)
+        public InstrucaoRetornar(LocalToken local, Expressao expressao)
         {
             Tipo = TipoInstrucao.Retornar;
             Expressao = expressao;
-            
+            Local = local;
         }
     }
 
     public class AtribuicaoIndice : Instrucao
     {
-        public AtribuicaoIndice(string identificador, Expressao indiceExpr, Expressao expressao)
+        public AtribuicaoIndice(LocalToken local, string identificador, Expressao indiceExpr, Expressao expressao)
         {
             Tipo = TipoInstrucao.AtribIndice;
             Expressao = expressao;
             Identificador = identificador;
             ExpressaoIndice = indiceExpr;
+            Local = local;
         }
 
         public string Identificador { get; private set; }
@@ -179,12 +187,13 @@ namespace Libra.Arvore
 
     public class AtribuicaoPropriedade : Instrucao
     {
-        public AtribuicaoPropriedade(string identificador, string propriedade, Expressao expressao)
+        public AtribuicaoPropriedade(LocalToken local, string identificador, string propriedade, Expressao expressao)
         {
             Tipo = TipoInstrucao.AtribProp;
             Expressao = expressao;
             Identificador = identificador;
             Propriedade = propriedade;
+            Local = local;
         }
 
         public string Identificador { get; private set; }

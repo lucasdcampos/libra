@@ -236,15 +236,12 @@ public class Interpretador
         return objeto;
     }
 
-    public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes)
+    public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
         if(!_programa.ClasseExiste(nome))
             throw new ErroFuncaoNaoDefinida(nome, _local);
 
         var tipo = _programa.Classes[nome];
-        
-        if(tipo.Variaveis.Length != expressoes.Length && expressoes.Length > 0)
-            throw new ErroEsperadoNArgumentos(nome, tipo.Variaveis.Length, expressoes.Length, _local);
 
         List<Variavel> vars = new();
         foreach(var i in tipo.Variaveis)
@@ -257,7 +254,9 @@ public class Interpretador
             funcs.Add(new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno));
         }
 
-        return new LibraObjeto(nome, vars.ToArray(), funcs.ToArray());
+        var obj = new LibraObjeto(nome, vars.ToArray(), funcs.ToArray(), expressoes);
+        
+        return obj;
     }
 
     public LibraObjeto ExecutarFuncao(Funcao funcao, Expressao[] argumentos)
@@ -346,6 +345,8 @@ public class Interpretador
 
         _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
 
+        resultado.Construtor(i.Identificador);
+        
         return resultado;
     }
 
@@ -357,6 +358,8 @@ public class Interpretador
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
 
         _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
+
+        resultado.Construtor(i.Identificador);
 
         return resultado;
     }
@@ -385,6 +388,8 @@ public class Interpretador
         if(expressao == null)
             return new LibraNulo();
 
+        _local = expressao.Local;
+        
         return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(_visitorExpressoes));
     }
 

@@ -29,6 +29,7 @@ public class LibraBase : IModulo
         _programa.Funcoes["sair"] = new FuncaoNativa(sair);
         _programa.Funcoes["exibir"] = new FuncaoNativa(exibir);
         _programa.Funcoes["obterTipo"] = new FuncaoNativa(tipo);
+        _programa.Funcoes["garantir"] = new FuncaoNativa(garantir);
         _programa.Funcoes["tamanho"] = new FuncaoNativa(tamanho);
         _programa.Funcoes["entrada"] = new FuncaoNativa(entrada);
         _programa.Funcoes["concat"] = new FuncaoNativa(concat);
@@ -79,6 +80,22 @@ public class LibraBase : IModulo
 
         return new Interpretador().Interpretar(args[0].ToString());
 
+    }
+
+    public object garantir(object[] args)
+    {
+        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
+
+        if(args[0] is not int valor)
+            throw new Erro("Esperado uma condição");
+
+        if(args[1] is not string mensagem)
+            throw new Erro("Esperado um texto");
+
+        if(valor == 0)
+            throw new Erro(args[1].ToString());
+        
+        return null;
     }
     
     public object sair(object[] args)

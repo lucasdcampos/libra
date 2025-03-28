@@ -1,19 +1,2 @@
-classe Pessoa
-    @estatica var quantidade = 0
-    var nome: Texto
-    var idade: Int
-    funcao Pessoa(auto, nome, idade)
-        auto.nome = nome
-        auto.idade = idade
-
-        // Nova pessoa foi criada, incrementa quantidade em 1
-        Pessoa.quantidade = Pessoa.quantidade + 1
-    fim
-fim
-
-const p1 = Pessoa("Carlos", 20)
-const p2 = Pessoa("João", 30)
-
-exibir(p1.nome)
-
-exibir(Pessoa.quantidade) // Propriedade estática, não precisa de instância
+// ...
+exibir("a")

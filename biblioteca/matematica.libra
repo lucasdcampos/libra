@@ -13,8 +13,8 @@ classe Matematica
     @estatica const LN10 = 2.302585092994046
     @estatica const RAZAO_AUREA = 1.618033988749895
 
-    @estatica const GRAUS_PARA_RAD = PI / 180
-    @estatica const RAD_PARA_GRAUS = 180.0 / PI
+    //@estatica const GRAUS_PARA_RAD = PI / 180
+    //@estatica const RAD_PARA_GRAUS = 180.0 / PI
 
     @estatica const VERDADEIRO = 1
     @estatica const FALSO = 0
@@ -36,23 +36,26 @@ classe Matematica
     @estatica const MB = 1024 * 1024
     @estatica const GB = 1024 * 1024 * 1024
 
-    funcao __criada__()
+    funcao Matematica(auto)
         // Ativa o modulo interno de matematica
         __ativarmodulo__("matematica")
     fim
 
     // Calcula e retorna a raiz enésima de um número
-    @estatica funcao raiz(numero: Real, indice: Int) -> Real
+    @estatica
+    funcao raiz(auto, numero: Real, indice: Int) -> Real
         retornar __csraiz__(numero, indice)
     fim
 
     // Calcula e retorna a raiz quadrada de um número
-    @estatica funcao raizq(x: Real) -> Real
+    @estatica
+    funcao raizq(auto, x: Real) -> Real
         retornar __csraizq__(x)
     fim
 
     // Calcula e retorna a o fatorial de um número
-    @estatica funcao fatorial(n: Int) -> Real
+    @estatica
+    funcao fatorial(auto, n: Int) -> Real
         var resultado = 1
         var contador = n
         enquanto contador > 0 faca
@@ -64,7 +67,8 @@ classe Matematica
     fim
 
     // Retorna o valor absoluto (módulo) de um número
-    @estatica funcao abs(x: Real) -> Real
+    @estatica
+    funcao abs(auto, x: Real) -> Real
         se x > 0 entao
             retornar x
         fim
@@ -73,7 +77,8 @@ classe Matematica
     fim
 
     // Retorna o maior valor dentro de um intervalo
-    @estatica funcao topo(a: Real, b: Real) -> Real
+    @estatica
+    funcao topo(auto, a: Real, b: Real) -> Real
         se a > b entao
             retornar a
         fim
@@ -82,7 +87,8 @@ classe Matematica
     fim
 
     // Retorna o menor valor dentro de um intervalo
-    @estatica funcao chao(a: Real, b: Real) -> Real
+    @estatica
+    funcao chao(auto, a: Real, b: Real) -> Real
         se a < b entao
             retornar a
         fim
@@ -91,7 +97,8 @@ classe Matematica
     fim
 
     // Retorna o inteiro mais próximo de um valor real
-    @estatica funcao arrendondar(x: Real) -> Int
+    @estatica
+    funcao arrendondar(auto, x: Real) -> Int
         se x > real(int(x)) + 0.5 entao
             retornar int(x+1)
         fim
@@ -99,62 +106,74 @@ classe Matematica
     fim
 
     // Retorna a hipotenusa de dois lados
-    @estatica funcao hipotenusa(a: Real, b: Real) -> Real
+    @estatica
+    funcao hipotenusa(auto, a: Real, b: Real) -> Real
         retornar raizq(a*a + b*b)
     fim
 
     // Retorna o seno de um ângulo x
-    @estatica funcao sen(x: Real) -> Real
+    @estatica
+    funcao sen(auto, x: Real) -> Real
         retornar __cssen__(x)
     fim
 
     // Retorna o cosseno de um ângulo x
-    @estatica funcao cos(x: Real) -> Real
+    @estatica
+    funcao cos(auto, x: Real) -> Real
         retornar __cscos__(x)
     fim
 
     // Retorna a tangente de um ângulo x
-    @estatica funcao tan(x: Real) -> Real
+    @estatica
+    funcao tan(auto, x: Real) -> Real
         retornar __cstan__(x)
     fim
 
     // Retorna o arco-seno de um ângulo x
-    @estatica funcao arcsen(x: Real) -> Real
+    @estatica
+    funcao arcsen(auto, x: Real) -> Real
         retornar sen(x)^-1
     fim
 
     // Retorna o arco-cosseno de um ângulo x
-    @estatica funcao arccos(x: Real) -> Real
+    @estatica funcao arccos(auto, x: Real) -> Real
         retornar cos(x)^-1
     fim
 
     // Retorna a arco-tangente de um ângulo x
-    @estatica funcao arctan(x: Real) -> Real
+    @estatica
+    funcao arctan(auto, x: Real) -> Real
         retornar tan(x)^-1
     fim
 
     // Retorna o logaritmo de x na base n
-    @estatica funcao log(x: Real, n: Real) -> Real
+    @estatica
+    funcao log(auto, x: Real, n: Real) -> Real
         retornar __cslog__(x, n)
     fim
 
-    @estatica funcao ln(x: Real) -> Real
+    @estatica
+    funcao ln(auto, x: Real) -> Real
         retornar log(x, E)
     fim
 
-    @estatica funcao log2(x: Real) -> Real
+    @estatica
+    funcao log2(auto, x: Real) -> Real
         retornar log(x, 2)
     fim
 
-    @estatica funcao exp(x: Real) -> Real
+    @estatica
+    funcao exp(auto, x: Real) -> Real
         retornar E^x
     fim
 
-    @estatica funcao exp2(x: Real) -> Real
+    @estatica
+    funcao exp2(auto, x: Real) -> Real
         retornar 2^x
     fim
 
-    @estatica funcao aleatorio(min: Real, max: Real) -> Real
+    @estatica
+    funcao aleatorio(auto, min: Real, max: Real) -> Real
         min = real(min)
         max = real(max)
 
@@ -162,4 +181,4 @@ classe Matematica
     fim
 fim
 
-const Matematica = Matematica()
+const Mt = Matematica()
