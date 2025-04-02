@@ -4,10 +4,10 @@ public class LibraTexto : LibraObjeto
 {
     public string Valor { get; private set; }
 
-    public LibraTexto(string valor) : base("Texto", new Variavel[0], new Funcao[0])
+    public LibraTexto(string valor) : base("Texto", new Variavel[0])
     {
         Valor = valor;
-        Metodos.Add("tamanho", new FuncaoNativa(tamanho));
+        Propriedades.Add("tamanho", new Variavel("tamanho", new FuncaoNativa(tamanho)));
     }
 
     public object tamanho(object[] args)

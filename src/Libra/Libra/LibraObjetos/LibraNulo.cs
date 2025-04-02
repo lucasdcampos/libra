@@ -2,7 +2,7 @@ namespace Libra;
 
 public class LibraNulo : LibraObjeto
 {
-    public LibraNulo() : base("Nulo", new Variavel[0], new Funcao[0])
+    public LibraNulo() : base("Nulo", new Variavel[0])
     {
         
     }

@@ -12,13 +12,13 @@ public class LibraMatematica : IModulo
     {
         _programa = programa;
 
-        _programa.Funcoes["__csraiz__"] = new FuncaoNativa(__csraiz__);
-        _programa.Funcoes["__csraizq__"] = new FuncaoNativa(__csraizq__);
-        _programa.Funcoes["__cssen__"] = new FuncaoNativa(__cssen__);
-        _programa.Funcoes["__cscos__"] = new FuncaoNativa(__cscos__);
-        _programa.Funcoes["__cstan__"] = new FuncaoNativa(__cstan__);
-        _programa.Funcoes["__csrand__"] = new FuncaoNativa(__csrand__);
-        _programa.Funcoes["__cslog__"] = new FuncaoNativa(__cslog__);
+        _programa.PilhaEscopos.DefinirVariavel("__csraiz__", new FuncaoNativa(__csraiz__));
+        _programa.PilhaEscopos.DefinirVariavel("__csraizq__", new FuncaoNativa(__csraizq__));
+        _programa.PilhaEscopos.DefinirVariavel("__cssen__", new FuncaoNativa(__cssen__));
+        _programa.PilhaEscopos.DefinirVariavel("__cscos__", new FuncaoNativa(__cscos__));
+        _programa.PilhaEscopos.DefinirVariavel("__cstan__", new FuncaoNativa(__cstan__));
+        _programa.PilhaEscopos.DefinirVariavel("__csrand__", new FuncaoNativa(__csrand__));
+        _programa.PilhaEscopos.DefinirVariavel("__cslog__", new FuncaoNativa(__cslog__));
     }
 
     public static object __csraizq__(object[] args)

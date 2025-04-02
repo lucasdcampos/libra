@@ -20,35 +20,30 @@ public class LibraBase : IModulo
     {
         _programa = programa;
 
-        // Usados em bytes(tipo) para obter a quantidade de memória em bytes usada por esses tipos
-        _programa.PilhaEscopos.DefinirVariavel("int", new LibraInt(4), true);
-        _programa.PilhaEscopos.DefinirVariavel("real", new LibraReal(8), true);
-        
-        _programa.Funcoes["__ativarmodulo__"] = new FuncaoNativa(__ativarmodulo__);
+        _programa.PilhaEscopos.DefinirVariavel("sair", new FuncaoNativa(sair));
+        _programa.PilhaEscopos.DefinirVariavel("exibir", new FuncaoNativa(exibir));
+        _programa.PilhaEscopos.DefinirVariavel("obterTipo", new FuncaoNativa(tipo));
+        _programa.PilhaEscopos.DefinirVariavel("garantir", new FuncaoNativa(garantir));
+        _programa.PilhaEscopos.DefinirVariavel("tamanho", new FuncaoNativa(tamanho));
+        _programa.PilhaEscopos.DefinirVariavel("entrada", new FuncaoNativa(entrada));
+        _programa.PilhaEscopos.DefinirVariavel("concat", new FuncaoNativa(concat));
+        _programa.PilhaEscopos.DefinirVariavel("pausar", new FuncaoNativa(pausar));
+        _programa.PilhaEscopos.DefinirVariavel("real", new FuncaoNativa(real));
+        _programa.PilhaEscopos.DefinirVariavel("int", new FuncaoNativa(_int));
+        _programa.PilhaEscopos.DefinirVariavel("texto", new FuncaoNativa(texto));
+        _programa.PilhaEscopos.DefinirVariavel("tentarReal", new FuncaoNativa(tentarReal));
+        _programa.PilhaEscopos.DefinirVariavel("tentarInt", new FuncaoNativa(tentarInt));
+        _programa.PilhaEscopos.DefinirVariavel("bytes", new FuncaoNativa(bytes));
+        _programa.PilhaEscopos.DefinirVariavel("erro", new FuncaoNativa(erro));
 
-        _programa.Funcoes["sair"] = new FuncaoNativa(sair);
-        _programa.Funcoes["exibir"] = new FuncaoNativa(exibir);
-        _programa.Funcoes["obterTipo"] = new FuncaoNativa(tipo);
-        _programa.Funcoes["garantir"] = new FuncaoNativa(garantir);
-        _programa.Funcoes["tamanho"] = new FuncaoNativa(tamanho);
-        _programa.Funcoes["entrada"] = new FuncaoNativa(entrada);
-        _programa.Funcoes["concat"] = new FuncaoNativa(concat);
-        _programa.Funcoes["pausar"] = new FuncaoNativa(pausar);
-        _programa.Funcoes["real"] = new FuncaoNativa(real);
-        _programa.Funcoes["int"] = new FuncaoNativa(_int);
-        _programa.Funcoes["texto"] = new FuncaoNativa(texto);
-        _programa.Funcoes["tentarReal"] = new FuncaoNativa(tentarReal);
-        _programa.Funcoes["tentarInt"] = new FuncaoNativa(tentarInt);
-        _programa.Funcoes["bytes"] = new FuncaoNativa(bytes);
-        _programa.Funcoes["erro"] = new FuncaoNativa(erro);
-        
         // Impedir uso de funções potencialmente perigosas
-        if(Ambiente.AmbienteSeguro)
+        if (Ambiente.AmbienteSeguro)
             return;
 
-        _programa.Funcoes["registrarCSharp"] = new FuncaoNativa(registrarCSharp);
-        _programa.Funcoes["registrardll"] = new FuncaoNativa(registrardll);
-        _programa.Funcoes["libra"] = new FuncaoNativa(libra);
+        _programa.PilhaEscopos.DefinirVariavel("registrarCSharp", new FuncaoNativa(registrarCSharp));
+        _programa.PilhaEscopos.DefinirVariavel("registrardll", new FuncaoNativa(registrardll));
+        _programa.PilhaEscopos.DefinirVariavel("libra", new FuncaoNativa(libra));
+
 
         _programa.PilhaEscopos.DefinirVariavel("NL", new LibraTexto("\n"), true);
         _programa.PilhaEscopos.DefinirVariavel("FDA", new LibraTexto("\0"), true);
@@ -84,16 +79,17 @@ public class LibraBase : IModulo
 
     public object garantir(object[] args)
     {
-        LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 2, args.Length);
-
         if(args[0] is not int valor)
             throw new Erro("Esperado uma condição");
 
-        if(args[1] is not string mensagem)
-            throw new Erro("Esperado um texto");
+        string msgErro = "";
+
+        if(args.Length > 1)
+            if(args[1] is string mensagem)
+                msgErro = mensagem;
 
         if(valor == 0)
-            throw new Erro(args[1].ToString());
+            throw new Erro(msgErro);
         
         return null;
     }
@@ -134,7 +130,7 @@ public class LibraBase : IModulo
             {
                 string nomeFuncao = $"{tipo.Name}_{metodo.Name}";
                 Func<object[], object> funcao = args => metodo.Invoke(null, args);
-                _programa.Funcoes[nomeFuncao] = new FuncaoNativa(funcao);
+                _programa.PilhaEscopos.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcao));
             }
         }
 

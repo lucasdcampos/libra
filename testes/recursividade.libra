@@ -2,12 +2,6 @@
 Testando funções recursivas para verificar se tudo
 está correndo como esperado
 */
-funcao garantir(condicao)
-    se condicao == 0 entao
-        erro("Teste falhou")
-    fim
-fim
-
 funcao fatorial(n: Int) -> Int
     se n == 0 entao
         retornar 1

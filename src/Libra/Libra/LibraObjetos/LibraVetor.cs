@@ -4,12 +4,12 @@ public class LibraVetor : LibraObjeto
 {
     public LibraObjeto[] Valor { get; private set; }
 
-    public LibraVetor(LibraObjeto[] vetor) : base("Vetor", new Variavel[0], new Funcao[0])
+    public LibraVetor(LibraObjeto[] vetor) : base("Vetor", new Variavel[0])
     {
         Valor = vetor;
     }
 
-    public LibraVetor(int tamanho) : base("Vetor", new Variavel[0], new Funcao[0])
+    public LibraVetor(int tamanho) : base("Vetor", new Variavel[0])
     {
         Valor = new LibraObjeto[tamanho];
     }

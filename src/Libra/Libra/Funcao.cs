@@ -14,17 +14,18 @@ namespace Libra
         }
     }
 
-    public class Funcao : Variavel, IChamavel
+    public class Funcao : LibraObjeto, IChamavel
     {
         public Instrucao[] Instrucoes;
         public Parametro[] Parametros;
         public string TipoRetorno;
-
-        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto") : base(ident, null, true, "Funcao", false)
+        public string Identificador { get; }
+        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto") : base("Func", new Variavel[0])
         {
             Instrucoes = instrucoes;
             Parametros = parametros;
             TipoRetorno = tipoRetorno;
+            Identificador = ident;
         }
     }
 

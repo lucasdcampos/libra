@@ -206,6 +206,7 @@ public class Interpretador
         }
     }
 
+    // TODO: Arrumar
     public void InterpretarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
@@ -213,12 +214,12 @@ public class Interpretador
         if(string.IsNullOrWhiteSpace(identificador))
             throw new Erro("Identificador inválido!", _local);
         
-        if(_programa.FuncaoExiste(identificador))
-            throw new ErroFuncaoJaDefinida(identificador, _local);
+        /*if(_programa.FuncaoExiste(identificador))
+            throw new ErroFuncaoJaDefinida(identificador, _local);*/
         
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
-        _programa.Funcoes[identificador] = novaFuncao;
+        _programa.PilhaEscopos.DefinirVariavel(identificador, novaFuncao, true, "Func", false);
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, Expressao[] argumentos) 
@@ -238,10 +239,11 @@ public class Interpretador
 
     public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
-        if(!_programa.ClasseExiste(nome))
+        /*
+        if(!_programa.PilhaEscopos.(nome))
             throw new ErroFuncaoNaoDefinida(nome, _local);
 
-        var tipo = _programa.Classes[nome];
+        var tipo = _programa.ObterVariavel(nome);
 
         List<Variavel> vars = new();
         foreach(var i in tipo.Variaveis)
@@ -256,7 +258,8 @@ public class Interpretador
 
         var obj = new LibraObjeto(nome, vars.ToArray(), funcs.ToArray(), expressoes);
         
-        return obj;
+        return obj;*/
+        return null;
     }
 
     public LibraObjeto ExecutarFuncao(Funcao funcao, Expressao[] argumentos)
@@ -313,27 +316,29 @@ public class Interpretador
         var argumentos = chamada.Argumentos;
 
         // Verificando se estamos chamando uma nova instancia de uma classe
-        if(_programa.ClasseExiste(chamada.Identificador))
+        /*if(_programa.ClasseExiste(chamada.Identificador))
         {
             return InterpretarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
-        }
+        }*/
 
-        if (!_programa.FuncaoExiste(chamada.Identificador))
+        /*if (!_programa.FuncaoExiste(chamada.Identificador))
         {
             throw new ErroFuncaoNaoDefinida(chamada.Identificador, _local);
-        }
+        }*/
 
-        var funcao = _programa.Funcoes[chamada.Identificador];
+        var funcao = _programa.ObterVariavel(chamada.Identificador);
 
-        return ExecutarFuncao(funcao, chamada.Argumentos);
+        return ExecutarFuncao((Funcao)funcao.Valor, chamada.Argumentos);
     }
 
     public void InterpretarInstrucaoClasse(DefinicaoTipo i)
     {
-        if(_programa.ClasseExiste(i.Identificador))
+        /*if(_programa.ClasseExiste(i.Identificador))
             throw new Erro($"Classe já existe: {i.Identificador}", _local);
 
        _programa.Classes.Add(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
+       */
+       throw new Erro("Funcionalidade não implementada: Interpretador.cs:341");
     }
 
     public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)

@@ -4,26 +4,23 @@ namespace Libra;
 
 public class LibraObjeto
 {
-    public LibraObjeto(string nome, Variavel[] propriedades, Funcao[] metodos, Expressao[] args = null) 
+    public LibraObjeto(string nome, Variavel[] propriedades, Expressao[] args = null) 
     {
         Nome = nome;
         Propriedades = new();
-        Metodos = new();
         _argsConstrutor = args;
+
+        if(propriedades == null)
+            return;
 
         for(int i = 0; i < propriedades.Length; i++)
         {
             DeclararPropriedade(propriedades[i]);
         }
-        for(int i = 0; i < metodos.Length; i++)
-        {
-            DefinirMetodo(metodos[i]);
-        }
     }
 
     public virtual string Nome { get; protected set; }
     public virtual Dictionary<string, Variavel> Propriedades { get; protected set; }
-    public virtual Dictionary<string, Funcao> Metodos { get; protected set; }
     protected Expressao[] _argsConstrutor;
 
     public virtual LibraObjeto Converter(string novoTipo)
@@ -33,7 +30,7 @@ public class LibraObjeto
 
     internal void Construtor(string ident)
     {
-        if(Metodos.ContainsKey(Nome))
+        if(Propriedades.ContainsKey(Nome) && Propriedades[Nome] is Funcao)
             ChamarMetodo(new ExpressaoChamadaFuncao(Interpretador.LocalAtual, Nome, _argsConstrutor), ident);
     }
 
@@ -43,14 +40,6 @@ public class LibraObjeto
             throw new ErroVariavelJaDeclarada(prop.Identificador);
         
         Propriedades.Add(prop.Identificador, prop);
-    }
-
-    protected void DefinirMetodo(Funcao metodo)
-    {
-        if(Metodos.ContainsKey(metodo.Identificador))
-            throw new ErroFuncaoJaDefinida(metodo.Identificador);
-        
-        Metodos.Add(metodo.Identificador, metodo);
     }
 
     public virtual object ObterValor() 
@@ -84,13 +73,13 @@ public class LibraObjeto
 
     public virtual LibraObjeto ChamarMetodo(ExpressaoChamadaFuncao chamada, string quemChamou = "")
     {
-        if(!Metodos.ContainsKey(chamada.Identificador))
+        if(!Propriedades.ContainsKey(chamada.Identificador) && Propriedades[chamada.Identificador].Valor is not Funcao)
             throw new ErroFuncaoNaoDefinida(chamada.Identificador);
         var args = chamada.Argumentos.ToList<Expressao>();
         if(!string.IsNullOrEmpty(quemChamou))
             args.Insert(0, new ExpressaoVariavel(chamada.Local, new Token(TokenTipo.Identificador, new LocalToken(), quemChamou)));
         
-        return new Interpretador().ExecutarFuncao(Metodos[chamada.Identificador], args.ToArray());
+        return new Interpretador().ExecutarFuncao((Funcao)Propriedades[chamada.Identificador].Valor, args.ToArray());
     }
 
     // Inicializa um novo Objeto de acordo com o tipo especificado

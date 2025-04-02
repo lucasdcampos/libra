@@ -4,12 +4,12 @@ public class LibraInt : LibraObjeto
 {
     public int Valor { get; private set; }
 
-    public LibraInt(int valor) : base("Int", new Variavel[0], new Funcao[0])
+    public LibraInt(int valor) : base("Int", new Variavel[0])
     {
         Valor = valor;
     }
 
-    public LibraInt(bool valor) : base("Int", new Variavel[0], new Funcao[0])
+    public LibraInt(bool valor) : base("Int", new Variavel[0])
     {
         Valor = valor ? 1 : 0;
     }
