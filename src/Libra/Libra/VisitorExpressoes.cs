@@ -42,7 +42,8 @@ public class VisitorExpressoes : IVisitor
 
     public LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao)
     {
-        return LibraObjeto.ParaLibraObjeto(_programa.ObterVariavel(expressao.Identificador.Valor.ToString()));
+        var v = _programa.ObterVariavel(expressao.Identificador.Valor.ToString());
+        return v.Valor;
     }
 
     public LibraObjeto VisitarExpressaoNovoVetor(ExpressaoNovoVetor expressao)

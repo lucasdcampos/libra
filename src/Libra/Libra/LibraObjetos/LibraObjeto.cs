@@ -103,18 +103,24 @@ public class LibraObjeto
             
         if(valor is LibraObjeto valorLibraObjeto)
             return valorLibraObjeto; // o valor JÁ é LibraObjeto
-        else if(valor is Variavel valorVariavel)
+        if(valor is Variavel valorVariavel)
+        {
+            if(valorVariavel.Valor is Funcao func)
+            {
+                return func;
+            }
             return ParaLibraObjeto(valorVariavel.Valor);
-        else if(valor is int valorInt)
+        }
+            
+        if(valor is int valorInt)
             return new LibraInt(valorInt);
-        else if(valor is double valorDouble)
+        if(valor is double valorDouble)
             return new LibraReal(valorDouble);
-        else if(valor is string valorString)
+        if(valor is string valorString)
             return new LibraTexto(valorString);
-        else if(valor is LibraObjeto[] valorVetor)
+        if(valor is LibraObjeto[] valorVetor)
             return new LibraVetor(valorVetor);
-
-        Ambiente.Msg($"Tipo: {valor.GetType()}");
+        
         throw new ErroAcessoNulo($" Causa: Impossível converter {valor.ToString()} para Objeto");
     }
 

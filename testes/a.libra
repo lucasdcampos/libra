@@ -1,2 +1,7 @@
-// ...
-exibir("a")
+funcao soma(a, b)
+    retornar a+b
+fim
+
+var teste = soma
+
+exibir(teste(1,2))

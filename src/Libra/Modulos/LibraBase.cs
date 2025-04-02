@@ -22,7 +22,7 @@ public class LibraBase : IModulo
 
         _programa.PilhaEscopos.DefinirVariavel("sair", new FuncaoNativa(sair));
         _programa.PilhaEscopos.DefinirVariavel("exibir", new FuncaoNativa(exibir));
-        _programa.PilhaEscopos.DefinirVariavel("obterTipo", new FuncaoNativa(tipo));
+        _programa.PilhaEscopos.DefinirVariavel("tipo", new FuncaoNativa(tipo));
         _programa.PilhaEscopos.DefinirVariavel("garantir", new FuncaoNativa(garantir));
         _programa.PilhaEscopos.DefinirVariavel("tamanho", new FuncaoNativa(tamanho));
         _programa.PilhaEscopos.DefinirVariavel("entrada", new FuncaoNativa(entrada));
@@ -315,8 +315,8 @@ public class LibraBase : IModulo
     public object tipo(object[] args)
     {
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
-
-        return LibraObjeto.ParaLibraObjeto(args[0]).ToString();
+        
+        return LibraObjeto.ParaLibraObjeto(args[0]).Nome;
     }
 
     public object erro(object[] args)
