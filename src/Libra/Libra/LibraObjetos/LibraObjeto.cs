@@ -30,8 +30,10 @@ public class LibraObjeto
 
     internal void Construtor(string ident)
     {
-        if(Propriedades.ContainsKey(Nome) && Propriedades[Nome] is Funcao)
+        if(Propriedades.ContainsKey(Nome) && Propriedades[Nome].Valor is Funcao)
+        {
             ChamarMetodo(new ExpressaoChamadaFuncao(Interpretador.LocalAtual, Nome, _argsConstrutor), ident);
+        }
     }
 
     protected void DeclararPropriedade(Variavel prop)

@@ -239,27 +239,23 @@ public class Interpretador
 
     public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
-        /*
-        if(!_programa.PilhaEscopos.(nome))
-            throw new ErroFuncaoNaoDefinida(nome, _local);
+        // TODO: Pode dar erro!
+        Classe tipo = (Classe)_programa.ObterVariavel(nome).Valor;
 
-        var tipo = _programa.ObterVariavel(nome);
-
+        // TODO: Arrumar, nunca vi um código tão porcaria em toda a minha vida
         List<Variavel> vars = new();
         foreach(var i in tipo.Variaveis)
         {
             vars.Add(new Variavel(i.Identificador, InterpretarExpressao(i.Expressao), i.Constante, i.TipoVar, i.TipoModificavel));
         }
-        List<Funcao> funcs = new();
         foreach(var i in tipo.Funcoes)
         {
-            funcs.Add(new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno));
+            vars.Add(new Variavel(i.Identificador, new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno)));
         }
 
-        var obj = new LibraObjeto(nome, vars.ToArray(), funcs.ToArray(), expressoes);
+        var obj = new LibraObjeto(nome, vars.ToArray(), expressoes);
         
-        return obj;*/
-        return null;
+        return obj;
     }
 
     public LibraObjeto ExecutarFuncao(Funcao funcao, Expressao[] argumentos)
@@ -315,30 +311,18 @@ public class Interpretador
     {
         var argumentos = chamada.Argumentos;
 
-        // Verificando se estamos chamando uma nova instancia de uma classe
-        /*if(_programa.ClasseExiste(chamada.Identificador))
-        {
+        var v = _programa.ObterVariavel(chamada.Identificador);
+
+        if(v.Valor is Classe)
             return InterpretarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
-        }*/
 
-        /*if (!_programa.FuncaoExiste(chamada.Identificador))
-        {
-            throw new ErroFuncaoNaoDefinida(chamada.Identificador, _local);
-        }*/
-
-        var funcao = _programa.ObterVariavel(chamada.Identificador);
-
-        return ExecutarFuncao((Funcao)funcao.Valor, chamada.Argumentos);
+        return ExecutarFuncao((Funcao)v.Valor, chamada.Argumentos);
     }
 
+    // TODO: É isso?
     public void InterpretarInstrucaoClasse(DefinicaoTipo i)
     {
-        /*if(_programa.ClasseExiste(i.Identificador))
-            throw new Erro($"Classe já existe: {i.Identificador}", _local);
-
-       _programa.Classes.Add(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
-       */
-       throw new Erro("Funcionalidade não implementada: Interpretador.cs:341");
+       _programa.PilhaEscopos.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
     }
 
     public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)

@@ -1,7 +1,9 @@
-funcao soma(a, b)
-    retornar a+b
+classe Pessoa
+    var nome = ""
+    funcao Pessoa(auto, nome)
+        auto.nome = nome
+    fim
 fim
 
-var teste = soma
-
-exibir(teste(1,2))
+const p = Pessoa("João")
+exibir(p.nome)

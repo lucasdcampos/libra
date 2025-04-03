@@ -20,6 +20,8 @@ public class LibraBase : IModulo
     {
         _programa = programa;
 
+        _programa.PilhaEscopos.DefinirVariavel("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
+        
         _programa.PilhaEscopos.DefinirVariavel("sair", new FuncaoNativa(sair));
         _programa.PilhaEscopos.DefinirVariavel("exibir", new FuncaoNativa(exibir));
         _programa.PilhaEscopos.DefinirVariavel("tipo", new FuncaoNativa(tipo));
