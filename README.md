@@ -48,7 +48,7 @@ enquanto escolha != num faca
     fim
 
     exibir("Tente denovo:")
-    escolha = int(entrada() // Pedindo outro número ao usuário
+    escolha = int(entrada()) // Pedindo outro número ao usuário
 fim
 
 // Loop terminou, o usuário acertou o número
