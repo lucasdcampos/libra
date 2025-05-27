@@ -62,7 +62,7 @@ public class LibraObjeto
     public LibraObjeto AcessarPropriedade(string prop)
     {
         if(!Propriedades.ContainsKey(prop))
-            throw new ErroVariavelNaoDeclarada(prop);
+            throw new ErroVariavelNaoDeclarada($"{Nome}.{prop}", Interpretador.LocalAtual);
         return Propriedades[prop].Valor;
     }
 

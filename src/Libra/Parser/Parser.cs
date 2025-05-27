@@ -10,6 +10,7 @@ public class Parser
 
     private static readonly Dictionary<TokenTipo, int> _precedenciaOperadores = new()
     {
+        { TokenTipo.Ponto, 999 }, // sempre deve ser o primeiro (a.b)
         { TokenTipo.OperadorPot, 4 },
         { TokenTipo.OperadorMult, 3 },
         { TokenTipo.OperadorDiv, 3 },
@@ -85,12 +86,22 @@ public class Parser
             case TokenTipo.Identificador:
                 if(Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return ParseExpressaoChamadaFuncao();
-                else if(Proximo(1).Tipo == TokenTipo.Ponto)
-                    return ParseAtribProp();
                 else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
                     return ParseAtribIndice();
                 else
                     return ParseAtribVar();
+        }
+
+        var expr = ParseExpressao();
+
+        // TODO: Implementar a.b.c...n()
+        if(expr != null && expr is ExpressaoBinaria bin && bin.Operador.Tipo == TokenTipo.Ponto)
+        {
+            // a.b.c...n = expr
+            ConsumirToken(TokenTipo.OperadorDefinir);
+            var ident = ConsumirToken(TokenTipo.Identificador);
+
+            //return new AtribuicaoPropriedade();
         }
 
         throw new Erro($"Instrução inválida {atual}", _local);
@@ -426,7 +437,7 @@ public class Parser
                 {
                     return ParseExpressaoAcessoVetor();
                 }
-                else if(Proximo(1).Tipo == TokenTipo.Ponto)
+                /*else if(Proximo(1).Tipo == TokenTipo.Ponto)
                 {
                     var ident = ConsumirToken().Valor.ToString();
                     Passar();
@@ -438,7 +449,7 @@ public class Parser
                         return new ExpressaoChamadaMetodo(_local, ident, new ExpressaoChamadaFuncao(_local, prop, args));
                     }
                     return new ExpressaoPropriedade(_local, ident, prop);
-                }
+                }*/
                 return new ExpressaoVariavel(_local, ConsumirToken());
 
             case TokenTipo.AbrirParen:

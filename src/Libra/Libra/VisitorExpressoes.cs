@@ -17,6 +17,9 @@ public class VisitorExpressoes : IVisitor
     
     public LibraObjeto VisitarExpressaoBinaria(ExpressaoBinaria expressao)
     {
+        if(expressao.Operador.Tipo == TokenTipo.Ponto)
+            return VisitarExprProp(expressao);
+
         var a = _interpretador.InterpretarExpressao(expressao.Esquerda);
         var b = _interpretador.InterpretarExpressao(expressao.Direita);
 
@@ -38,6 +41,15 @@ public class VisitorExpressoes : IVisitor
             TokenTipo.OperadorOu => a.Ou(b),
             _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}", expressao.Operador.Local)
         };
+    }
+
+    private LibraObjeto VisitarExprProp(ExpressaoBinaria expressao)
+    {
+        if(expressao.Direita is not ExpressaoVariavel dir)
+            throw new Erro($"Esperado Identificador, recebido {expressao.Direita.TipoExpr}", Interpretador.LocalAtual);
+        
+        var esq = _interpretador.InterpretarExpressao(expressao.Esquerda);
+        return esq.AcessarPropriedade(dir.Identificador.Valor.ToString());
     }
 
     public LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao)

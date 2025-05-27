@@ -1,9 +1,0 @@
-classe Pessoa
-    var nome = ""
-    funcao Pessoa(auto, nome)
-        auto.nome = nome
-    fim
-fim
-
-const p = Pessoa("João")
-exibir(p.nome)

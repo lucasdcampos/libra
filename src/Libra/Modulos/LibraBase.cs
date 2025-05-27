@@ -21,7 +21,7 @@ public class LibraBase : IModulo
         _programa = programa;
 
         _programa.PilhaEscopos.DefinirVariavel("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
-        
+
         _programa.PilhaEscopos.DefinirVariavel("sair", new FuncaoNativa(sair));
         _programa.PilhaEscopos.DefinirVariavel("exibir", new FuncaoNativa(exibir));
         _programa.PilhaEscopos.DefinirVariavel("tipo", new FuncaoNativa(tipo));
@@ -45,7 +45,6 @@ public class LibraBase : IModulo
         _programa.PilhaEscopos.DefinirVariavel("registrarCSharp", new FuncaoNativa(registrarCSharp));
         _programa.PilhaEscopos.DefinirVariavel("registrardll", new FuncaoNativa(registrardll));
         _programa.PilhaEscopos.DefinirVariavel("libra", new FuncaoNativa(libra));
-
 
         _programa.PilhaEscopos.DefinirVariavel("NL", new LibraTexto("\n"), true);
         _programa.PilhaEscopos.DefinirVariavel("FDA", new LibraTexto("\0"), true);
