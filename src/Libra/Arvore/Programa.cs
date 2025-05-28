@@ -1,6 +1,6 @@
 namespace Libra.Arvore
 {
-    public class Programa
+    public class Programa : Instrucao
     {
         public Programa(Instrucao[] instrucoes)
         {
@@ -10,7 +10,7 @@ namespace Libra.Arvore
 
         public string Saida { get; internal set; }
         public int CodigoSaida { get; private set; }
-        public PilhaDeEscopos PilhaEscopos { get; private set;}
+        public PilhaDeEscopos PilhaEscopos { get; private set; }
         public Instrucao[] Instrucoes;
 
         public Variavel ObterVariavel(string identificador)
@@ -21,6 +21,11 @@ namespace Libra.Arvore
         public void Sair(int codigo)
         {
             CodigoSaida = codigo;
+        }
+
+        public override object Aceitar(IVisitor visitor)
+        {
+            throw new NotImplementedException();
         }
     }
 }
