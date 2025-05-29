@@ -5,20 +5,17 @@ namespace Libra.Modulos;
 
 public class LibraMatematica : IModulo
 {
-    private Programa _programa;
     private Random random = new Random();
 
-    public void RegistrarFuncoes(Programa programa)
+    public void RegistrarFuncoes(Programa programa = null)
     {
-        _programa = programa;
-
-        _programa.PilhaEscopos.DefinirVariavel("__csraiz__", new FuncaoNativa(__csraiz__));
-        _programa.PilhaEscopos.DefinirVariavel("__csraizq__", new FuncaoNativa(__csraizq__));
-        _programa.PilhaEscopos.DefinirVariavel("__cssen__", new FuncaoNativa(__cssen__));
-        _programa.PilhaEscopos.DefinirVariavel("__cscos__", new FuncaoNativa(__cscos__));
-        _programa.PilhaEscopos.DefinirVariavel("__cstan__", new FuncaoNativa(__cstan__));
-        _programa.PilhaEscopos.DefinirVariavel("__csrand__", new FuncaoNativa(__csrand__));
-        _programa.PilhaEscopos.DefinirVariavel("__cslog__", new FuncaoNativa(__cslog__));
+        Ambiente.DefinirGlobal("__csraiz__", new FuncaoNativa(__csraiz__));
+        Ambiente.DefinirGlobal("__csraizq__", new FuncaoNativa(__csraizq__));
+        Ambiente.DefinirGlobal("__cssen__", new FuncaoNativa(__cssen__));
+        Ambiente.DefinirGlobal("__cscos__", new FuncaoNativa(__cscos__));
+        Ambiente.DefinirGlobal("__cstan__", new FuncaoNativa(__cstan__));
+        Ambiente.DefinirGlobal("__csrand__", new FuncaoNativa(__csrand__));
+        Ambiente.DefinirGlobal("__cslog__", new FuncaoNativa(__cslog__));
     }
 
     public static object __csraizq__(object[] args)

@@ -16,38 +16,36 @@ public class LibraBase : IModulo
     public  bool DEBUG = false;
     private Programa _programa;
 
-    public void RegistrarFuncoes(Programa programa)
+    public void RegistrarFuncoes(Programa programa = null)
     {
-        _programa = programa;
+        Ambiente.DefinirGlobal("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
 
-        _programa.PilhaEscopos.DefinirVariavel("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
-
-        _programa.PilhaEscopos.DefinirVariavel("sair", new FuncaoNativa(sair));
-        _programa.PilhaEscopos.DefinirVariavel("exibir", new FuncaoNativa(exibir));
-        _programa.PilhaEscopos.DefinirVariavel("tipo", new FuncaoNativa(tipo));
-        _programa.PilhaEscopos.DefinirVariavel("garantir", new FuncaoNativa(garantir));
-        _programa.PilhaEscopos.DefinirVariavel("tamanho", new FuncaoNativa(tamanho));
-        _programa.PilhaEscopos.DefinirVariavel("entrada", new FuncaoNativa(entrada));
-        _programa.PilhaEscopos.DefinirVariavel("concat", new FuncaoNativa(concat));
-        _programa.PilhaEscopos.DefinirVariavel("pausar", new FuncaoNativa(pausar));
-        _programa.PilhaEscopos.DefinirVariavel("real", new FuncaoNativa(real));
-        _programa.PilhaEscopos.DefinirVariavel("int", new FuncaoNativa(_int));
-        _programa.PilhaEscopos.DefinirVariavel("texto", new FuncaoNativa(texto));
-        _programa.PilhaEscopos.DefinirVariavel("tentarReal", new FuncaoNativa(tentarReal));
-        _programa.PilhaEscopos.DefinirVariavel("tentarInt", new FuncaoNativa(tentarInt));
-        _programa.PilhaEscopos.DefinirVariavel("bytes", new FuncaoNativa(bytes));
-        _programa.PilhaEscopos.DefinirVariavel("erro", new FuncaoNativa(erro));
+        Ambiente.DefinirGlobal("sair", new FuncaoNativa(sair));
+        Ambiente.DefinirGlobal("exibir", new FuncaoNativa(exibir));
+        Ambiente.DefinirGlobal("tipo", new FuncaoNativa(tipo));
+        Ambiente.DefinirGlobal("garantir", new FuncaoNativa(garantir));
+        Ambiente.DefinirGlobal("tamanho", new FuncaoNativa(tamanho));
+        Ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
+        Ambiente.DefinirGlobal("concat", new FuncaoNativa(concat));
+        Ambiente.DefinirGlobal("pausar", new FuncaoNativa(pausar));
+        Ambiente.DefinirGlobal("real", new FuncaoNativa(real));
+        Ambiente.DefinirGlobal("int", new FuncaoNativa(_int));
+        Ambiente.DefinirGlobal("texto", new FuncaoNativa(texto));
+        Ambiente.DefinirGlobal("tentarReal", new FuncaoNativa(tentarReal));
+        Ambiente.DefinirGlobal("tentarInt", new FuncaoNativa(tentarInt));
+        Ambiente.DefinirGlobal("bytes", new FuncaoNativa(bytes));
+        Ambiente.DefinirGlobal("erro", new FuncaoNativa(erro));
 
         // Impedir uso de funções potencialmente perigosas
         if (Ambiente.AmbienteSeguro)
             return;
 
-        _programa.PilhaEscopos.DefinirVariavel("registrarCSharp", new FuncaoNativa(registrarCSharp));
-        _programa.PilhaEscopos.DefinirVariavel("registrardll", new FuncaoNativa(registrardll));
-        _programa.PilhaEscopos.DefinirVariavel("libra", new FuncaoNativa(libra));
+        Ambiente.DefinirGlobal("registrarCSharp", new FuncaoNativa(registrarCSharp));
+        Ambiente.DefinirGlobal("registrardll", new FuncaoNativa(registrardll));
+        Ambiente.DefinirGlobal("libra", new FuncaoNativa(libra));
 
-        _programa.PilhaEscopos.DefinirVariavel("NL", new LibraTexto("\n"), true);
-        _programa.PilhaEscopos.DefinirVariavel("FDA", new LibraTexto("\0"), true);
+        Ambiente.DefinirGlobal("NL", new LibraTexto("\n"));
+        Ambiente.DefinirGlobal("FDA", new LibraTexto("\0"));
     }
 
     public object __ativarmodulo__(object[] args)
@@ -105,7 +103,6 @@ public class LibraBase : IModulo
         {
             int.TryParse(args[0].ToString(), out int resultado);
             codigo = resultado;
-            _programa.Sair(codigo);
         }
 
         Ambiente.Encerrar(codigo);
@@ -133,7 +130,7 @@ public class LibraBase : IModulo
             {
                 string nomeFuncao = $"{tipo.Name}_{metodo.Name}";
                 Func<object[], object> funcao = args => metodo.Invoke(null, args);
-                _programa.PilhaEscopos.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcao));
+                Ambiente.DefinirGlobal(nomeFuncao, new FuncaoNativa(funcao));
             }
         }
 

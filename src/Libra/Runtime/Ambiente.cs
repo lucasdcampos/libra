@@ -19,13 +19,11 @@ public class Ambiente
     {
         _ambienteAtual = new Ambiente();
         _ambienteAtual._pilha = new PilhaDeEscopos();
-        if (logger == null)
-            _ambienteAtual._logger = new ConsoleLogger();
-        else
-            _ambienteAtual._logger = logger;
+        _ambienteAtual._logger = logger ?? new ConsoleLogger();
 
         _ambienteAtual._ambienteSeguro = seguro;
 
+        new LibraBase().RegistrarFuncoes();
         return _ambienteAtual;
     }
 
