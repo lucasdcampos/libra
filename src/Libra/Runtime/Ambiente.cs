@@ -15,16 +15,18 @@ public class Ambiente
 
     private Ambiente() { }
 
-    public static void ConfigurarAmbiente(ILogger logger, bool seguro)
+    public static Ambiente ConfigurarAmbiente(ILogger logger, bool seguro)
     {
         _ambienteAtual = new Ambiente();
 
-        if(logger == null)
+        if (logger == null)
             _ambienteAtual._logger = new ConsoleLogger();
         else
             _ambienteAtual._logger = logger;
-        
+
         _ambienteAtual._ambienteSeguro = seguro;
+
+        return _ambienteAtual;
     }
 
     public static void SetarPrograma(Programa programa)
@@ -33,9 +35,34 @@ public class Ambiente
         new LibraBase().RegistrarFuncoes(programa);
     }
 
+    public static void DefinirGlobal(string identificador, object valor)
+    {
+        if (_ambienteAtual._programaAtual == null)
+            ConfigurarAmbiente(null, false);
+
+        _ambienteAtual._programaAtual.PilhaEscopos.DefinirVariavel(identificador, LibraObjeto.ParaLibraObjeto(valor));
+    }
+
+    public static object ObterGlobal(string identificador)
+    {
+        if (_ambienteAtual._programaAtual == null)
+            ConfigurarAmbiente(null, false);
+
+        var variavel = _ambienteAtual._programaAtual.PilhaEscopos.ObterVariavel(identificador);
+        return variavel?.Valor ?? null;
+    }
+
+    public static void RegistrarFuncaoNativa(string nomeFuncao, Func<object[], object> funcaoCSharp)
+    {
+        if (_ambienteAtual._programaAtual == null)
+            ConfigurarAmbiente(null, false);
+
+        _ambienteAtual._programaAtual.PilhaEscopos.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcaoCSharp, nomeFuncao));
+    }
+
     public static void Msg(string msg, string final = "\n")
     {
-        if(_ambienteAtual == null)
+        if (_ambienteAtual == null)
             ConfigurarAmbiente(null, false);
 
         var loggerReal = Logger == null ? new ConsoleLogger() : Logger;

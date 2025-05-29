@@ -1,5 +1,7 @@
 using Libra.Arvore;
+using Libra.Runtime;
 using Libra;
+
 public class VisitorExpressoes : IVisitor
 {
     private Interpretador _interpretador;

@@ -1,14 +1,10 @@
 ﻿using Libra;
+using Libra.Api;
 using Libra.Arvore;
 
 internal static class Program
 {
-    private static bool _carregarBibliotecas = true;
-    private static readonly string _bibliotecas = 
-@"importar matematica
-importar vetores
-";
-
+    private static bool _vanilla = false;
     private static bool _avisos = false;
     private static bool _modoRigido = false;
     private static bool _modoSeguro = false;
@@ -35,7 +31,7 @@ importar vetores
                         break;
 
                     case "vanilla":
-                        _carregarBibliotecas = false;
+                        _vanilla = true;
                         break;
 
                     default:
@@ -53,13 +49,6 @@ importar vetores
         Console.WriteLine($"Bem-vindo à Libra {LibraUtil.VersaoAtual()}");
         Console.WriteLine("Digite \"ajuda\", \"licenca\" ou uma instrução.");
 
-        var ASTBiblioteca = new Instrucao[0];
-        #if DEBUG
-        #else
-            if(_carregarBibliotecas)
-                ASTBiblioteca = GerarAst(_bibliotecas);
-        #endif
-
         while (true)
         {
             Console.Write(">>> ");
@@ -70,7 +59,6 @@ importar vetores
                 Console.WriteLine("Ocorreu um erro, não foi possível ler do terminal.");
                 Console.WriteLine("Dica: Se você estiver rodando via Docker, use a flag -it.");
             }
-                
 
             if(linha.EndsWith(".libra"))
             {
@@ -83,30 +71,14 @@ importar vetores
 
             try
             {
-                var instrucoes = GerarAst($"exibir({linha})").ToList<Instrucao>();
-                if(ASTBiblioteca != null && ASTBiblioteca.Length != 0)
-                    instrucoes.InsertRange(0, ASTBiblioteca);
-                
-                new Interpretador().ExecutarPrograma(
-                    new Programa(instrucoes.ToArray()),
-                    false,
-                    new ConsoleLogger(),
-                    true
-                );
+                var motor = new MotorLibra();
+                motor.Executar($"exibir({linha})");
             }
             catch (Exception e)
             {
                 Erro.MensagemBug(e);
             }
         }
-    }
-
-    private static Instrucao[] CarregarBibliotecas()
-    {
-        if (!_carregarBibliotecas)
-            return Array.Empty<Instrucao>();
-
-        return GerarAst(_bibliotecas);
     }
 
     private static Instrucao[] GerarAst(string codigo)
@@ -137,7 +109,8 @@ importar vetores
         var codigoFonte = File.ReadAllText(arquivoInicial);
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        new Interpretador(flags).Interpretar(codigoFonte, false, new ConsoleLogger(), false, arquivoInicial);
+        var motor = new MotorLibra();
+        motor.Executar(codigoFonte);
 
         stopwatch.Stop();
         Console.WriteLine($"Tempo de execução: {stopwatch.ElapsedMilliseconds} ms");

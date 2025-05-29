@@ -1,4 +1,6 @@
-namespace Libra.Arvore;
+using Libra.Arvore;
+
+namespace Libra.Runtime;
 
 public interface IVisitor
 {

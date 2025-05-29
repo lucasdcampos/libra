@@ -57,26 +57,6 @@ public class Interpretador
         _local = new LocalToken();
     }
     
-    public int Interpretar(string codigo, bool ambienteSeguro = true, ILogger logger = null, bool shell = false, string arquivo = "")
-    {
-        try
-        {
-            var tokenizador = new Tokenizador();
-            var tokens = tokenizador.Tokenizar(codigo, arquivo);
-            var parser = new Parser();
-            var programa = parser.Parse(tokens.ToArray());
-
-            programa.PilhaEscopos.DefinirVariavel("__ambienteSeguro__", new LibraInt(ambienteSeguro), true);
-
-            return ExecutarPrograma(programa, ambienteSeguro, logger, shell);
-        }
-        catch(Exception e)
-        {
-            Erro.MensagemBug(e);
-            return 1;
-        }
-    }
-
     public int ExecutarPrograma(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
     {
         Resetar();

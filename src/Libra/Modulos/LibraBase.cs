@@ -54,10 +54,10 @@ public class LibraBase : IModulo
     {
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
-        if(args[0] is not string str)
+        if (args[0] is not string str)
             throw new ErroAcessoNulo(" Esperava Texto", Interpretador.LocalAtual);
-        
-        switch(str)
+
+        switch (str)
         {
             case "matematica":
                 new LibraMatematica().RegistrarFuncoes(_programa);
@@ -67,15 +67,17 @@ public class LibraBase : IModulo
         return null;
     }
 
+    // TODO: Implementar
     public object libra(object[] args)
     {
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
-        if(args[0] is not string)
+        if (args[0] is not string)
             throw new Erro("Esperado um texto");
 
-        return new Interpretador().Interpretar(args[0].ToString());
+        //return new Interpretador().Interpretar(args[0].ToString());
 
+        return null;
     }
 
     public object garantir(object[] args)

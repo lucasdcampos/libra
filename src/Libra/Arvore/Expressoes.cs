@@ -1,3 +1,6 @@
+using System;
+using Libra.Runtime;
+
 namespace Libra.Arvore
 {
     public enum TipoExpressao
@@ -16,7 +19,7 @@ namespace Libra.Arvore
 
     public abstract class Expressao : Instrucao
     {
-        public TipoExpressao TipoExpr { get; protected set ;}
+        public TipoExpressao TipoExpr { get; protected set; }
     }
 
     public class ExpressaoUnaria : Expressao
@@ -32,9 +35,7 @@ namespace Libra.Arvore
 
             TipoExpr = TipoExpressao.ExpressaoUnaria;
         }
-
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoUnaria(this);
-
     }
 
     public class ExpressaoLiteral : Expressao
