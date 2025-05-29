@@ -1,6 +1,9 @@
 var i = 0
-enquanto i < 3 repetir
-    exibir("i: " + i)
+enquanto i < 10 repetir
+    // Mostrando apenas pares
+    se i % 2 == 0 entao
+        exibir(i)
+    fim
     i = i + 1
 fim
 

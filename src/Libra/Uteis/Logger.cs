@@ -16,7 +16,7 @@ namespace Libra
         public void Msg(string mensagem, string final = "\n")
         {
             if(string.IsNullOrEmpty(mensagem))
-                mensagem = "";
+                mensagem = "Nulo";
             
             if(mensagem.StartsWith("Aviso: "))
                 Console.ForegroundColor = ConsoleColor.Yellow;
