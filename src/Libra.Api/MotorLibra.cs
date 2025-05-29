@@ -9,6 +9,7 @@ public class MotorLibra
     private Tokenizador _tokenizador = new Tokenizador();
     private Parser _parser = new Parser();
     private Interpretador? _interpretador;
+    private Compilador? _compilador;
     private Ambiente? _ambiente;
 
     /// <summary>
@@ -79,20 +80,25 @@ public class MotorLibra
     /// <returns>Resultado da execução, se houver; caso contrário, null.</returns>
     public object? Executar(string codigo)
     {
-        if (_opcoes.ModoExecucao == ModoExecucao.Interpretar)
-        {
-            _interpretador = new Interpretador();
-        }
-        else
-        {
-            Console.WriteLine("Modo de execução não suportado. Apenas 'Interpretar' está implementado.");
-            return null;
-        }
         try
         {
             var tokens = _tokenizador.Tokenizar(codigo);
             var programa = _parser.Parse(tokens.ToArray());
-            _interpretador.ExecutarPrograma(programa);
+
+            switch (_opcoes.ModoExecucao)
+            {
+                case ModoExecucao.Interpretar:
+                    _interpretador = new Interpretador();
+                    _interpretador.ExecutarPrograma(programa);
+                    break;
+                case ModoExecucao.Compilar:
+                    _compilador = new Compilador();
+                    var bytecode = _compilador.Compilar(programa);
+                    Console.WriteLine("Bytecode compilado: " + string.Join(", ", bytecode));
+                    break;
+                default:
+                    throw new NotSupportedException($"Modo de execução {_opcoes.ModoExecucao} não suportado.");
+            }
         }
         catch (Exception ex)
         {

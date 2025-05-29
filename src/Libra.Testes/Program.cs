@@ -1,9 +1,13 @@
 ﻿using Libra.Api;
 
-var motor = new MotorLibra();
+var motor = new MotorLibra(new OpcoesMotorLibra
+{
+    NivelDebug = 0,
+    ModoExecucao = ModoExecucao.Compilar
+});
 
-motor.DefinirGlobal("x", 40);
+var saida = motor.Executar("42");
 
-var saida = motor.Executar("x + 2");
-
-Console.WriteLine(saida); // Deve imprimir 42
+// DEVE COMPILAR:
+// EMPILHAR, 42
+// 1, 42
