@@ -41,3 +41,5 @@ garantir(fatorial(5) == 120)
 garantir(potencia(2, 10) == 1024)
 garantir(soma_naturais(5) == 15)
 garantir(mdc(48, 18) == 6)
+
+exibir("Nenhum problema encontrado com recursividade.")
