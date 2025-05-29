@@ -1,5 +1,5 @@
 var n = 0
-enquanto n < 100000 faca
+enquanto n < 100000 repetir
     exibir(n)
     n = n+1
 fim

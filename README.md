@@ -40,7 +40,7 @@ exibir("Digite um número entre 0 e 100:)
 var escolha = int(entrada()) // Pedir um número ao usuário
 
 // Enquanto o usuário não acertar o número
-enquanto escolha != num faca
+enquanto escolha != num repetir
     se escolha > num entao
         exibir("Número maior que o aleatório!")
     senao se escolha < num entao

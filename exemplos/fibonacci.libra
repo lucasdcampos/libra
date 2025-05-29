@@ -4,7 +4,7 @@ funcao fibonacci(n: Int)
     var b = 1
     var contador = 0
     var temp = 0
-    enquanto contador < n faca
+    enquanto contador < n repetir
         exibir(a)
         temp = a
         a = b

@@ -7,7 +7,7 @@ var num: Int = int(aleatorio(MIN, MAX))
 exibir("> Digite um número (" + texto(MIN) + ", " + texto(MAX) + "):", " ")
 var escolha: Int = int(entrada())
 
-enquanto escolha != num faca
+enquanto escolha != num repetir
     se escolha > num entao
         exibir("Número maior que o aleatório!")
     fim

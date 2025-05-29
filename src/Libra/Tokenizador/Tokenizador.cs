@@ -22,7 +22,7 @@ public class Tokenizador
         { "se", TokenTipo.Se },
         { "senao", TokenTipo.Senao },
         { "enquanto", TokenTipo.Enquanto },
-        { "faca", TokenTipo.Faca },
+        { "repetir", TokenTipo.Repetir },
         { "romper", TokenTipo.Romper },
         { "continuar", TokenTipo.Continuar },
         { "retornar", TokenTipo.Retornar },

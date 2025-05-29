@@ -51,7 +51,7 @@ fim
 funcao fatorial(n: Int) -> Real
     var resultado = 1
     var contador = n
-    enquanto contador > 0 faca
+    enquanto contador > 0 repetir
         resultado = resultado * contador
         contador = contador - 1
     fim

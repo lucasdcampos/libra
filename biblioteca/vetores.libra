@@ -7,7 +7,7 @@ funcao mostrarVetor(vetor: Vetor)
     var n = 0
     exibir("{ ", "")
 
-    enquanto n < tamanho(vetor) faca
+    enquanto n < tamanho(vetor) repetir
         exibir(vetor[n], " ")
         n = n + 1
     fim
@@ -20,7 +20,7 @@ funcao incluir(vetor: Vetor, elemento: Objeto) -> Vetor
     var temp = [tamanho(vetor)+1]
     var n = 0
 
-    enquanto n < tamanho(vetor) faca
+    enquanto n < tamanho(vetor) repetir
         temp[n] = vetor[n]
         n = n+1
     fim
@@ -35,7 +35,7 @@ funcao remover(vetor: Vetor, indice: Int) -> Vetor
     var n = 0
     var m = 0
 
-    enquanto n < tamanho(vetor) faca
+    enquanto n < tamanho(vetor) repetir
         se n != indice entao
             temp[m] = vetor[n]
             m = m + 1
@@ -57,7 +57,7 @@ funcao adicionarInicio(vetor: Vetor, elemento: Objeto) -> Vetor
     temp[0] = elemento
     var n = 0
 
-    enquanto n < tamanho(vetor) faca
+    enquanto n < tamanho(vetor) repetir
         temp[n + 1] = vetor[n]
         n = n + 1
     fim
@@ -70,7 +70,7 @@ funcao reverter(vetor: Vetor) -> Vetor
     var temp = [tamanho(vetor)]
     var n = 0
     
-    enquanto n < tamanho(vetor) faca
+    enquanto n < tamanho(vetor) repetir
         temp[n] = vetor[(tamanho(vetor) - 1) - n]
         n = n + 1
     fim
@@ -87,7 +87,7 @@ funcao maiorElemento(vetor: Vetor)
     var maior = vetor[0]
     var n = 1
 
-    enquanto n < tamanho(vetor) faca
+    enquanto n < tamanho(vetor) repetir
         se vetor[n] > maior entao
             maior = vetor[n]
         fim
@@ -99,9 +99,9 @@ fim
 
 funcao ordenar(vetor: Vetor) -> Vetor
     var i = 0
-    enquanto i < tamanho(vetor) faca
+    enquanto i < tamanho(vetor) repetir
         var j = 0
-        enquanto j < tamanho(vetor) - 1 faca
+        enquanto j < tamanho(vetor) - 1 repetir
             se vetor[j] > vetor[j + 1] entao
                 var temp = vetor[j]
                 vetor[j] = vetor[j + 1]

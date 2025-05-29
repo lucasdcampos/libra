@@ -6,7 +6,7 @@ funcao media(dados: Vetor<Real>) -> Real
     var total: Real
     var i: Int
     const qtd = tamanho(dados)
-    enquanto i < qtd faca
+    enquanto i < qtd repetir
         total = total + dados[i]
         i = i+1
     fim

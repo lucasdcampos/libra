@@ -70,12 +70,12 @@ fim
 
 exibir("Testando Loops")
 var n = 0
-enquanto n < 3 faca
+enquanto n < 3 repetir
     n = n + 1
 fim
 n = 0
 
-enquanto n < 3 faca
+enquanto n < 3 repetir
     se n == 1 entao
         romper
     fim

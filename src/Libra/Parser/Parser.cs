@@ -336,7 +336,7 @@ public class Parser
         ConsumirToken(TokenTipo.Enquanto);
 
         var expressao = ParseExpressao();
-        ConsumirToken(TokenTipo.Faca);
+        ConsumirToken(TokenTipo.Repetir);
 
         var instrucoes = ParseInstrucoes();
 

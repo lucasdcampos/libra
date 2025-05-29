@@ -1,0 +1,6 @@
+var i = 0
+enquanto i < 3 repetir
+    exibir("i: " + i)
+    i = i + 1
+fim
+

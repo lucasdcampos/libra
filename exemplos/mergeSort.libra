@@ -2,7 +2,7 @@
 funcao mergeSort(primeiro: Vetor, segundo: Vetor)
     var i = 0
     var j = 0
-    enquanto (i < tamanho(primeiro)) e (j < tamanho(segundo)) faca
+    enquanto (i < tamanho(primeiro)) e (j < tamanho(segundo)) repetir
         se primeiro[i] < segundo[j] entao
             exibir(primeiro[i], " ")
             i = i + 1
@@ -12,12 +12,12 @@ funcao mergeSort(primeiro: Vetor, segundo: Vetor)
         fim
     fim
 
-    enquanto i < tamanho(primeiro) faca
+    enquanto i < tamanho(primeiro) repetir
         exibir(primeiro[i], " ")
         i = i + 1
     fim
 
-    enquanto j < tamanho(segundo) faca
+    enquanto j < tamanho(segundo) repetir
         exibir(segundo[j], " ")
         j = j + 1
     fim

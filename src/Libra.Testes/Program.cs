@@ -6,7 +6,7 @@ var motor = new MotorLibra(new OpcoesMotorLibra
     ModoExecucao = ModoExecucao.Compilar
 });
 
-var saida = motor.Executar("42");
+var saida = motor.Executar("1+2*3");
 
 // DEVE COMPILAR:
 // EMPILHAR, 42

@@ -29,7 +29,7 @@ O comando `enquanto` permite repetir um bloco de código enquanto uma condição
 **Exemplo:**
 ```js
 var contador = 0
-enquanto contador < 5 faca
+enquanto contador < 5 repetir
     exibir(contador)
     contador = contador + 1
 fim
@@ -37,7 +37,7 @@ fim
 ```
 **Descrição:**
 - expressao: Uma condição que é avaliada antes de cada iteração. Se for falso, o laço é encerrado.
-- faca: Marca o início do bloco de instruções a ser repetido.
+- repetir: Marca o início do bloco de instruções a ser repetido.
 - fim: Indica o final do laço.
 
 Próximo Capítulo: [Funções](funcoes.md)

@@ -1,6 +1,6 @@
 // Ultimo teste: 508872ms (8 minutos e meio)
 // Python: 37493ms (37 segundos)
 var n = 0
-enquanto n < 1_000_000_000 faca
+enquanto n < 1_000_000_000 repetir
     n = n+1
 fim

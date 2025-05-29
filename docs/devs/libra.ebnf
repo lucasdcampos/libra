@@ -30,7 +30,7 @@ inst_se                 ::= "se" expr "entao" instrucao* (senao_se*)? "fim"
 
 senao_se                ::= "senao" "se" expr "entao" instrucao*
 
-inst_enquanto           ::= "enquanto" expr "faca" bloco
+inst_enquanto           ::= "enquanto" expr "repetir" bloco
 
 expr                    ::= expr_lit | expr_var | expr_indice | expr_chamada | expr_unaria | expr_bin | construir_vetor
 

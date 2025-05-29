@@ -1,7 +1,7 @@
 funcao buscaBinaria(vetor: Vetor, alvo: Int)
     var inicio = 0
     var fimVetor = tamanho(vetor) - 1
-    enquanto inicio <= fimVetor faca
+    enquanto inicio <= fimVetor repetir
         var meio = int((inicio + fimVetor))
         se vetor[meio] == alvo entao
             exibir(concat("Elemento encontrado na posição: ", meio))

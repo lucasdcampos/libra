@@ -72,7 +72,7 @@ public enum TokenTipo
     SenaoSe,
     Entao,
     Enquanto,
-    Faca,
+    Repetir,
     Romper,
     Continuar,
     Retornar,

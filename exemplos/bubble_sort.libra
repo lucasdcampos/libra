@@ -2,9 +2,9 @@ importar vetores
 
 funcao bubbleSort(vetor: Vetor)
     var i = 0
-    enquanto i < tamanho(vetor) faca
+    enquanto i < tamanho(vetor) repetir
         var j = 0
-        enquanto j < tamanho(vetor) - 1 faca
+        enquanto j < tamanho(vetor) - 1 repetir
             se vetor[j] > vetor[j + 1] entao
                 var temp = vetor[j]
                 vetor[j] = vetor[j + 1]

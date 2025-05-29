@@ -21,7 +21,7 @@ public class Token
 Todo Token possui um Tipo, a Linha correspondente no código-fonte e opcionalmente um Valor.
 
 ### Tipos de Token:
-`NumeroLiteral, CaractereLiteral, TextoLiteral, Vetor, Identificador, Nulo, TokenInvalido, OperadorSoma, OperadorSub, OperadorMult, OperadorDiv, OperadorPot, OperadorComparacao, OperadorDefinir, OperadorMaiorQue, OperadorMenorQue, OperadorMaiorIgualQue, OperadorMenorIgualQue, OperadorE, OperadorOu, OperadorOuExclusivo, OperadorDiferente, OperadorNeg, OperadorResto, AbrirParen, FecharParen, AbrirCol, FecharCol, AbrirChave, FecharChave, PontoEVirgula, Virgula, NovaLinha, FimDoArquivo, Var, Const, Funcao, Se, Senao, SenaoSe, Entao, Enquanto, Faca, Romper, Retornar, Fim`
+`NumeroLiteral, CaractereLiteral, TextoLiteral, Vetor, Identificador, Nulo, TokenInvalido, OperadorSoma, OperadorSub, OperadorMult, OperadorDiv, OperadorPot, OperadorComparacao, OperadorDefinir, OperadorMaiorQue, OperadorMenorQue, OperadorMaiorIgualQue, OperadorMenorIgualQue, OperadorE, OperadorOu, OperadorOuExclusivo, OperadorDiferente, OperadorNeg, OperadorResto, AbrirParen, FecharParen, AbrirCol, FecharCol, AbrirChave, FecharChave, PontoEVirgula, Virgula, NovaLinha, FimDoArquivo, Var, Const, Funcao, Se, Senao, SenaoSe, Entao, Enquanto, repetir, Romper, Retornar, Fim`
 
 Alguns tokens necessitam de valor, enquanto outros não, por exemplo: Um Token de tipo `NumeroLiteral` deve possuir um valor, pois precisamos saber qual número em questão está associado a esse Token, enquanto um Token de tipo
 `AbrirChave` (`{`) não.
