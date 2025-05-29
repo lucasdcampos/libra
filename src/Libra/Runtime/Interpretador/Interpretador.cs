@@ -36,7 +36,9 @@ public class Interpretador
     private bool _shell = false;
     private VisitorExpressoes _visitorExpressoes;
     private static Interpretador _instancia;
-
+    private static LibraObjeto _ultimoRetorno;
+    public static LibraObjeto Saida => _ultimoRetorno ?? LibraObjeto.Inicializar("Nulo");
+    
     public Interpretador(InterpretadorFlags flags = null)
     {
         _instancia = this;
@@ -94,6 +96,7 @@ public class Interpretador
         
         var acoes = new Dictionary<TipoInstrucao, Action>
         {
+            { TipoInstrucao.Expressao, () => InterpretarInstrucaoExpressao((InstrucaoExpressao)instrucao) },
             { TipoInstrucao.DeclVar, () => InterpretarDeclVar((DeclaracaoVar)instrucao) },
             { TipoInstrucao.DeclFunc, () => InterpretarFuncao((DefinicaoFuncao)instrucao) },
             { TipoInstrucao.DeclClasse, () => InterpretarInstrucaoClasse((DefinicaoTipo)instrucao) },
@@ -112,10 +115,18 @@ public class Interpretador
             acao();
     }
 
+    public void InterpretarInstrucaoExpressao(InstrucaoExpressao instrucao)
+    {
+        if(instrucao.Expressao == null)
+            return;
+
+        _ultimoRetorno = InterpretarExpressao(instrucao.Expressao);
+    }
+
     public void InterpretarAtribProp(AtribuicaoPropriedade instrucao)
     {
         var obj = _programa.ObterVariavel(instrucao.Identificador).Valor;
-        
+
         obj.AtribuirPropriedade(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
     }
 
@@ -131,6 +142,7 @@ public class Interpretador
     public void InterpretarRetorno(InstrucaoRetornar instrucao)
     {
         object resultadoExpressao = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
+        _ultimoRetorno = LibraObjeto.ParaLibraObjeto(resultadoExpressao);
         throw new ExcecaoRetorno(resultadoExpressao);
     }
 

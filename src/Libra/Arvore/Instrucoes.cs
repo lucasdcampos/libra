@@ -6,6 +6,7 @@ namespace Libra.Arvore
 {
     public enum TipoInstrucao
     {
+        Expressao, // InstrucaoExpressao
         DeclVar,
         DeclFunc,
         DeclClasse,
@@ -30,20 +31,37 @@ namespace Libra.Arvore
         public abstract object Aceitar(IVisitor visitor);
     }
 
+    public class InstrucaoExpressao : Instrucao
+    {
+        public Expressao Expressao { get; private set; }
+
+        public InstrucaoExpressao(LocalToken local, Expressao expressao)
+        {
+            Tipo = TipoInstrucao.Expressao;
+            Expressao = expressao;
+            Local = local;
+        }
+
+        public override object Aceitar(IVisitor visitor)
+        {
+            return Expressao.Aceitar(visitor);
+        }
+    }
+
     public class DeclaracaoVar : Instrucao
     {
         public DeclaracaoVar(LocalToken local, string identificador, Expressao expressao, string tipo, bool tipoModificavel, bool constante)
         {
             Tipo = TipoInstrucao.DeclVar;
             Identificador = identificador;
-            Expressao = expressao; 
+            Expressao = expressao;
             TipoModificavel = tipoModificavel;
             TipoVar = tipo;
             Local = local;
         }
 
         public Expressao Expressao { get; private set; }
-        public string Identificador {get; private set; }
+        public string Identificador { get; private set; }
         internal string TipoVar;
         internal bool TipoModificavel;
         public bool Constante { get; private set; }

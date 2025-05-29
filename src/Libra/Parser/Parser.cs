@@ -72,7 +72,7 @@ public class Parser
         var atual = Atual();
         _local = atual.Local;
 
-        switch(atual.Tipo)
+        switch (atual.Tipo)
         {
             case TokenTipo.Var: return ParseDeclVar();
             case TokenTipo.Const: return ParseDeclVar();
@@ -84,25 +84,19 @@ public class Parser
             case TokenTipo.Continuar: Passar(); return new InstrucaoContinuar(_local);
             case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, ParseExpressao());
             case TokenTipo.Identificador:
-                if(Proximo(1).Tipo == TokenTipo.AbrirParen)
+                if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return ParseExpressaoChamadaFuncao();
-                else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
+                else if (Proximo(1).Tipo == TokenTipo.AbrirCol)
                     return ParseAtribIndice();
-                else
+                else if (Proximo(1).Tipo == TokenTipo.OperadorDefinir)
                     return ParseAtribVar();
+                break;
         }
 
         var expr = ParseExpressao();
 
-        // TODO: Implementar a.b.c...n()
-        if(expr != null && expr is ExpressaoBinaria bin && bin.Operador.Tipo == TokenTipo.Ponto)
-        {
-            // a.b.c...n = expr
-            ConsumirToken(TokenTipo.OperadorDefinir);
-            var ident = ConsumirToken(TokenTipo.Identificador);
-
-            //return new AtribuicaoPropriedade();
-        }
+        if (expr != null)
+            return new InstrucaoExpressao(_local, expr);
 
         throw new Erro($"Instrução inválida {atual}", _local);
     }
