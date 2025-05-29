@@ -45,8 +45,7 @@ public class Erro : Exception
         Ambiente.Msg(Mensagem);
         Ambiente.Msg(string.IsNullOrEmpty(Local.Arquivo) ? "" : $"  Arquivo \"{Local.Arquivo}\", linha {Local.Linha}");
 
-
-        string callStack = Ambiente.ProgramaAtual == null ? "" : Ambiente.ProgramaAtual.PilhaEscopos.ObterCallStack();
+        string callStack =  Ambiente.Pilha.ObterCallStack();
         Ambiente.Msg(string.IsNullOrEmpty(callStack) ? "\n": $"  Pilha de Chamadas:\n{callStack}", "");
 
         if(!String.IsNullOrEmpty(dica))

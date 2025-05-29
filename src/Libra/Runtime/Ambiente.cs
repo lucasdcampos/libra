@@ -10,15 +10,15 @@ public class Ambiente
     public static ILogger Logger => _ambienteAtual._logger;
     public static bool AmbienteSeguro => _ambienteAtual._ambienteSeguro;
     public bool _ambienteSeguro; 
-    private Programa _programaAtual;
-    public static Programa ProgramaAtual => _ambienteAtual._programaAtual;
 
+    private PilhaDeEscopos _pilha;
+    public static PilhaDeEscopos Pilha => _ambienteAtual._pilha;
     private Ambiente() { }
 
     public static Ambiente ConfigurarAmbiente(ILogger logger, bool seguro)
     {
         _ambienteAtual = new Ambiente();
-
+        _ambienteAtual._pilha = new PilhaDeEscopos();
         if (logger == null)
             _ambienteAtual._logger = new ConsoleLogger();
         else
@@ -29,35 +29,20 @@ public class Ambiente
         return _ambienteAtual;
     }
 
-    public static void SetarPrograma(Programa programa)
-    {
-        _ambienteAtual._programaAtual = programa;
-        new LibraBase().RegistrarFuncoes(programa);
-    }
-
     public static void DefinirGlobal(string identificador, object valor)
     {
-        if (_ambienteAtual._programaAtual == null)
-            ConfigurarAmbiente(null, false);
-
-        _ambienteAtual._programaAtual.PilhaEscopos.DefinirVariavel(identificador, LibraObjeto.ParaLibraObjeto(valor));
+        Pilha.DefinirVariavel(identificador, LibraObjeto.ParaLibraObjeto(valor));
     }
 
     public static object ObterGlobal(string identificador)
     {
-        if (_ambienteAtual._programaAtual == null)
-            ConfigurarAmbiente(null, false);
-
-        var variavel = _ambienteAtual._programaAtual.PilhaEscopos.ObterVariavel(identificador);
+        var variavel = Pilha.ObterVariavel(identificador);
         return variavel?.Valor ?? null;
     }
 
     public static void RegistrarFuncaoNativa(string nomeFuncao, Func<object[], object> funcaoCSharp)
     {
-        if (_ambienteAtual._programaAtual == null)
-            ConfigurarAmbiente(null, false);
-
-        _ambienteAtual._programaAtual.PilhaEscopos.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcaoCSharp, nomeFuncao));
+        Pilha.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcaoCSharp, nomeFuncao));
     }
 
     public static void Msg(string msg, string final = "\n")

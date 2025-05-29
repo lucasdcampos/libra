@@ -14,7 +14,7 @@ public class Escopo
 
     public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, string tipo = "Objeto", bool tipoModificavel = true)
     {
-        if(VariavelExiste(identificador))
+        if (VariavelExiste(identificador))
             throw new ErroVariavelJaDeclarada(identificador);
 
         if(valor == null)

@@ -5,7 +5,6 @@ using Libra;
 public class VisitorExpressoes : IVisitor
 {
     private Interpretador _interpretador;
-    private Programa _programa => Ambiente.ProgramaAtual;
 
     public VisitorExpressoes(Interpretador interpretador)
     {
@@ -56,7 +55,7 @@ public class VisitorExpressoes : IVisitor
 
     public LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao)
     {
-        var v = _programa.ObterVariavel(expressao.Identificador.Valor.ToString());
+        var v = Ambiente.Pilha.ObterVariavel(expressao.Identificador.Valor.ToString());
         return v.Valor;
     }
 
@@ -96,7 +95,7 @@ public class VisitorExpressoes : IVisitor
         string ident = expressao.Identificador;
         int indice = _interpretador.InterpretarExpressao<LibraInt>(expressao.Expressao).Valor;
 
-        var variavel = _programa.PilhaEscopos.ObterVariavel(ident);
+        var variavel = Ambiente.Pilha.ObterVariavel(ident);
 
         if(variavel.Valor is LibraVetor vetor)
         {
@@ -121,13 +120,13 @@ public class VisitorExpressoes : IVisitor
 
     public LibraObjeto VisitarExpressaoPropriedade(ExpressaoPropriedade expressao)
     {
-        var obj = LibraObjeto.ParaLibraObjeto(_programa.ObterVariavel(expressao.Identificador));
+        var obj = LibraObjeto.ParaLibraObjeto(Ambiente.Pilha.ObterVariavel(expressao.Identificador));
         return obj.AcessarPropriedade(expressao.Propriedade);
     }
 
     public LibraObjeto VisitarExpressaoChamadaMetodo(ExpressaoChamadaMetodo expressao)
     {
-        var obj = LibraObjeto.ParaLibraObjeto(_programa.ObterVariavel(expressao.Identificador));
+        var obj = LibraObjeto.ParaLibraObjeto(Ambiente.Pilha.ObterVariavel(expressao.Identificador));
 
         return obj.ChamarMetodo(expressao.Chamada, expressao.Identificador);
 

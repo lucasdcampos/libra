@@ -99,6 +99,6 @@ public class MotorLibra
             Console.WriteLine($"Erro: {ex.Message}");
         }
 
-        return Interpretador.Saida.ObterValor().ToString();
+        return Interpretador.Saida.ObterValor();
     }
 }

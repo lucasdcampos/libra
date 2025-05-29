@@ -31,14 +31,13 @@ public class Interpretador
     public static LocalToken LocalAtual => ObterLocalAtual();
     public static InterpretadorFlags Flags => _instancia == null ? InterpretadorFlags.Padrao() : _instancia._flags;
     private InterpretadorFlags _flags;
-    private Programa _programa => Ambiente.ProgramaAtual;
     private LocalToken _local = new LocalToken();
     private bool _shell = false;
     private VisitorExpressoes _visitorExpressoes;
     private static Interpretador _instancia;
     private static LibraObjeto _ultimoRetorno;
     public static LibraObjeto Saida => _ultimoRetorno ?? LibraObjeto.Inicializar("Nulo");
-    
+
     public Interpretador(InterpretadorFlags flags = null)
     {
         _instancia = this;
@@ -63,14 +62,11 @@ public class Interpretador
     {
         Resetar();
         _shell = shell;
-        
-        Ambiente.ConfigurarAmbiente(logger, ambienteSeguro);
 
         try
         {
-            Ambiente.SetarPrograma(programa);
             InterpretarInstrucoes(programa.Instrucoes);
-            return Ambiente.ProgramaAtual.CodigoSaida;
+            return 0;
         }
         catch(Exception e)
         {
@@ -125,7 +121,7 @@ public class Interpretador
 
     public void InterpretarAtribProp(AtribuicaoPropriedade instrucao)
     {
-        var obj = _programa.ObterVariavel(instrucao.Identificador).Valor;
+        var obj = Ambiente.Pilha.ObterVariavel(instrucao.Identificador).Valor;
 
         obj.AtribuirPropriedade(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
     }
@@ -136,7 +132,7 @@ public class Interpretador
         int indice = InterpretarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
         LibraObjeto expressao = InterpretarExpressao(instrucao.Expressao);
 
-        _programa.PilhaEscopos.ModificarVetor(identificador, indice, expressao);
+        Ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
     }
 
     public void InterpretarRetorno(InstrucaoRetornar instrucao)
@@ -150,9 +146,9 @@ public class Interpretador
     {
         if(InterpretarExpressao<LibraInt>(se.Condicao).Valor != 0)
             {
-                _programa.PilhaEscopos.EmpilharEscopo();
+                Ambiente.Pilha.EmpilharEscopo();
                 InterpretarInstrucoes(se.Corpo.ToArray());
-                _programa.PilhaEscopos.DesempilharEscopo();
+                Ambiente.Pilha.DesempilharEscopo();
                 return;
             }
 
@@ -163,9 +159,9 @@ public class Interpretador
         {
             if(InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
             {
-                _programa.PilhaEscopos.EmpilharEscopo();
+                Ambiente.Pilha.EmpilharEscopo();
                 InterpretarInstrucoes(inst.Corpo.ToArray());
-                _programa.PilhaEscopos.DesempilharEscopo();
+                Ambiente.Pilha.DesempilharEscopo();
                 
                 return;
             }
@@ -178,7 +174,7 @@ public class Interpretador
         // como em "enquanto 1", por exemplo.
         while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
-            _programa.PilhaEscopos.EmpilharEscopo();
+            Ambiente.Pilha.EmpilharEscopo();
             foreach(var i in enquanto.Instrucoes)
             {
                 try
@@ -189,12 +185,12 @@ public class Interpretador
                 {
                     if(e is ExcecaoRomper)
                     {
-                        _programa.PilhaEscopos.DesempilharEscopo();
+                        Ambiente.Pilha.DesempilharEscopo();
                         return;
                     }
                 }
             }
-            _programa.PilhaEscopos.DesempilharEscopo();
+            Ambiente.Pilha.DesempilharEscopo();
         }
     }
 
@@ -211,7 +207,7 @@ public class Interpretador
         
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
-        _programa.PilhaEscopos.DefinirVariavel(identificador, novaFuncao, true, "Func", false);
+        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, true, "Func", false);
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, Expressao[] argumentos) 
@@ -232,7 +228,7 @@ public class Interpretador
     public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
         // TODO: Pode dar erro!
-        Classe tipo = (Classe)_programa.ObterVariavel(nome).Valor;
+        Classe tipo = (Classe)Ambiente.Pilha.ObterVariavel(nome).Valor;
 
         // TODO: Arrumar, nunca vi um código tão porcaria em toda a minha vida
         List<Variavel> vars = new();
@@ -262,7 +258,7 @@ public class Interpretador
         if (argumentos.Length != qtdParametros)
             throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Length, _local);
 
-        _programa.PilhaEscopos.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
+        Ambiente.Pilha.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
 
         try 
         {
@@ -275,7 +271,7 @@ public class Interpretador
                 if(funcao.Parametros[i].Tipo != "Objeto" && funcao.Parametros[i].Tipo != obj.Nome)
                     obj = obj.Converter(funcao.Parametros[i].Tipo);
 
-                _programa.PilhaEscopos.DefinirVariavel(ident, obj);
+                Ambiente.Pilha.DefinirVariavel(ident, obj);
             }
 
             InterpretarInstrucoes(funcao.Instrucoes);
@@ -292,7 +288,7 @@ public class Interpretador
         }
         finally
         {
-            _programa.PilhaEscopos.DesempilharEscopo(); // Removendo o Escopo da Pilha
+            Ambiente.Pilha.DesempilharEscopo(); // Removendo o Escopo da Pilha
         }
 
         // Caso a função não tenha um retorno explicito
@@ -303,7 +299,7 @@ public class Interpretador
     {
         var argumentos = chamada.Argumentos;
 
-        var v = _programa.ObterVariavel(chamada.Identificador);
+        var v = Ambiente.Pilha.ObterVariavel(chamada.Identificador);
 
         if(v.Valor is Classe)
             return InterpretarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
@@ -314,7 +310,7 @@ public class Interpretador
     // TODO: É isso?
     public void InterpretarInstrucaoClasse(DefinicaoTipo i)
     {
-       _programa.PilhaEscopos.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
+       Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
     }
 
     public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)
@@ -324,7 +320,7 @@ public class Interpretador
 
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
 
-        _programa.PilhaEscopos.AtualizarVariavel(i.Identificador, resultado);
+        Ambiente.Pilha.AtualizarVariavel(i.Identificador, resultado);
 
         resultado.Construtor(i.Identificador);
         
@@ -338,7 +334,7 @@ public class Interpretador
 
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
 
-        _programa.PilhaEscopos.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
+        Ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
 
         resultado.Construtor(i.Identificador);
 

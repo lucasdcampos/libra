@@ -1,8 +1,9 @@
 ﻿using Libra.Api;
 
-string codigo = "1+2*3";
 var motor = new MotorLibra();
-var saida = motor.Executar(codigo);
 
-Console.WriteLine("Código: " + codigo);
-Console.WriteLine($"Saída: {saida}");
+motor.DefinirGlobal("x", 40);
+
+var saida = motor.Executar("x + 2");
+
+Console.WriteLine(saida); // Deve imprimir 42

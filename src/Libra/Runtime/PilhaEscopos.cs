@@ -10,7 +10,7 @@ public class PilhaDeEscopos
     public PilhaDeEscopos()
     {
         // Adiciona o escopo global ao iniciar
-        EmpilharEscopo("", new LocalToken());
+        EmpilharEscopo("Global", new LocalToken());
     }
 
     // Adiciona um novo escopo à pilha (usado para blocos locais, funções, etc.)
