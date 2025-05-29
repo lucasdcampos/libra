@@ -72,7 +72,8 @@ internal static class Program
             try
             {
                 var motor = new MotorLibra();
-                motor.Executar($"exibir({linha})");
+                var saida = motor.Executar(linha);
+                Console.WriteLine(saida);
             }
             catch (Exception e)
             {
