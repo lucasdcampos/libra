@@ -2,52 +2,110 @@
 // Arquivo: matematica.libra
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
-__ativarmodulo__("matematica")
+__ativarmodulo__("matematica") // chamado internamente
 
-// Constantes matemáticas
+/// Valor aproximado de pi, a razão entre a circunferência e o diâmetro de um círculo.
 const PI = 3.141592653589793
+
+/// Valor aproximado de e, a base dos logaritmos naturais.
 const E = 2.718281828459045
+
+/// Valor aproximado de tau, que equivale a 2pi.
 const TAU = 6.283185307179586
+
+/// Valor aproximado da raiz quadrada de 2.
 const RAIZ2 = 1.4142135623730951
+
+/// Valor aproximado da raiz quadrada de 3.
 const RAIZ3 = 1.7320508075688772
+
+/// Valor aproximado do logaritmo natural de 2 (ln(2)).
 const LN2 = 0.6931471805599453
+
+/// Valor aproximado do logaritmo natural de 10 (ln(10)).
 const LN10 = 2.302585092994046
+
+/// Valor aproximado da razão áurea (phi), um número irracional.
 const RAZAO_AUREA = 1.618033988749895
 
+/// Fator para converter graus em radianos (pi dividido por 180).
 const GRAUS_PARA_RAD = PI / 180
+
+/// Fator para converter radianos em graus (180 dividido por pi).
 const RAD_PARA_GRAUS = 180.0 / PI
 
+/// Valor que representa verdadeiro (booleano) como 1.
 const VERDADEIRO = 1
+
+/// Valor que representa falso (booleano) como 0.
 const FALSO = 0
 
+/// Valor do seno de 45 graus (raizq(2)/2 aproximadamente).
 const SEN_45 = 0.7071067811865476
+
+/// Valor do cosseno de 45 graus (raizq(2)/2 aproximadamente).
 const COS_45 = 0.7071067811865476
+
+/// Valor do seno de 90 graus (exatamente 1).
 const SEN_90 = 1.0
+
+/// Valor do cosseno de 90 graus (exatamente 0).
 const COS_90 = 0.0
+
+/// Valor do seno de 30 graus (exatamente 0.5).
 const SEN_30 = 0.5
+
+/// Valor do cosseno de 30 graus (raizq(3)/2 aproximadamente).
 const COS_30 = 0.8660254037844386
+
+/// Valor do seno de 60 graus (raizq(3)/2 aproximadamente).
 const SEN_60 = 0.8660254037844386
+
+/// Valor do cosseno de 60 graus (exatamente 0.5).
 const COS_60 = 0.5
 
+/// Valor máximo aproximado de um inteiro de 32 bits (signed).
 const MAX_INT = 2147483646
+
+/// Valor mínimo aproximado de um inteiro de 32 bits (signed).
 const MIN_INT = -2147483647
 
+/// Número de bits em um byte.
 const BYTE = 8
+
+/// Quantidade de bytes em um kilobyte (KB).
 const KB = 1024
+
+/// Quantidade de bytes em um megabyte (MB).
 const MB = 1024 * 1024
+
+/// Quantidade de bytes em um gigabyte (GB).
 const GB = 1024 * 1024 * 1024
 
-// Calcula e retorna a raiz enésima de um número
+/// Calcula e retorna a raiz enésima de um número.
+/// Parâmetros:
+///   numero: valor do qual será extraída a raiz.
+///   indice: índice da raiz (ex: 2 para raiz quadrada, 3 para cúbica, etc).
+/// Retorna:
+///   A raiz enésima do número fornecido.
 funcao raiz(numero: Real, indice: Int) -> Real
     retornar __csraiz__(numero, indice)
 fim
 
-// Calcula e retorna a raiz quadrada de um número
+/// Calcula e retorna a raiz quadrada de um número.
+/// Parâmetros:
+///   x: número real positivo do qual se deseja extrair a raiz quadrada.
+/// Retorna:
+///   A raiz quadrada do número fornecido.
 funcao raizq(x: Real) -> Real
     retornar __csraizq__(x)
 fim
 
-// Calcula e retorna a o fatorial de um número
+/// Calcula e retorna o fatorial de um número inteiro.
+/// Parâmetros:
+///   n: número inteiro não negativo.
+/// Retorna:
+///   O valor do fatorial de n (n!), como número real.
 funcao fatorial(n: Int) -> Real
     var resultado = 1
     var contador = n
@@ -59,7 +117,11 @@ funcao fatorial(n: Int) -> Real
     retornar resultado
 fim
 
-// Retorna o valor absoluto (módulo) de um número
+/// Retorna o valor absoluto (módulo) de um número.
+/// Parâmetros:
+///   x: número real.
+/// Retorna:
+///   O valor absoluto de x (positivo ou zero).
 funcao abs(x: Real) -> Real
     se x > 0 entao
         retornar x
@@ -68,7 +130,12 @@ funcao abs(x: Real) -> Real
     retornar -x
 fim
 
-// Retorna o maior valor dentro de um intervalo
+/// Retorna o maior valor entre dois números reais.
+/// Parâmetros:
+///   a: primeiro número real.
+///   b: segundo número real.
+/// Retorna:
+///   O maior valor entre a e b.
 funcao topo(a: Real, b: Real) -> Real
     se a > b entao
         retornar a
@@ -77,7 +144,12 @@ funcao topo(a: Real, b: Real) -> Real
     retornar b
 fim
 
-// Retorna o menor valor dentro de um intervalo
+/// Retorna o menor valor entre dois números reais.
+/// Parâmetros:
+///   a: primeiro número real.
+///   b: segundo número real.
+/// Retorna:
+///   O menor valor entre a e b.
 funcao chao(a: Real, b: Real) -> Real
     se a < b entao
         retornar a
@@ -86,7 +158,11 @@ funcao chao(a: Real, b: Real) -> Real
     retornar b
 fim
 
-// Retorna o inteiro mais próximo de um valor real
+/// Retorna o inteiro mais próximo de um valor real.
+/// Parâmetros:
+///   x: número real a ser arredondado.
+/// Retorna:
+///   Um número inteiro que mais se aproxima de x.
 funcao arrendondar(x: Real) -> Int
     se x > real(int(x)) + 0.5 entao
         retornar int(x+1)
@@ -94,62 +170,122 @@ funcao arrendondar(x: Real) -> Int
     retornar int(x)
 fim
 
-// Retorna a hipotenusa de dois lados
+/// Retorna a hipotenusa de um triângulo retângulo dados os dois catetos.
+/// Parâmetros:
+///   a: comprimento do primeiro cateto.
+///   b: comprimento do segundo cateto.
+/// Retorna:
+///   O comprimento da hipotenusa, calculado por √(a² + b²).
 funcao hipotenusa(a: Real, b: Real) -> Real
     retornar raizq(a*a + b*b)
 fim
 
-// Retorna o seno de um ângulo x
+/// Retorna o seno de um ângulo.
+/// Parâmetros:
+///   x: ângulo em radianos.
+/// Retorna:
+///   O valor do seno do ângulo fornecido.
 funcao sen(x: Real) -> Real
     retornar __cssen__(x)
 fim
 
-// Retorna o cosseno de um ângulo x
+/// Retorna o cosseno de um ângulo.
+/// Parâmetros:
+///   x: ângulo em radianos.
+/// Retorna:
+///   O valor do cosseno do ângulo fornecido.
 funcao cos(x: Real) -> Real
     retornar __cscos__(x)
 fim
 
-// Retorna a tangente de um ângulo x
+/// Retorna a tangente de um ângulo.
+/// Parâmetros:
+///   x: ângulo em radianos.
+/// Retorna:
+///   O valor da tangente do ângulo fornecido.
 funcao tan(x: Real) -> Real
     retornar __cstan__(x)
 fim
 
-// Retorna o arco-seno de um ângulo x
+/// Retorna o arco-seno (inverso do seno) de um valor.
+/// Parâmetros:
+///   x: valor real no intervalo [-1, 1].
+/// Retorna:
+///   O ângulo em radianos cujo seno é x.
 funcao arcsen(x: Real) -> Real
     retornar sen(x)^-1
 fim
 
-// Retorna o arco-cosseno de um ângulo x
+/// Retorna o arco-cosseno (inverso do cosseno) de um valor.
+/// Parâmetros:
+///   x: valor real no intervalo [-1, 1].
+/// Retorna:
+///   O ângulo em radianos cujo cosseno é x.
 funcao arccos(x: Real) -> Real
     retornar cos(x)^-1
 fim
 
-// Retorna a arco-tangente de um ângulo x
+/// Retorna a arco-tangente (inverso da tangente) de um valor.
+/// Parâmetros:
+///   x: valor real.
+/// Retorna:
+///   O ângulo em radianos cuja tangente é x.
 funcao arctan(x: Real) -> Real
     retornar tan(x)^-1
 fim
 
-// Retorna o logaritmo de x na base n
+/// Retorna o logaritmo de x na base n.
+/// Parâmetros:
+///   x: número real positivo.
+///   n: base do logaritmo (real positivo, diferente de 1).
+/// Retorna:
+///   O logaritmo de x na base n.
 funcao log(x: Real, n: Real) -> Real
     retornar __cslog__(x, n)
 fim
 
+/// Retorna o logaritmo natural de x (base e).
+/// Parâmetros:
+///   x: número real positivo.
+/// Retorna:
+///   O logaritmo natural (ln) de x.
 funcao ln(x: Real) -> Real
     retornar log(x, E)
 fim
 
+/// Retorna o logaritmo de x na base 2.
+/// Parâmetros:
+///   x: número real positivo.
+/// Retorna:
+///   O logaritmo de x na base 2.
 funcao log2(x: Real) -> Real
     retornar log(x, 2)
 fim
 
+/// Retorna o valor de e elevado à potência x.
+/// Parâmetros:
+///   x: expoente real.
+/// Retorna:
+///   O valor de e^x.
 funcao exp(x: Real) -> Real
     retornar E^x
 fim
 
+/// Retorna o valor de 2 elevado à potência x.
+/// Parâmetros:
+///   x: expoente real.
+/// Retorna:
+///   O valor de 2^x.
 funcao exp2(x: Real) -> Real
     retornar 2^x
 fim
 
+/// Retorna um número real aleatório dentro de um intervalo especificado.
+/// Parâmetros:
+///   min: valor mínimo do intervalo.
+///   max: valor máximo do intervalo.
+/// Retorna:
+///   Um número real aleatório entre min (inclusivo) e max (exclusivo).
 funcao aleatorio(min: Real, max: Real) -> Real
     min = real(min)
     max = real(max)
