@@ -21,7 +21,6 @@ public class MotorLibra
         _opcoes = new OpcoesMotorLibra
         {
             NivelDebug = 0,
-            ModoExecucao = ModoExecucao.Interpretar
         };
 
         _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
@@ -35,6 +34,8 @@ public class MotorLibra
     public MotorLibra(OpcoesMotorLibra opcoes)
     {
         _opcoes = opcoes;
+
+        _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
     }
 
     /// <summary>
@@ -84,21 +85,8 @@ public class MotorLibra
         {
             var tokens = _tokenizador.Tokenizar(codigo);
             var programa = _parser.Parse(tokens.ToArray());
-
-            switch (_opcoes.ModoExecucao)
-            {
-                case ModoExecucao.Interpretar:
-                    _interpretador = new Interpretador();
-                    _interpretador.ExecutarPrograma(programa);
-                    break;
-                case ModoExecucao.Compilar:
-                    _compilador = new Compilador();
-                    var bytecode = _compilador.Compilar(programa);
-                    Console.WriteLine("Bytecode compilado: " + string.Join(", ", bytecode));
-                    break;
-                default:
-                    throw new NotSupportedException($"Modo de execução {_opcoes.ModoExecucao} não suportado.");
-            }
+            _interpretador = new Interpretador();
+            _interpretador.ExecutarPrograma(programa);
         }
         catch (Erro e)
         {
@@ -114,7 +102,27 @@ public class MotorLibra
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Ocorreu um erro{ex.Message}");
+            string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+            string logFile = Path.Combine(logsDir, $"erro-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+
+            if (!Directory.Exists(logsDir))
+            {
+                Directory.CreateDirectory(logsDir);
+            }
+
+            string mensagemLog = "Ocorreu um erro interno na Libra, veja a descrição para mais detalhes:\n";
+            mensagemLog += "Versão: Libra 1.0.0-Beta\n";
+            mensagemLog += $"Ultima local do Script Libra executada: {Interpretador.LocalAtual}\n";
+            mensagemLog += $"Problema:\n{ex.ToString()}\n";
+            mensagemLog += "Por favor reportar em https://github.com/lucasdcampos/libra/issues/ (se possível incluir script que causou o problema)\n";
+
+            File.WriteAllText(logFile, mensagemLog);
+
+            Ambiente.Msg("\nHouve um problema, mas não foi culpa sua :(");
+            Ambiente.Msg($"Uma descrição do erro foi salva em: {logFile}");
+            Ambiente.Msg("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
+            Ambiente.Msg($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
+            Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
         }
 
         return Interpretador.Saida.ObterValor();
