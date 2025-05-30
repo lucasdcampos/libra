@@ -63,6 +63,9 @@ public class LibraBase : IModulo
             case "sistema":
                 new LibraSistema().RegistrarFuncoes(_programa);
                 break;
+            case "json":
+                new LibraJson().RegistrarFuncoes(_programa);
+                break;
         }
 
         return null;

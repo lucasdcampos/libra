@@ -1,14 +1,14 @@
-importar http
+importar sistema
+importar json
 
-var servidor = criar_servidor(3000)
+// Poderia ser carregado de um arquivo também
+const documento = "
+{
+    \"nome\": \"Pedrinho\",
+    \"idade\": 10
+}
+"
 
-servidor.get = funcao(req)
-    se req.caminho == "/" entao
-        retornar Res(200, "Olá, Mundo!")
-    fim
-
-    se req.caminho == "/teste" entao
-        retornar Res(200, "Teste")
-    fim
-fim
+var nome = json_ler(documento, "nome")
+exibir(nome)
 

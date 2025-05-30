@@ -1,0 +1,8 @@
+// Biblioteca padrão da Libra
+// Arquivo: json.libra
+// Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
+
+// Ativa o módulo internamente
+__ativarmodulo__("json")
+
+// Não há nada aqui pois a implementação é feita pelo lado do C#!
