@@ -79,11 +79,11 @@ public class MotorLibra
     /// </summary>
     /// <param name="codigo">Código a ser executado.</param>
     /// <returns>Resultado da execução, se houver; caso contrário, null.</returns>
-    public object? Executar(string codigo)
+    public object? Executar(string codigo, string arquivo="", string caminho="")
     {
         try
         {
-            var tokens = _tokenizador.Tokenizar(codigo.ReplaceLineEndings("\n"));
+            var tokens = _tokenizador.Tokenizar(codigo.ReplaceLineEndings("\n"), arquivo, caminho);
             var programa = _parser.Parse(tokens.ToArray());
             _interpretador = new Interpretador();
             _interpretador.ExecutarPrograma(programa);

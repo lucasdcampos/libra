@@ -1,14 +1,5 @@
-importar sistema
-importar json
+importar b
+importar matematica
 
-// Poderia ser carregado de um arquivo também
-const documento = "
-{
-    \"nome\": \"Pedrinho\",
-    \"idade\": 10
-}
-"
-
-var nome = json_ler(documento, "nome")
-exibir(nome)
-
+exibir(B)
+exibir(PI)

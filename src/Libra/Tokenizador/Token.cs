@@ -4,11 +4,12 @@ public struct LocalToken
 {
     public string Arquivo = "";
     public int Linha = 1;
-
-    public LocalToken(string arquivo, int linha)
+    public string CaminhoCompleto = "";
+    public LocalToken(string caminho, string arquivo, int linha)
     {
         Arquivo = arquivo;
         Linha = linha;
+        CaminhoCompleto = caminho;
     }
 
     public override string ToString()

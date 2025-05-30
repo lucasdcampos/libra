@@ -54,8 +54,10 @@ internal static class Program
                     {
                         Console.WriteLine("Não foi possível carregar o arquivo " + acaoPrincipal);
                     }
-                    
-                    motor.Executar(codigo);
+
+                    string caminhoCompleto = Path.Combine(Directory.GetCurrentDirectory(), acaoPrincipal);
+                
+                    motor.Executar(codigo, acaoPrincipal, Path.GetDirectoryName(caminhoCompleto) ?? "");
                     break;
             }
         }

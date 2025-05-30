@@ -38,13 +38,12 @@ public class Tokenizador
         { "nao", TokenTipo.OperadorNeg }
     };
 
-    public List<Token> Tokenizar(string source, string arquivo = "") 
+    public List<Token> Tokenizar(string source, string arquivo = "", string caminho = "") 
     {
         _fonte = source.ReplaceLineEndings("\n");
         _tokens = new();
-        _local = new LocalToken(arquivo, 1);
+        _local = new LocalToken(caminho, arquivo, 1);
         _posicao = 0;
-        
         var texto = "";
  
         while (Atual() != '\0')
@@ -531,26 +530,32 @@ public class Tokenizador
         }
     }
 
-    // TODO: Esquecer essa porcaria e importar arquivo com base no caminho do arquivo atual
-    private void ImportarArquivo(string caminho)
+   private void ImportarArquivo(string caminho)
     {
         if (_arquivosImportados.Contains(caminho))
             return;
 
+        string arquivoCompleto = Path.Combine(_local.CaminhoCompleto, caminho);
+
+        if (!File.Exists(arquivoCompleto))
+        {
+            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Libra", caminho);
+
+            if (File.Exists(appDataPath))
+            {
+                arquivoCompleto = appDataPath;
+            }
+            else
+            {
+                throw new ErroAcessoNulo($" Arquivo '{caminho}' não encontrado.");
+            }
+        }
+
         _arquivosImportados.Add(caminho);
 
-        string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "biblioteca/" + caminho);
-        string caminhoUsuario = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), caminho);
+        string codigoArquivo = File.ReadAllText(arquivoCompleto).ReplaceLineEndings("\n");
 
-        if (!File.Exists(caminhoExecutavel) && !File.Exists(caminhoUsuario))
-            throw new ErroAcessoNulo(caminhoExecutavel);
-
-        string caminhoFinalArquivo = File.Exists(caminhoExecutavel) ? caminhoExecutavel : caminhoUsuario;
-
-        // Cruzando os dedos para que a leitura não falhe. MELHORAR ISSO!
-        string codigoArquivo = File.ReadAllText(caminhoFinalArquivo).ReplaceLineEndings("\n");
-
-        var novosTokens = new Tokenizador().Tokenizar(codigoArquivo, caminho);
+        var novosTokens = new Tokenizador().Tokenizar(codigoArquivo, caminho, arquivoCompleto);
 
         for (int i = 0; i < novosTokens.Count - 1; i++)
         {
