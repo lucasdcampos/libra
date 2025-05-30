@@ -80,6 +80,7 @@ public class Parser
             case TokenTipo.Classe: return ParseDeclClasse();
             case TokenTipo.Se: return ParseInstrucaoSe();
             case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
+            case TokenTipo.Para: return ParseInstrucaoParaCada();
             case TokenTipo.Romper: Passar(); return new InstrucaoRomper(_local);
             case TokenTipo.Continuar: Passar(); return new InstrucaoContinuar(_local);
             case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, ParseExpressao());
@@ -342,6 +343,18 @@ public class Parser
 
         return new InstrucaoEnquanto(_local, expressao, instrucoes);
     }
+    
+    private InstrucaoParaCada? ParseInstrucaoParaCada()
+    {
+        ConsumirToken(TokenTipo.Para);
+        ConsumirToken(TokenTipo.Cada);
+        var identificador = ConsumirToken(TokenTipo.Identificador);
+        ConsumirToken(TokenTipo.Em);
+        var vetor = ParseExpressao(); // TODO: Conferir se a expressão é enumerável
+        var instrucoes = ParseInstrucoes(); // até encontrar "fim"
+
+        return new InstrucaoParaCada(_local, identificador, vetor, instrucoes);
+    }
 
     private Expressao ParseExpressao(int precedenciaMinima = 0)
     {
@@ -358,16 +371,16 @@ public class Parser
             var expr_dir = ParseExpressao(proxPrecedenciaMinima);
 
             // Detectando problemas em tempo de compilação
-            if(opr.Tipo == TokenTipo.OperadorDiv && expr_dir is ExpressaoLiteral exprLit)
+            if (opr.Tipo == TokenTipo.OperadorDiv && expr_dir is ExpressaoLiteral exprLit)
             {
-                if ((exprLit.Valor is int intValue && intValue == 0) || 
+                if ((exprLit.Valor is int intValue && intValue == 0) ||
                     (exprLit.Valor is double doubleValue && doubleValue == 0.0))
                 {
                     throw new ErroDivisaoPorZero(_local);
                 }
 
             }
-            
+
             expr_esq = new ExpressaoBinaria(_local, expr_esq, opr, expr_dir);
         }
 

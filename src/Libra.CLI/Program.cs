@@ -45,16 +45,17 @@ internal static class Program
                         return;
                     }
                     var motor = new MotorLibra(opcoesMotor);
+                    string codigo = "";
                     try
                     {
-                        string codigo = File.ReadAllText(acaoPrincipal);
+                        codigo = File.ReadAllText(acaoPrincipal);
                     }
                     catch
                     {
                         Console.WriteLine("Não foi possível carregar o arquivo " + acaoPrincipal);
                     }
                     
-                    motor.Executar(acaoPrincipal);
+                    motor.Executar(codigo);
                     break;
             }
         }

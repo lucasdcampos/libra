@@ -83,7 +83,7 @@ public class MotorLibra
     {
         try
         {
-            var tokens = _tokenizador.Tokenizar(codigo);
+            var tokens = _tokenizador.Tokenizar(codigo.ReplaceLineEndings("\n"));
             var programa = _parser.Parse(tokens.ToArray());
             _interpretador = new Interpretador();
             _interpretador.ExecutarPrograma(programa);

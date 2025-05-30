@@ -47,9 +47,9 @@ public class Interpretador
 
     private static LocalToken ObterLocalAtual()
     {
-        if(_instancia == null)
+        if (_instancia == null)
             return new LocalToken();
-        
+
         return _instancia._local;
     }
 
@@ -57,7 +57,7 @@ public class Interpretador
     {
         _local = new LocalToken();
     }
-    
+
     public int ExecutarPrograma(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
     {
         Resetar();
@@ -70,7 +70,7 @@ public class Interpretador
 
     public void InterpretarInstrucoes(Instrucao[] instrucoes)
     {
-        for(int i = 0; i < instrucoes.Length; i++)
+        for (int i = 0; i < instrucoes.Length; i++)
         {
             InterpretarInstrucao(instrucoes[i]);
         }
@@ -78,11 +78,11 @@ public class Interpretador
 
     public void InterpretarInstrucao(Instrucao instrucao)
     {
-        if(instrucao is null)
+        if (instrucao is null)
             return;
 
         _local = instrucao.Local;
-        
+
         var acoes = new Dictionary<TipoInstrucao, Action>
         {
             { TipoInstrucao.Expressao, () => InterpretarInstrucaoExpressao((InstrucaoExpressao)instrucao) },
@@ -92,6 +92,7 @@ public class Interpretador
             { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
             //{ TipoInstrucao.AtribProp, () => InterpretarAtribProp((AtribuicaoPropriedade)instrucao) },
             { TipoInstrucao.Enquanto, () => InterpretarEnquanto((InstrucaoEnquanto)instrucao) },
+            { TipoInstrucao.ParaCada, () => InterpretarParaCada((InstrucaoParaCada)instrucao) },
             { TipoInstrucao.Se, () => InterpretarSe((InstrucaoSe)instrucao) },
             { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
             { TipoInstrucao.AtribIndice, () => InterpretarAtribIndice((AtribuicaoIndice)instrucao) },
@@ -106,7 +107,7 @@ public class Interpretador
 
     public void InterpretarInstrucaoExpressao(InstrucaoExpressao instrucao)
     {
-        if(instrucao.Expressao == null)
+        if (instrucao.Expressao == null)
             return;
 
         _ultimoRetorno = InterpretarExpressao(instrucao.Expressao);
@@ -137,25 +138,25 @@ public class Interpretador
 
     public void InterpretarSe(InstrucaoSe se)
     {
-        if(InterpretarExpressao<LibraInt>(se.Condicao).Valor != 0)
-            {
-                Ambiente.Pilha.EmpilharEscopo();
-                InterpretarInstrucoes(se.Corpo.ToArray());
-                Ambiente.Pilha.DesempilharEscopo();
-                return;
-            }
+        if (InterpretarExpressao<LibraInt>(se.Condicao).Valor != 0)
+        {
+            Ambiente.Pilha.EmpilharEscopo();
+            InterpretarInstrucoes(se.Corpo.ToArray());
+            Ambiente.Pilha.DesempilharEscopo();
+            return;
+        }
 
-        if(se.ListaSenaoSe == null || se.ListaSenaoSe.Count == 0)
+        if (se.ListaSenaoSe == null || se.ListaSenaoSe.Count == 0)
             return;
 
-        foreach(var inst in se.ListaSenaoSe)
+        foreach (var inst in se.ListaSenaoSe)
         {
-            if(InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
+            if (InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
             {
                 Ambiente.Pilha.EmpilharEscopo();
                 InterpretarInstrucoes(inst.Corpo.ToArray());
                 Ambiente.Pilha.DesempilharEscopo();
-                
+
                 return;
             }
         }
@@ -165,7 +166,7 @@ public class Interpretador
     {
         // TODO: Otimizar casos em que não é necessário calcular a expressão toda vez,
         // como em "enquanto 1", por exemplo.
-        while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
+        while (InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
             Ambiente.Pilha.EmpilharEscopo();
             foreach (var i in enquanto.Instrucoes)
@@ -185,17 +186,42 @@ public class Interpretador
         }
     }
 
+    public void InterpretarParaCada(InstrucaoParaCada instrucao)
+    {
+        var expr = instrucao.Vetor;
+
+        var vetor = InterpretarExpressao<LibraVetor>(expr);
+
+        foreach (var item in vetor.Valor)
+        {
+            Ambiente.Pilha.EmpilharEscopo();
+            try
+            {
+                Ambiente.DefinirGlobal(instrucao.Identificador.Valor.ToString(), item);
+                InterpretarInstrucoes(instrucao.Instrucoes);
+            }
+            catch (ExcecaoRomper e)
+            {
+                Ambiente.Pilha.DesempilharEscopo();
+                return;
+            }
+            // TODO: Adicionar 'continuar'
+        }
+
+        Ambiente.Pilha.DesempilharEscopo();
+    }
+
     // TODO: Arrumar
     public void InterpretarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
 
-        if(string.IsNullOrWhiteSpace(identificador))
+        if (string.IsNullOrWhiteSpace(identificador))
             throw new Erro("Identificador inválido!", _local);
-        
+
         /*if(_programa.FuncaoExiste(identificador))
             throw new ErroFuncaoJaDefinida(identificador, _local);*/
-        
+
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
         Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, true, "Func", false);
