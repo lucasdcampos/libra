@@ -10,7 +10,7 @@ public class Parser
 
     private static readonly Dictionary<TokenTipo, int> _precedenciaOperadores = new()
     {
-        { TokenTipo.Ponto, 999 }, // sempre deve ser o primeiro (a.b)
+        { TokenTipo.Ponto, 999 }, // sempre deve ser o primeiro (a.b) -- EDIT: Que imbecilidade é essa?
         { TokenTipo.OperadorPot, 4 },
         { TokenTipo.OperadorMult, 3 },
         { TokenTipo.OperadorDiv, 3 },

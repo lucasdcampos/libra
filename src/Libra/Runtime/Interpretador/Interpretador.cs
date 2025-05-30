@@ -63,16 +63,9 @@ public class Interpretador
         Resetar();
         _shell = shell;
 
-        try
-        {
-            InterpretarInstrucoes(programa.Instrucoes);
-            return 0;
-        }
-        catch(Exception e)
-        {
-            Ambiente.ExibirErro(e);
-            return 1;
-        }
+        InterpretarInstrucoes(programa.Instrucoes);
+
+        return 0;
     }
 
     public void InterpretarInstrucoes(Instrucao[] instrucoes)
@@ -175,20 +168,18 @@ public class Interpretador
         while(InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
             Ambiente.Pilha.EmpilharEscopo();
-            foreach(var i in enquanto.Instrucoes)
+            foreach (var i in enquanto.Instrucoes)
             {
                 try
                 {
                     InterpretarInstrucao(i);
                 }
-                catch (Exception e)
+                catch (ExcecaoRomper e)
                 {
-                    if(e is ExcecaoRomper)
-                    {
-                        Ambiente.Pilha.DesempilharEscopo();
-                        return;
-                    }
+                    Ambiente.Pilha.DesempilharEscopo();
+                    return;
                 }
+                // TODO: Adicionar 'continuar'
             }
             Ambiente.Pilha.DesempilharEscopo();
         }
@@ -292,7 +283,7 @@ public class Interpretador
         }
 
         // Caso a função não tenha um retorno explicito
-        return null;
+        return LibraObjeto.Inicializar("Nulo");
     }
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
@@ -378,5 +369,4 @@ public class Interpretador
 
         throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado", _local);
     }
-
 }
