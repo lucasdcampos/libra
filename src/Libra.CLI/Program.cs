@@ -27,15 +27,11 @@ internal static class Program
             switch (acaoPrincipal.ToLowerInvariant())
             {
                 case "novo":
-                    if (argumentosParaProcessar.Any()) {
-                        Console.WriteLine("Erro: O comando 'novo' não aceita argumentos adicionais.");
-                        return;
-                    }
-                    Comandos.IniciarProjeto();
+                    Comandos.IniciarProjeto(argumentosParaProcessar);
                     break;
 
                 case "rodar":
-                    ExecutarComandoRodar(opcoesMotor, argumentosParaProcessar);
+                    Comandos.RodarProjeto(argumentosParaProcessar);
                     break;
 
                 default:
