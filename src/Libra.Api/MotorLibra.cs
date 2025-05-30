@@ -105,7 +105,7 @@ public class MotorLibra
             Console.WriteLine($"Erro: {e.Mensagem}\n{e.Local}");
             if (_opcoes.NivelDebug > 0)
             {
-                Console.WriteLine($"Stack Trace: {e.StackTrace}");
+                Console.WriteLine($"Pilha de Chamadas: {e.StackTrace}");
             }
         }
         catch (Exception ex)
