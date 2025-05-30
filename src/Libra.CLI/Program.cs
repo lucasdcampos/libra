@@ -77,7 +77,7 @@ internal static class Program
             }
             catch (Exception e)
             {
-                Erro.MensagemBug(e);
+                Ambiente.ExibirErro(e);
             }
         }
     }

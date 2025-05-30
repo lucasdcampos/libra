@@ -58,7 +58,7 @@ public List<Token> Tokenizar(string source)
         }
         catch (Exception e)
         {
-            Erro.MensagemBug(e);
+            Ambiente.ExibirErro(e);
         }
 
         return null;

@@ -70,7 +70,7 @@ public class Interpretador
         }
         catch(Exception e)
         {
-            Erro.MensagemBug(e);
+            Ambiente.ExibirErro(e);
             return 1;
         }
     }

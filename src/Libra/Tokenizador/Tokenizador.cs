@@ -85,7 +85,7 @@ public class Tokenizador
         }
         catch (Exception e)
         {
-            Erro.MensagemBug(e);
+            Ambiente.ExibirErro(e);
         }
 
         return null;

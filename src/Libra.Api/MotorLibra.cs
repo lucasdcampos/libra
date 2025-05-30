@@ -100,9 +100,17 @@ public class MotorLibra
                     throw new NotSupportedException($"Modo de execução {_opcoes.ModoExecucao} não suportado.");
             }
         }
+        catch (Erro e)
+        {
+            Console.WriteLine($"Erro: {e.Mensagem}\n{e.Local}");
+            if (_opcoes.NivelDebug > 0)
+            {
+                Console.WriteLine($"Stack Trace: {e.StackTrace}");
+            }
+        }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erro: {ex.Message}");
+            Console.WriteLine($"Ocorreu um erro{ex.Message}");
         }
 
         return Interpretador.Saida.ObterValor();
