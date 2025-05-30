@@ -43,52 +43,44 @@ public class Tokenizador
         _posicao = 0;
         
         var texto = "";
-        try
+ 
+        while (Atual() != '\0')
         {
-            while (Atual() != '\0')
+            if(Atual() == '0')
             {
-                if(Atual() == '0')
+                if(Proximo(1) == 'b')
                 {
-                    if(Proximo(1) == 'b')
-                    {
-                        ConsumirChar();
-                        ConsumirChar();
-                        TokenizarBinario();
-                        continue;
-                    }
-                    if(Proximo(1) == 'x')
-                    {
-                        ConsumirChar();
-                        ConsumirChar();
-                        TokenizarHexa();
-                        continue;
-                    }
+                    ConsumirChar();
+                    ConsumirChar();
+                    TokenizarBinario();
+                    continue;
                 }
-                if(char.IsDigit(Atual()))
+                if(Proximo(1) == 'x')
                 {
-                    TokenizarNumero();
-                }
-
-                else if(char.IsLetter(Atual()) || Atual() == '_')
-                {
-                    TokenizarPalavra();
-                }
-                else 
-                {
-                    TokenizarSimbolo();
+                    ConsumirChar();
+                    ConsumirChar();
+                    TokenizarHexa();
+                    continue;
                 }
             }
+            if(char.IsDigit(Atual()))
+            {
+                TokenizarNumero();
+            }
+
+            else if(char.IsLetter(Atual()) || Atual() == '_')
+            {
+                TokenizarPalavra();
+            }
+            else 
+            {
+                TokenizarSimbolo();
+            }
+        }
         
-            AdicionarTokenALista(TokenTipo.FimDoArquivo);
+        AdicionarTokenALista(TokenTipo.FimDoArquivo);
 
-            return _tokens;
-        }
-        catch (Exception e)
-        {
-            Ambiente.ExibirErro(e);
-        }
-
-        return null;
+        return _tokens;
     }
 
     private void TokenizarBinario()
@@ -154,7 +146,6 @@ public class Tokenizador
         else
             throw new Erro("Esperado digito Hexadecimal, recebido: " + Atual(), _local);
         
-        
         while (DigitoHexadecimal(Atual()))
         {
             buffer.Append(ConsumirChar());
@@ -182,12 +173,12 @@ public class Tokenizador
         {
             // Ignorando underscores em números, facilita visualização
             // de números grandes. Ex: 1_000_000_000 = 1000000000
-            if(Atual() == '_')
+            if (Atual() == '_')
             {
                 ConsumirChar();
                 continue;
             }
-                
+
             buffer.Append(ConsumirChar());
             if (Atual() == '.')
             {
@@ -198,11 +189,21 @@ public class Tokenizador
                 ponto = true;
             }
         }
-
-        if (ponto)
-            AdicionarTokenALista(TokenTipo.NumeroLiteral, double.Parse(buffer.ToString()));
-        else
-            AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(buffer.ToString()));
+        try
+        {
+            if (ponto)
+            {
+                AdicionarTokenALista(TokenTipo.NumeroLiteral, double.Parse(buffer.ToString()));
+            }
+            else
+            {
+                AdicionarTokenALista(TokenTipo.NumeroLiteral, int.Parse(buffer.ToString()));
+            }
+        }
+        catch
+        {
+            throw new ErroAcessoNulo($" Não foi possível converter {buffer} para" + (ponto ? " Real" : " Int"));
+        }
     }
 
     private string TokenizarIdentificador()
@@ -235,7 +236,6 @@ public class Tokenizador
                 ImportarArquivo(arquivo + ".libra");
                 return;
             }
-                
             
             ConsumirChar(); // Consumindo `"`
             var caminhoArquivo = new StringBuilder();
@@ -528,11 +528,12 @@ public class Tokenizador
         }
     }
 
+    // TODO: Esquecer essa porcaria e importar arquivo com base no caminho do arquivo atual
     private void ImportarArquivo(string caminho)
     {
-        if(_arquivosImportados.Contains(caminho))
+        if (_arquivosImportados.Contains(caminho))
             return;
-        
+
         _arquivosImportados.Add(caminho);
 
         string caminhoExecutavel = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "biblioteca/" + caminho);
@@ -543,8 +544,9 @@ public class Tokenizador
 
         string caminhoFinalArquivo = File.Exists(caminhoExecutavel) ? caminhoExecutavel : caminhoUsuario;
 
+        // Cruzando os dedos para que a leitura não falhe. MELHORAR ISSO!
         string codigoArquivo = File.ReadAllText(caminhoFinalArquivo).ReplaceLineEndings("\n");
-        
+
         var novosTokens = new Tokenizador().Tokenizar(codigoArquivo, caminho);
 
         for (int i = 0; i < novosTokens.Count - 1; i++)
