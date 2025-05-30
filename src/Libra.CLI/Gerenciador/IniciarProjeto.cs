@@ -66,10 +66,9 @@ internal static class IniciarNovoProjeto
             File.WriteAllText(nomeArquivoConfig, conteudoJson);
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Arquivo '{nomeArquivoConfig}' criado com sucesso no diretório atual!");
+            Console.WriteLine($"Arquivo '{_nomePadraoProjeto}/{nomeArquivoConfig}' criado com sucesso!");
             Console.ResetColor();
-            Console.WriteLine("Você pode editá-lo para ajustar as configurações do seu projeto Libra.");
-            Console.WriteLine($"Não se esqueça de criar o arquivo principal: '{codigoPrincipal}'");
+            Console.WriteLine($"Use 'cd {_nomePadraoProjeto}' e depois 'libra rodar' para executar seu código!");
 
         }
         catch (Exception ex)
