@@ -1,5 +1,7 @@
-importar http
+erro("http.libra não foi implementado")
 
+/*
+Exemplo de uso:
 var servidor = criar_servidor(3000)
 
 servidor.get = funcao(req)
@@ -11,4 +13,4 @@ servidor.get = funcao(req)
         retornar Res(200, "Teste")
     fim
 fim
-
+*/
