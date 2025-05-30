@@ -60,6 +60,9 @@ public class LibraBase : IModulo
             case "matematica":
                 new LibraMatematica().RegistrarFuncoes(_programa);
                 break;
+            case "sistema":
+                new LibraSistema().RegistrarFuncoes(_programa);
+                break;
         }
 
         return null;

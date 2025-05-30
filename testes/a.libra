@@ -1,11 +1,5 @@
-para cada i em intervalo(0, 10, 1)
-    exibir(i, " ")
-fim
+importar sistema
 
-para cada i em intervalo(10, 0, -1)
-    exibir(i, " ")
-fim
+var conteudo = ler_arquivo("testes/a.libra")
 
-para cada i em intervalo(0, 10, 2)
-    exibir(i, " ")
-fim
+exibir(conteudo)
