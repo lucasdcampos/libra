@@ -108,6 +108,10 @@ public class MotorLibra
                 Console.WriteLine($"Pilha de Chamadas: {e.StackTrace}");
             }
         }
+        catch (ExcecaoSaida)
+        {
+            // Não faz nada, programa foi encerrado com sucesso
+        }
         catch (Exception ex)
         {
             Console.WriteLine($"Ocorreu um erro{ex.Message}");
