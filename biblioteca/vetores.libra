@@ -2,7 +2,42 @@
 // Arquivo: vetores.libra
 // Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
 
-// Exibe todos os elementos de um Vetor
+// Função que gera uma progressão aritmética (PA) em forma de vetor.
+// Parâmetros:
+//   a: valor inicial da PA
+//   n: valor limite (exclusivo). A PA para antes de atingir ou ultrapassar este valor.
+//   r: razão da PA (diferente de zero)
+// Retorna:
+//   Um vetor contendo os elementos da PA, respeitando a direção (crescente ou decrescente)
+//   e parando antes de atingir o valor limite.
+funcao intervalo(a, n, r)
+    var i = 0
+    se r > 0 entao
+        var tamanho = int((n-a) / r)
+        var vetor = [tamanho]
+        enquanto i < tamanho repetir
+            vetor[i] = a + i * r
+            i = i + 1
+        fim
+        retornar vetor
+    senao se r < 0 entao
+        var tamanho = int((a-n) / (-1 * r))
+        var vetor = [tamanho]
+        enquanto i < tamanho repetir
+            vetor[i] = a + i * r
+            i = i + 1
+        fim
+        retornar vetor
+    senao
+        erro("Razão r não pode ser zero!")
+    fim
+fim
+
+// Função que exibe todos os elementos de um vetor.
+// Parâmetros:
+//   vetor: vetor cujos elementos serão exibidos.
+// Retorna:
+//   Nulo (procedimento apenas para exibição dos elementos).
 funcao mostrarVetor(vetor: Vetor)
     var n = 0
     exibir("{ ", "")
@@ -15,7 +50,12 @@ funcao mostrarVetor(vetor: Vetor)
     exibir("}")
 fim
 
-// Retorna um novo Vetor com o elemento adicionado ao final
+// Função que retorna um novo vetor com o elemento adicionado ao final.
+// Parâmetros:
+//   vetor: vetor original.
+//   elemento: objeto a ser adicionado ao final do vetor.
+// Retorna:
+//   Um novo vetor contendo todos os elementos originais e o novo elemento no final.
 funcao incluir(vetor: Vetor, elemento: Objeto) -> Vetor
     var temp = [tamanho(vetor)+1]
     var n = 0
@@ -29,7 +69,12 @@ funcao incluir(vetor: Vetor, elemento: Objeto) -> Vetor
     retornar temp
 fim
 
-// Retorna um novo Vetor com o elemento do indice removido
+// Função que retorna um novo vetor com o elemento do índice especificado removido.
+// Parâmetros:
+//   vetor: vetor original.
+//   indice: posição do elemento a ser removido.
+// Retorna:
+//   Um novo vetor sem o elemento da posição informada.
 funcao remover(vetor: Vetor, indice: Int) -> Vetor
     var temp = [tamanho(vetor) - 1]
     var n = 0
@@ -46,12 +91,21 @@ funcao remover(vetor: Vetor, indice: Int) -> Vetor
     retornar temp
 fim
 
-// Retorna se o Vetor está vazio
+// Função que verifica se um vetor está vazio.
+// Parâmetros:
+//   vetor: vetor a ser verificado.
+// Retorna:
+//   1 se o vetor estiver vazio, 0 caso contrário.
 funcao estaVazio(vetor: Vetor) -> Int
     retornar tamanho(vetor) == 0
 fim
 
-// Retorna um novo Vetor com o elemento adicionado ao inicio
+// Função que retorna um novo vetor com o elemento adicionado ao início.
+// Parâmetros:
+//   vetor: vetor original.
+//   elemento: objeto a ser adicionado no início do vetor.
+// Retorna:
+//   Um novo vetor com o elemento na primeira posição, seguido pelos elementos originais.
 funcao adicionarInicio(vetor: Vetor, elemento: Objeto) -> Vetor
     var temp = [tamanho(vetor) + 1]
     temp[0] = elemento
@@ -65,7 +119,11 @@ funcao adicionarInicio(vetor: Vetor, elemento: Objeto) -> Vetor
     retornar temp
 fim
 
-// Retorna o reverso de um Vetor
+// Função que retorna o reverso de um vetor.
+// Parâmetros:
+//   vetor: vetor a ser invertido.
+// Retorna:
+//   Um novo vetor com os elementos em ordem inversa ao vetor original.
 funcao reverter(vetor: Vetor) -> Vetor
     var temp = [tamanho(vetor)]
     var n = 0
@@ -78,7 +136,11 @@ funcao reverter(vetor: Vetor) -> Vetor
     retornar temp
 fim
 
-// Retorna o maior elemento de um Vetor
+// Função que retorna o maior elemento de um vetor.
+// Parâmetros:
+//   vetor: vetor de onde será encontrado o maior valor.
+// Retorna:
+//   O maior elemento presente no vetor.
 funcao maiorElemento(vetor: Vetor)
     se tamanho(vetor) == 0 entao
         retornar nulo
@@ -97,6 +159,11 @@ funcao maiorElemento(vetor: Vetor)
     retornar maior
 fim
 
+// Função que retorna um novo vetor com os elementos ordenados.
+// Parâmetros:
+//   vetor: vetor original.
+// Retorna:
+//   Um novo vetor com os elementos em ordem crescente.
 funcao ordenar(vetor: Vetor) -> Vetor
     var i = 0
     enquanto i < tamanho(vetor) repetir

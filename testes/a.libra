@@ -1,45 +1,10 @@
-// Função que gera uma progressão aritmética (PA) em forma de vetor.
-// Parâmetros:
-//   a: valor inicial da PA
-//   n: valor limite (exclusivo). A PA para antes de atingir ou ultrapassar este valor.
-//   r: razão da PA (diferente de zero)
-// Retorna:
-//   Um vetor contendo os elementos da PA, respeitando a direção (crescente ou decrescente)
-//   e parando antes de atingir o valor limite.
-funcao intervalo(a, n, r)
-    var i = 0
-    se r > 0 entao
-        var tamanho = int((n-a) / r)
-        var vetor = [tamanho]
-        enquanto i < tamanho repetir
-            vetor[i] = a + i * r
-            i = i + 1
-        fim
-        retornar vetor
-    senao se r < 0 entao
-        var tamanho = int((a-n) / (-1 * r))
-        var vetor = [tamanho]
-        enquanto i < tamanho repetir
-            vetor[i] = a + i * r
-            i = i + 1
-        fim
-        retornar vetor
-    senao
-        erro("Razão r não pode ser zero!")
-    fim
-fim
-
 para cada i em intervalo(0, 10, 1)
     exibir(i, " ")
 fim
 
-exibir(" ")
-
 para cada i em intervalo(10, 0, -1)
     exibir(i, " ")
 fim
-
-exibir(" ")
 
 para cada i em intervalo(0, 10, 2)
     exibir(i, " ")
