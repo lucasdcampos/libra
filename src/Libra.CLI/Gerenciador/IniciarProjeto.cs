@@ -9,7 +9,7 @@ internal static class IniciarNovoProjeto
         _nomePadraoProjeto = nome;
         string codigoPath = Path.Combine(nome, "codigo");
         string arquivoInicialPath = Path.Combine(codigoPath, "inicio.libra");
-        string conteudoInicial = "exibir(\"Olá, Mundo!\")";
+        string conteudoInicial = "//Para mais informações, visite: https://docs.linguagem-libra.github.io\nexibir(\"Olá, Mundo!\")";
 
         // Cria o diretório principal e o subdiretório "codigo"
         Directory.CreateDirectory(codigoPath);

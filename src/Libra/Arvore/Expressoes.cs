@@ -74,12 +74,12 @@ namespace Libra.Arvore
 
     public class ExpressaoPropriedade : Expressao
     {
-        public string Identificador { get; private set ;}
+        public Expressao Alvo { get; private set ;}
         public string Propriedade { get; private set ;}
-        public ExpressaoPropriedade(LocalToken local, string identificador, string prop)
+        public ExpressaoPropriedade(LocalToken local, Expressao alvo, string prop)
         {
             Local = local;
-            Identificador = identificador;
+            Alvo = alvo;
             Propriedade = prop;
             TipoExpr = TipoExpressao.ExpressaoPropriedade;
         }
@@ -112,15 +112,15 @@ namespace Libra.Arvore
 
     public class ExpressaoChamadaMetodo : Expressao
     {
-        public string Identificador { get; private set; }
+        public Expressao Alvo { get; private set; }
         public ExpressaoChamadaFuncao Chamada { get; private set ;}
 
-        public ExpressaoChamadaMetodo(LocalToken local, string ident, ExpressaoChamadaFuncao chamada)
+        public ExpressaoChamadaMetodo(LocalToken local, Expressao alvo, ExpressaoChamadaFuncao chamada)
         {
             Local = local;
             Tipo = TipoInstrucao.ChamadaMetodo;
             TipoExpr = TipoExpressao.ExpressaoChamadaMetodo;
-            Identificador = ident;
+            Alvo = alvo;
             Chamada = chamada;
         }
 

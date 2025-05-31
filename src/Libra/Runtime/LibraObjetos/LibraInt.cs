@@ -26,7 +26,7 @@ public class LibraInt : LibraObjeto
 
     public override string ToString()
     {
-        return "Int";
+        return TiposPadrao.Int.ToString();
     }
     
     public override LibraObjeto Converter(string novoTipo)

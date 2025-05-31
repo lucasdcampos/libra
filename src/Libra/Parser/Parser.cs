@@ -10,7 +10,6 @@ public class Parser
 
     private static readonly Dictionary<TokenTipo, int> _precedenciaOperadores = new()
     {
-        { TokenTipo.Ponto, 999 }, // sempre deve ser o primeiro (a.b) -- EDIT: Que imbecilidade é essa?
         { TokenTipo.OperadorPot, 4 },
         { TokenTipo.OperadorMult, 3 },
         { TokenTipo.OperadorDiv, 3 },
@@ -97,29 +96,27 @@ public class Parser
         var expr = ParseExpressao();
 
         if (expr != null)
+        {
+            if (expr.TipoExpr == TipoExpressao.ExpressaoPropriedade &&
+                Atual().Tipo == TokenTipo.OperadorDefinir)
+            {
+                ConsumirToken(TokenTipo.OperadorDefinir);
+
+                return ParseAtribProp((ExpressaoPropriedade)expr);
+            }
+
             return new InstrucaoExpressao(_local, expr);
+        }
+            
 
         throw new Erro($"Instrução inválida {atual}", _local);
     }
 
-    private Instrucao? ParseAtribProp()
+    private Instrucao? ParseAtribProp(ExpressaoPropriedade alvo)
     {
-        string ident = ConsumirToken().Valor.ToString();
-        Passar(); // .
-        string prop = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-
-        // Não é uma atribuição de propriedade, mas sim chamada de método
-        if(TentarConsumirToken(TokenTipo.AbrirParen))
-        {
-            var args = ParseArgumentos();
-            ConsumirToken(TokenTipo.FecharParen);
-            return new ExpressaoChamadaMetodo(_local, ident, new ExpressaoChamadaFuncao(_local, prop, args));
-        }
-
-        ConsumirToken(TokenTipo.OperadorDefinir);
         var expr = ParseExpressao();
 
-        return new AtribuicaoPropriedade(_local, ident, prop, expr);
+        return new AtribuicaoPropriedade(_local, alvo, expr);
     }
 
     private Instrucao? ParseAtribVar()
@@ -150,7 +147,7 @@ public class Parser
             constante = true;
         else
             ConsumirToken(TokenTipo.Var);
-        
+
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
         bool tipoModificavel = false;
@@ -176,7 +173,7 @@ public class Parser
         var expressao = ParseExpressao();
 
         if(Interpretador.Flags.ForcarTiposEstaticos && tipo == "Objeto")
-            throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
+            throw new Erro("Obrigatório especificar tipo quando a flag --estrito estiver marcada.", _local);
 
         return new DeclaracaoVar(_local, identificador, expressao, tipo, tipoModificavel, constante);
     }
@@ -360,6 +357,15 @@ public class Parser
     {
         var expr_esq = ParseExpressaoTermo();
 
+        while (Atual().Tipo == TokenTipo.Ponto)
+        {
+            ConsumirToken();
+
+            var tokenIdent = ConsumirToken(TokenTipo.Identificador);
+
+            expr_esq = new ExpressaoPropriedade(_local, expr_esq, tokenIdent.Valor.ToString());
+        }
+
         while (true)
         {
             if (Atual() == null || PrioridadeOperador(Atual()) == null ||
@@ -409,16 +415,6 @@ public class Parser
         return new ExpressaoInicializacaoVetor(_local, expressoes);
     }
 
-    // Identificador que possui ponto, ex: pessoa.nome
-    private Token ParseIdentificadorComposto()
-    {
-        var final = ConsumirToken(TokenTipo.Identificador).Valor.ToString() + ".";
-        ConsumirToken(TokenTipo.Ponto);
-        final += ConsumirToken(TokenTipo.Identificador).Valor;
-        
-        return new Token(TokenTipo.Identificador, _local, final);
-    }
-
     private Expressao ParseExpressaoTermo()
     {
         switch (Atual().Tipo)
@@ -444,19 +440,6 @@ public class Parser
                 {
                     return ParseExpressaoAcessoVetor();
                 }
-                /*else if(Proximo(1).Tipo == TokenTipo.Ponto)
-                {
-                    var ident = ConsumirToken().Valor.ToString();
-                    Passar();
-                    var prop = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-                    if(TentarConsumirToken(TokenTipo.AbrirParen))
-                    {
-                        var args = ParseArgumentos();
-                        ConsumirToken(TokenTipo.FecharParen);
-                        return new ExpressaoChamadaMetodo(_local, ident, new ExpressaoChamadaFuncao(_local, prop, args));
-                    }
-                    return new ExpressaoPropriedade(_local, ident, prop);
-                }*/
                 return new ExpressaoVariavel(_local, ConsumirToken());
 
             case TokenTipo.AbrirParen:

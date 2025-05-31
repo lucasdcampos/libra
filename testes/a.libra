@@ -1,5 +1,8 @@
-importar b
-importar matematica
+classe Pessoa
+    var nome = "Carlos"
+fim
 
-exibir(B)
-exibir(PI)
+var p = Pessoa()
+exibir(p.nome)
+p.nome = "Joao"
+exibir(p.nome)

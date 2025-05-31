@@ -5,4 +5,6 @@
 // Ativa o módulo internamente
 __ativarmodulo__("json")
 
-// Não há nada aqui pois a implementação é feita pelo lado do C#!
+funcao json_lerint(documento, prop)
+    retornar int(json_ler(documento, prop))
+fim

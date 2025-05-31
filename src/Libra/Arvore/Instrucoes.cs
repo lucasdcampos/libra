@@ -283,17 +283,15 @@ namespace Libra.Arvore
 
     public class AtribuicaoPropriedade : Instrucao
     {
-        public AtribuicaoPropriedade(LocalToken local, string identificador, string propriedade, Expressao expressao)
+        public AtribuicaoPropriedade(LocalToken local, ExpressaoPropriedade alvo, Expressao expressao)
         {
             Tipo = TipoInstrucao.AtribProp;
             Expressao = expressao;
-            Identificador = identificador;
-            Propriedade = propriedade;
+            Alvo = alvo;
             Local = local;
         }
 
-        public string Identificador { get; private set; }
-        public string Propriedade { get; private set; }
+        public ExpressaoPropriedade Alvo { get; private set; }
         public Expressao Expressao { get; private set; }
 
         public override object Aceitar(IVisitor visitor)

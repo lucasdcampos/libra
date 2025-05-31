@@ -90,7 +90,7 @@ public class Interpretador
             { TipoInstrucao.DeclFunc, () => InterpretarFuncao((DefinicaoFuncao)instrucao) },
             { TipoInstrucao.DeclClasse, () => InterpretarInstrucaoClasse((DefinicaoTipo)instrucao) },
             { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
-            //{ TipoInstrucao.AtribProp, () => InterpretarAtribProp((AtribuicaoPropriedade)instrucao) },
+            { TipoInstrucao.AtribProp, () => InterpretarAtribProp((AtribuicaoPropriedade)instrucao) },
             { TipoInstrucao.Enquanto, () => InterpretarEnquanto((InstrucaoEnquanto)instrucao) },
             { TipoInstrucao.ParaCada, () => InterpretarParaCada((InstrucaoParaCada)instrucao) },
             { TipoInstrucao.Se, () => InterpretarSe((InstrucaoSe)instrucao) },
@@ -115,9 +115,9 @@ public class Interpretador
 
     public void InterpretarAtribProp(AtribuicaoPropriedade instrucao)
     {
-        var obj = Ambiente.Pilha.ObterVariavel(instrucao.Identificador).Valor;
+        var obj = LibraObjeto.ParaLibraObjeto(InterpretarExpressao(instrucao.Alvo));
 
-        obj.AtribuirPropriedade(instrucao.Propriedade, InterpretarExpressao(instrucao.Expressao));
+        obj.AtribuirPropriedade(instrucao.Alvo.Propriedade, InterpretarExpressao(instrucao.Expressao));
     }
 
     public void InterpretarAtribIndice(AtribuicaoIndice instrucao)
@@ -211,7 +211,6 @@ public class Interpretador
         Ambiente.Pilha.DesempilharEscopo();
     }
 
-    // TODO: Arrumar
     public void InterpretarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
@@ -219,12 +218,9 @@ public class Interpretador
         if (string.IsNullOrWhiteSpace(identificador))
             throw new Erro("Identificador inválido!", _local);
 
-        /*if(_programa.FuncaoExiste(identificador))
-            throw new ErroFuncaoJaDefinida(identificador, _local);*/
-
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
-        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, true, "Func", false);
+        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, true, TiposPadrao.Func.ToString(), false);
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, Expressao[] argumentos) 
@@ -296,7 +292,7 @@ public class Interpretador
         catch(ExcecaoRetorno retorno)
         {
             var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
-            if(funcao.TipoRetorno != resultado.Nome && funcao.TipoRetorno != "Objeto")
+            if(funcao.TipoRetorno != resultado.Nome && funcao.TipoRetorno != TiposPadrao.Objeto.ToString())
             {
                 return resultado.Converter(funcao.TipoRetorno);
             }
@@ -309,7 +305,7 @@ public class Interpretador
         }
 
         // Caso a função não tenha um retorno explicito
-        return LibraObjeto.Inicializar("Nulo");
+        return LibraObjeto.Inicializar(TiposPadrao.Nulo.ToString());
     }
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
