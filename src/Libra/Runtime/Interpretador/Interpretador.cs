@@ -97,7 +97,8 @@ public class Interpretador
             { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
             { TipoInstrucao.AtribIndice, () => InterpretarAtribIndice((AtribuicaoIndice)instrucao) },
             { TipoInstrucao.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
-            { TipoInstrucao.Romper, () => throw new ExcecaoRomper() }
+            { TipoInstrucao.Romper, () => throw new ExcecaoRomper() },
+            {TipoInstrucao.Tentar, () => InterpretarTentar((InstrucaoTentar)instrucao)}
         };
 
         // Executa a ação associada ao tipo, se existir.
@@ -111,6 +112,26 @@ public class Interpretador
             return;
 
         _ultimoRetorno = InterpretarExpressao(instrucao.Expressao);
+    }
+
+    public void InterpretarTentar(InstrucaoTentar instrucao)
+    {
+        try
+        {
+            Ambiente.Pilha.EmpilharEscopo();
+            InterpretarInstrucoes(instrucao.InstrucoesTentar);
+            Ambiente.Pilha.DesempilharEscopo();
+        }
+        catch (Erro err)
+        {
+            Ambiente.Pilha.DesempilharEscopo(); // Desempilhando escopo do "Tentar"
+
+            Ambiente.Pilha.EmpilharEscopo();
+            Ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem));
+            InterpretarInstrucoes(instrucao.InstrucoesCapturar);
+            Ambiente.Pilha.DesempilharEscopo();
+        }
+
     }
 
     public void InterpretarAtribProp(AtribuicaoPropriedade instrucao)

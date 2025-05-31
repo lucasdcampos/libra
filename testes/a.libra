@@ -1,8 +1,8 @@
-classe Pessoa
-    var nome = "Carlos"
+tentar
+    var x = 1/(1-1)
+capturar err
+    exibir("Algo deu errado: " + err)
 fim
 
-var p = Pessoa()
-exibir(p.nome)
-p.nome = "Joao"
-exibir(p.nome)
+exibir("Aplicação segue executando..")
+

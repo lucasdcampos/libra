@@ -21,7 +21,8 @@ namespace Libra.Arvore
         ParaCada,
         Romper,
         Continuar,
-        Retornar
+        Retornar,
+        Tentar
     }
 
     public abstract class Instrucao
@@ -254,6 +255,28 @@ namespace Libra.Arvore
             Local = local;
         }
 
+        public override object Aceitar(IVisitor visitor)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class InstrucaoTentar : Instrucao
+    {
+        public Instrucao[] InstrucoesTentar { get; private set; }
+        public string VariavelErro { get; private set; }
+        public Instrucao[] InstrucoesCapturar { get; private set; }
+
+        public InstrucaoTentar(LocalToken local, Instrucao[] tentar, string variavelErro, Instrucao[] capturar)
+        {
+            Local = local;
+            InstrucoesTentar = tentar;
+            VariavelErro = variavelErro;
+            InstrucoesCapturar = capturar;
+
+            Tipo = TipoInstrucao.Tentar;
+        }
+        
         public override object Aceitar(IVisitor visitor)
         {
             throw new NotImplementedException();

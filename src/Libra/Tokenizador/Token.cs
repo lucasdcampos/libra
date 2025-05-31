@@ -80,6 +80,8 @@ public enum TokenTipo
     Romper,
     Continuar,
     Retornar,
+    Tentar,
+    Capturar,
     Fim,    
 }
 

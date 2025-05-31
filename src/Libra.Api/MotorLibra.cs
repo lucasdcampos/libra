@@ -90,7 +90,8 @@ public class MotorLibra
         }
         catch (Erro e)
         {
-            Console.WriteLine($"Erro: {e.Mensagem}\n{e.Local}");
+            e.ExibirFormatado();
+
             if (_opcoes.NivelDebug > 0)
             {
                 Console.WriteLine($"Pilha de Chamadas: {e.StackTrace}");

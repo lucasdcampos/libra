@@ -29,6 +29,8 @@ public class Tokenizador
         { "romper", TokenTipo.Romper },
         { "continuar", TokenTipo.Continuar },
         { "retornar", TokenTipo.Retornar },
+        { "tentar", TokenTipo.Tentar },
+        { "capturar", TokenTipo.Capturar },
         { "entao", TokenTipo.Entao },
         { "fim", TokenTipo.Fim },
         { "nulo", TokenTipo.Nulo },

@@ -83,6 +83,7 @@ public class Parser
             case TokenTipo.Romper: Passar(); return new InstrucaoRomper(_local);
             case TokenTipo.Continuar: Passar(); return new InstrucaoContinuar(_local);
             case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, ParseExpressao());
+            case TokenTipo.Tentar: return ParseInstrucaoTentar();
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return ParseExpressaoChamadaFuncao();
@@ -117,6 +118,18 @@ public class Parser
         var expr = ParseExpressao();
 
         return new AtribuicaoPropriedade(_local, alvo, expr);
+    }
+    private Instrucao? ParseInstrucaoTentar()
+    {
+        ConsumirToken(TokenTipo.Tentar);
+
+        Instrucao[] blocoTentar = ParseInstrucoes(TokenTipo.Capturar);
+
+        string variavelErro = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+
+        Instrucao[] blocoCapturar = ParseInstrucoes();
+
+        return new InstrucaoTentar(_local, blocoTentar, variavelErro, blocoCapturar);
     }
 
     private Instrucao? ParseAtribVar()

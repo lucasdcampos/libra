@@ -22,7 +22,6 @@ public class Erro : Exception
         this.dica = dica;
 
         AtribuirCategoria();
-        ExibirErro();
     }
 
     protected Erro(int codigo, string mensagem, LocalToken local = new LocalToken(), string dica = "")
@@ -33,10 +32,9 @@ public class Erro : Exception
         this.dica = dica;
 
         AtribuirCategoria();
-        ExibirErro();
     }
 
-    internal void ExibirErro()
+    public void ExibirFormatado()
     {
         Console.ForegroundColor = ConsoleColor.Red;
         
@@ -56,7 +54,6 @@ public class Erro : Exception
             Ambiente.Msg(dica.Replace("\n", "\n      ")+"\n");
         }
         
-        Ambiente.Encerrar(this.Codigo);
     }
     
     private void AtribuirCategoria()
