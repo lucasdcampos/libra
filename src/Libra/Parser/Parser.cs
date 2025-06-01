@@ -164,12 +164,12 @@ public class Parser
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
         bool tipoModificavel = false;
-        string tipo = "Objeto";
+        string tipo = TiposPadrao.Objeto.ToString();
 
         if(TentarConsumirToken(TokenTipo.DoisPontos))
         {
             string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-            tipoModificavel = tipo == "Objeto";
+            tipoModificavel = tipo == TiposPadrao.Objeto.ToString();
 
             // "var n: T" (Declara uma variável de tipo T nula)
             if(Atual().Tipo != TokenTipo.OperadorDefinir)
@@ -185,7 +185,7 @@ public class Parser
         
         var expressao = ParseExpressao();
 
-        if(Interpretador.Flags.ForcarTiposEstaticos && tipo == "Objeto")
+        if(Interpretador.Flags.ForcarTiposEstaticos && tipo == TiposPadrao.Objeto.ToString())
             throw new Erro("Obrigatório especificar tipo quando a flag --estrito estiver marcada.", _local);
 
         return new DeclaracaoVar(_local, identificador, expressao, tipo, tipoModificavel, constante);

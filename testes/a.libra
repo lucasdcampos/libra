@@ -1,8 +1,5 @@
-tentar
-    var x = 1/(1-1)
-capturar err
-    exibir("Algo deu errado: " + err)
+const x = Nulo
+
+se x == Nulo entao 
+    exibir(tipo(x))
 fim
-
-exibir("Aplicação segue executando..")
-

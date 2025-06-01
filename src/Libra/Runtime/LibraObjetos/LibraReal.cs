@@ -125,6 +125,7 @@ public class LibraReal : LibraObjeto
     {
         return (outro) switch
         {
+            (LibraNulo libraNulo) => new LibraInt(0),
             (LibraInt libraInt) => new LibraInt(Valor == libraInt.Valor),
             (LibraReal libraReal) => new LibraInt(Valor == libraReal.Valor),
             _ => throw new Erro($"Não é possível calcular {this.ToString()}%{outro.ToString()}")

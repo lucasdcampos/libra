@@ -61,7 +61,7 @@ namespace Libra.Arvore
             TipoVar = tipo;
             Local = local;
         }
-
+        
         public Expressao Expressao { get; private set; }
         public string Identificador { get; private set; }
         internal string TipoVar;
@@ -276,7 +276,7 @@ namespace Libra.Arvore
 
             Tipo = TipoInstrucao.Tentar;
         }
-        
+
         public override object Aceitar(IVisitor visitor)
         {
             throw new NotImplementedException();

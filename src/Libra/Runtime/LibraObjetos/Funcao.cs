@@ -27,6 +27,12 @@ namespace Libra
             TipoRetorno = tipoRetorno;
             Identificador = ident;
         }
+
+        public override LibraInt Igual(LibraObjeto outro)
+        {
+           return new LibraInt(0);
+        }
+
     }
 
     // Definidas em Modulos/

@@ -37,7 +37,7 @@ namespace Libra.Api
         /// proibir certas construções consideradas inseguras ou obsoletas, etc.
         /// O padrão é false.
         /// </summary>
-        public bool ModoEstrito { get; set; } = false;
+        public bool ModoEstrito { get; set; } = true;
 
         /// <summary>
         /// Se true, todos os avisos gerados pelo motor ou compilador serão tratados como erros,

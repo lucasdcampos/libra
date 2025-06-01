@@ -29,21 +29,24 @@ namespace Libra
             if (Constante)
                 throw new ErroModificacaoConstante(Identificador, Interpretador.LocalAtual);
 
+            // Tentando alterar o tipo da variável
             if (novoValor.Nome != Valor.Nome && !TipoModificavel)
             {
+                // Tentando converter para o tipo base
+                // Ex: Se o tipo base é Real, mas recebemos um Int,
+                // então convertemos o Int para Real (O contrário não ocorre)
                 novoValor = novoValor.Converter(Valor.Nome);
 
-                if(Valor.Nome != novoValor.Nome)
+                if (Valor.Nome != novoValor.Nome)
                 {
-                    if(Tipo == "Objeto")
+                    if (Tipo == TiposPadrao.Objeto.ToString())
                         Tipo = Valor.Nome;
                     else
                     {
                         throw new ErroTipoIncompativel(Identificador, Interpretador.LocalAtual);
                     }
-                        
+
                 }
-                    
             }
 
             Valor = novoValor;

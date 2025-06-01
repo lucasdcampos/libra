@@ -31,7 +31,7 @@ public class VisitorExpressoes : IVisitor
             TokenTipo.OperadorPot => a.Pot(b),
             TokenTipo.OperadorResto => a.Resto(b),
             TokenTipo.OperadorComparacao => a.Igual(b),
-            TokenTipo.OperadorDiferente => new LibraInt(LibraUtil.NegarInteiroLogico(a.Igual(b).Valor)),
+            TokenTipo.OperadorDiferente => new LibraInt(LibraUtil.NegarInteiroLogico(a.Igual(b).Valor)), // Vendo isso aqui meses depois, genial!
             TokenTipo.OperadorMaiorQue => a.MaiorQue(b),
             TokenTipo.OperadorMaiorIgualQue => a.MaiorIgualQue(b),
             TokenTipo.OperadorMenorQue => a.MenorQue(b),

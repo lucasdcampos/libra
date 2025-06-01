@@ -15,4 +15,9 @@ public class Classe : LibraObjeto, IChamavel
         Variaveis = variaveis;
         Funcoes = funcoes;
     }
+
+    public override LibraInt Igual(LibraObjeto outro)
+    {
+        return new LibraInt(0);
+    }
 }

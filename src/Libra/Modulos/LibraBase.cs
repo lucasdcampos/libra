@@ -18,6 +18,8 @@ public class LibraBase : IModulo
 
     public void RegistrarFuncoes(Programa programa = null)
     {
+        Ambiente.DefinirGlobal("Nulo", new LibraNulo());
+        
         Ambiente.DefinirGlobal("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
 
         Ambiente.DefinirGlobal("sair", new FuncaoNativa(sair));
@@ -321,8 +323,15 @@ public class LibraBase : IModulo
     public object tipo(object[] args)
     {
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
-        
-        return LibraObjeto.ParaLibraObjeto(args[0]).Nome;
+
+        var nome = LibraObjeto.ParaLibraObjeto(args[0]).Nome;
+
+        if (nome == TiposPadrao.Nulo.ToString())
+        {
+            throw new ErroAcessoNulo();
+        }
+
+        return nome;
     }
 
     public object erro(object[] args)
@@ -331,7 +340,6 @@ public class LibraBase : IModulo
         {
             throw new Erro("Erro!");
         }
-            
         throw new Erro(args[0].ToString(), Interpretador.LocalAtual);
     }
 

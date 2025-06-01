@@ -139,7 +139,7 @@ public class LibraInt : LibraObjeto
         {
             (LibraInt libraInt) => new LibraInt(Valor <= libraInt.Valor),
             (LibraReal libraReal) => new LibraInt(Valor <= libraReal.Valor),
-            _ => throw new Erro($"Não é possível calcular {this.ToString()}%{outro.ToString()}")
+            _ => throw new Erro($"Não é possível calcular {this.ToString()}<={outro.ToString()}")
         };
     }
 
@@ -147,9 +147,10 @@ public class LibraInt : LibraObjeto
     {
         return (outro) switch
         {
+            (LibraNulo libraNulo) => new LibraInt(0),
             (LibraInt libraInt) => new LibraInt(Valor == libraInt.Valor),
             (LibraReal libraReal) => new LibraInt(Valor == libraReal.Valor),
-            _ => throw new Erro($"Não é possível calcular {this.ToString()}%{outro.ToString()}")
+            _ => throw new Erro($"Não é possível calcular {this.ToString()}=={outro.ToString()}")
         };
     }
 

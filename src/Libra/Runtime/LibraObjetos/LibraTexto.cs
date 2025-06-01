@@ -34,6 +34,8 @@ public class LibraTexto : LibraObjeto
 
     public override LibraInt Igual(LibraObjeto outro)
     {
+        if (outro is LibraNulo) return new LibraInt(0);
+        
         return new LibraInt(Valor == outro.ObterValor().ToString());
     }
 }

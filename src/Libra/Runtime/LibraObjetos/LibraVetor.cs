@@ -29,4 +29,9 @@ public class LibraVetor : LibraObjeto
         // Não é possível calcular o tamanho diretamente
         return new LibraInt(-1);
     }
+
+    public override LibraInt Igual(LibraObjeto outro)
+    {
+        return new LibraInt(0);
+    }
 }

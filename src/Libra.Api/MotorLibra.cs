@@ -18,10 +18,7 @@ public class MotorLibra
     /// </summary>
     public MotorLibra()
     {
-        _opcoes = new OpcoesMotorLibra
-        {
-            NivelDebug = 0,
-        };
+        _opcoes = new OpcoesMotorLibra();
 
         _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
     }
@@ -85,6 +82,7 @@ public class MotorLibra
         {
             var tokens = _tokenizador.Tokenizar(codigo.ReplaceLineEndings("\n"), arquivo, caminho);
             var programa = _parser.Parse(tokens.ToArray());
+            var flags = new InterpretadorFlags(true, _opcoes.ModoEstrito, true);
             _interpretador = new Interpretador();
             _interpretador.ExecutarPrograma(programa);
         }
