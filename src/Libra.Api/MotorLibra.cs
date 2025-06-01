@@ -83,7 +83,7 @@ public class MotorLibra
             var tokens = _tokenizador.Tokenizar(codigo.ReplaceLineEndings("\n"), arquivo, caminho);
             var programa = _parser.Parse(tokens.ToArray());
             var flags = new InterpretadorFlags(true, _opcoes.ModoEstrito, true);
-            _interpretador = new Interpretador();
+            _interpretador = new Interpretador(flags);
             _interpretador.ExecutarPrograma(programa);
         }
         catch (Erro e)

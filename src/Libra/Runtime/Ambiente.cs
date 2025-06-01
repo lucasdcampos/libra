@@ -29,7 +29,9 @@ public class Ambiente
 
     public static void DefinirGlobal(string identificador, object valor)
     {
-        Pilha.DefinirVariavel(identificador, LibraObjeto.ParaLibraObjeto(valor));
+        var obj = LibraObjeto.ParaLibraObjeto(valor);
+
+        Pilha.DefinirVariavel(identificador, obj, obj.Nome);
     }
 
     public static object ObterGlobal(string identificador)
@@ -40,7 +42,7 @@ public class Ambiente
 
     public static void RegistrarFuncaoNativa(string nomeFuncao, Func<object[], object> funcaoCSharp)
     {
-        Pilha.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcaoCSharp, nomeFuncao));
+        Pilha.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcaoCSharp, nomeFuncao), TiposPadrao.Func);
     }
 
     public static void Msg(string msg, string final = "\n")

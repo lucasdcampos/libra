@@ -1,13 +1,14 @@
 namespace Libra;
 
-public enum TiposPadrao
+public static class TiposPadrao
 {
-    Nulo,
-    Byte,
-    Int,
-    Real,
-    Texto,
-    Vetor,
-    Func,
-    Objeto // Pode ser qualquer tipo
+    public static string Indefinido = "Indefinido";
+    public static string Nulo = "Nulo";
+    public static string Byte = "Byte";
+    public static string Int = "Int";
+    public static string Real = "Real";
+    public static string Texto = "Texto";
+    public static string Vetor = "Vetor";
+    public static string Func = "Func";
+    public static string Objeto = "Objeto"; // Pode ser qualquer tipo
 }

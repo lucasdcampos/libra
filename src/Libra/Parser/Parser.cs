@@ -163,13 +163,11 @@ public class Parser
 
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
-        bool tipoModificavel = false;
-        string tipo = TiposPadrao.Objeto.ToString();
+        string tipo = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Indefinido : TiposPadrao.Objeto;
 
         if(TentarConsumirToken(TokenTipo.DoisPontos))
         {
-            string tipoStr = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
-            tipoModificavel = tipo == TiposPadrao.Objeto.ToString();
+            tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
             // "var n: T" (Declara uma variável de tipo T nula)
             if(Atual().Tipo != TokenTipo.OperadorDefinir)
@@ -177,7 +175,7 @@ public class Parser
                 if(constante) // Constante precisa de um valor (não pode ser atribuído depois)
                     throw new ErroEsperado(TokenTipo.OperadorDefinir, Atual().Tipo, _local);
 
-                return new DeclaracaoVar(_local, identificador, null, tipo, tipoModificavel, false);
+                return new DeclaracaoVar(_local, identificador, null, tipo, false);
             }
         }
 
@@ -185,10 +183,7 @@ public class Parser
         
         var expressao = ParseExpressao();
 
-        if(Interpretador.Flags.ForcarTiposEstaticos && tipo == TiposPadrao.Objeto.ToString())
-            throw new Erro("Obrigatório especificar tipo quando a flag --estrito estiver marcada.", _local);
-
-        return new DeclaracaoVar(_local, identificador, expressao, tipo, tipoModificavel, constante);
+        return new DeclaracaoVar(_local, identificador, expressao, tipo, constante);
     }
 
     private ExpressaoNovoVetor? ParseVetor()
@@ -243,15 +238,16 @@ public class Parser
                 ConsumirToken(TokenTipo.FecharParen); // tentar fechar paren (vai dar erro da msm forma)
             
             var ident = (string)ConsumirToken()?.Valor;
-            string tipo = "Objeto";
-            if(TentarConsumirToken(TokenTipo.DoisPontos))
+            string tipo = TiposPadrao.Objeto;
+            
+            if (TentarConsumirToken(TokenTipo.DoisPontos))
             {
                 tipo = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
             }
             else
             {
-                if(Interpretador.Flags.ForcarTiposEstaticos)
-                    throw new Erro("Obrigatório especificar tipo quando a flag --rigido estiver marcada.", _local);
+                if (Interpretador.Flags.ForcarTiposEstaticos)
+                    throw new Erro("Obrigatório especificar tipo quando a flag --estrito estiver marcada.", _local);
             }
             parametros.Add(new Parametro(ident, tipo));
 
@@ -273,8 +269,8 @@ public class Parser
         if(parametros.Length > 255)
             throw new Erro($"Função {identificador} passou de 255 parâmetros", _local, 255, "Procure ajuda.");
 
-        string tipoRetorno = "Objeto";
-        if(TentarConsumirSeta())
+        string tipoRetorno = TiposPadrao.Objeto;
+        if(TentarConsumirToken(TokenTipo.DoisPontos))
         {
             tipoRetorno = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
         }
@@ -282,7 +278,7 @@ public class Parser
         {
             // Quando tipos estáticos são forçados, se não especificar o tipo de retorno, ele será interpretado como nulo.
             // Em casos normais, o tipo de retorno poderá ser qualquer objeto
-            tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? "Nulo" : "Objeto";
+            tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Nulo : TiposPadrao.Objeto;
         }
 
         var instrucoes = ParseInstrucoes();

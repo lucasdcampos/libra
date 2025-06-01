@@ -21,7 +21,7 @@ public class InterpretadorFlags
 
     public static InterpretadorFlags Padrao()
     {
-        return new InterpretadorFlags(true, false, true);
+        return new InterpretadorFlags(true, true, true);
     }
 }
 
@@ -127,7 +127,7 @@ public class Interpretador
             Ambiente.Pilha.DesempilharEscopo(); // Desempilhando escopo do "Tentar"
 
             Ambiente.Pilha.EmpilharEscopo();
-            Ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem));
+            Ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem), TiposPadrao.Texto, true);
             InterpretarInstrucoes(instrucao.InstrucoesCapturar);
             Ambiente.Pilha.DesempilharEscopo();
         }
@@ -241,7 +241,7 @@ public class Interpretador
 
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
-        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, true, TiposPadrao.Func.ToString(), false);
+        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, TiposPadrao.Func, true);
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, Expressao[] argumentos) 
@@ -268,11 +268,16 @@ public class Interpretador
         List<Variavel> vars = new();
         foreach(var i in tipo.Variaveis)
         {
-            vars.Add(new Variavel(i.Identificador, InterpretarExpressao(i.Expressao), i.Constante, i.TipoVar, i.TipoModificavel));
+            vars.Add(new Variavel(i.Identificador, InterpretarExpressao(i.Expressao), i.TipoVar, i.Constante));
         }
         foreach(var i in tipo.Funcoes)
         {
-            vars.Add(new Variavel(i.Identificador, new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno)));
+            vars.Add(new Variavel(
+                i.Identificador,
+                new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno),
+                TiposPadrao.Func,
+                true
+            ));
         }
 
         var obj = new LibraObjeto(nome, vars.ToArray(), expressoes);
@@ -302,10 +307,10 @@ public class Interpretador
                 string ident = funcao.Parametros[i].Identificador;
                 var obj = InterpretarExpressao(argumentos[i]);
                 
-                if(funcao.Parametros[i].Tipo != "Objeto" && funcao.Parametros[i].Tipo != obj.Nome)
+                if(funcao.Parametros[i].Tipo != TiposPadrao.Objeto && funcao.Parametros[i].Tipo != obj.Nome)
                     obj = obj.Converter(funcao.Parametros[i].Tipo);
 
-                Ambiente.Pilha.DefinirVariavel(ident, obj);
+                Ambiente.Pilha.DefinirVariavel(ident, obj, funcao.Parametros[i].Tipo);
             }
 
             InterpretarInstrucoes(funcao.Instrucoes);
@@ -313,7 +318,7 @@ public class Interpretador
         catch(ExcecaoRetorno retorno)
         {
             var resultado = LibraObjeto.ParaLibraObjeto(retorno.Valor);
-            if(funcao.TipoRetorno != resultado.Nome && funcao.TipoRetorno != TiposPadrao.Objeto.ToString())
+            if(funcao.TipoRetorno != resultado.Nome && funcao.TipoRetorno != TiposPadrao.Objeto)
             {
                 return resultado.Converter(funcao.TipoRetorno);
             }
@@ -326,7 +331,7 @@ public class Interpretador
         }
 
         // Caso a função não tenha um retorno explicito
-        return LibraObjeto.Inicializar(TiposPadrao.Nulo.ToString());
+        return LibraObjeto.Inicializar(TiposPadrao.Nulo);
     }
 
     public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
@@ -344,7 +349,7 @@ public class Interpretador
     // TODO: É isso?
     public void InterpretarInstrucaoClasse(DefinicaoTipo i)
     {
-       Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes));
+       Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
     }
 
     public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)
@@ -368,7 +373,7 @@ public class Interpretador
 
         LibraObjeto resultado = InterpretarExpressao(i.Expressao);
 
-        Ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.Constante, i.TipoVar, i.TipoModificavel);
+        Ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.TipoVar, i.Constante);
 
         resultado.Construtor(i.Identificador);
 

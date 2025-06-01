@@ -52,12 +52,11 @@ namespace Libra.Arvore
 
     public class DeclaracaoVar : Instrucao
     {
-        public DeclaracaoVar(LocalToken local, string identificador, Expressao expressao, string tipo, bool tipoModificavel, bool constante)
+        public DeclaracaoVar(LocalToken local, string identificador, Expressao expressao, string tipo, bool constante)
         {
             Tipo = TipoInstrucao.DeclVar;
             Identificador = identificador;
             Expressao = expressao;
-            TipoModificavel = tipoModificavel;
             TipoVar = tipo;
             Local = local;
         }
@@ -65,7 +64,6 @@ namespace Libra.Arvore
         public Expressao Expressao { get; private set; }
         public string Identificador { get; private set; }
         internal string TipoVar;
-        internal bool TipoModificavel;
         public bool Constante { get; private set; }
 
         public override object Aceitar(IVisitor visitor)

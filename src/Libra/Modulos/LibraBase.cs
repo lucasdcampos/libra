@@ -19,7 +19,7 @@ public class LibraBase : IModulo
     public void RegistrarFuncoes(Programa programa = null)
     {
         Ambiente.DefinirGlobal("Nulo", new LibraNulo());
-        
+
         Ambiente.DefinirGlobal("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
 
         Ambiente.DefinirGlobal("sair", new FuncaoNativa(sair));
@@ -326,7 +326,7 @@ public class LibraBase : IModulo
 
         var nome = LibraObjeto.ParaLibraObjeto(args[0]).Nome;
 
-        if (nome == TiposPadrao.Nulo.ToString())
+        if (nome == TiposPadrao.Nulo)
         {
             throw new ErroAcessoNulo();
         }

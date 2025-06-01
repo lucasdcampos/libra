@@ -12,7 +12,7 @@ public class Escopo
         Local = local;
     }
 
-    public void DefinirVariavel(string identificador, LibraObjeto valor, bool constante = false, string tipo = "Objeto", bool tipoModificavel = true)
+    public void DefinirVariavel(string identificador, LibraObjeto valor, string tipo, bool constante = false)
     {
         if (VariavelExiste(identificador))
             throw new ErroVariavelJaDeclarada(identificador);
@@ -22,13 +22,17 @@ public class Escopo
             valor = LibraObjeto.Inicializar(tipo);
         }
 
-        if(tipo != "Objeto" && valor.Nome != tipo)
+        if (tipo == TiposPadrao.Indefinido)
+        {
+            tipo = valor.Nome;    
+        }
+        
+        if (tipo != TiposPadrao.Objeto && valor.Nome != tipo)
         {
             valor = valor.Converter(tipo);
         }
-            //throw new ErroTipoIncompativel(identificador, Interpretador.LocalAtual);
             
-        _variaveis[identificador] = new Variavel(identificador, valor, constante, valor.Nome, tipoModificavel);
+        _variaveis[identificador] = new Variavel(identificador, valor, valor.Nome, constante);
     }
 
     public Variavel? ObterVariavel(string identificador)

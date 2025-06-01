@@ -7,7 +7,7 @@ public class LibraTexto : LibraObjeto
     public LibraTexto(string valor) : base("Texto", new Variavel[0])
     {
         Valor = valor;
-        Propriedades.Add("tamanho", new Variavel("tamanho", new FuncaoNativa(tamanho)));
+        Propriedades.Add("tamanho", new Variavel("tamanho", new FuncaoNativa(tamanho), TiposPadrao.Texto, true));
     }
 
     public object tamanho(object[] args)
@@ -35,7 +35,7 @@ public class LibraTexto : LibraObjeto
     public override LibraInt Igual(LibraObjeto outro)
     {
         if (outro is LibraNulo) return new LibraInt(0);
-        
+
         return new LibraInt(Valor == outro.ObterValor().ToString());
     }
 }
