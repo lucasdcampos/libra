@@ -31,8 +31,8 @@ public class Escopo
         {
             valor = valor.Converter(tipo);
         }
-            
-        _variaveis[identificador] = new Variavel(identificador, valor, valor.Nome, constante);
+        // TODO: Se for uma classe, o Tipo tem que ser o Nome da classe!
+        _variaveis[identificador] = new Variavel(identificador, valor, tipo, constante);
     }
 
     public Variavel? ObterVariavel(string identificador)

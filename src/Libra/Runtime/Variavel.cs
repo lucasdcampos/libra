@@ -23,7 +23,7 @@ namespace Libra
         public void AtualizarValor(LibraObjeto novoValor)
         {
             Referenciada = true;
-            
+
             if (Constante)
                 throw new ErroModificacaoConstante(Identificador, Interpretador.LocalAtual);
 
@@ -36,21 +36,10 @@ namespace Libra
                 // Tentando converter para o tipo base
                 // Ex: Se o tipo base é Real, mas recebemos um Int,
                 // então convertemos o Int para Real (O contrário não ocorre)
-                novoValor = novoValor.Converter(Valor.Nome);
-
-                if (Valor.Nome != novoValor.Nome)
-                {
-                    if (Tipo == TiposPadrao.Objeto)
-                        Tipo = Valor.Nome;
-                    else
-                    {
-                        throw new ErroTipoIncompativel(Identificador, Interpretador.LocalAtual);
-                    }
-                }
+                novoValor= novoValor.Converter(Valor.Nome);
             }
 
             Valor = novoValor;
-            Tipo = novoValor.Nome;
         }
 
         public override string ToString()

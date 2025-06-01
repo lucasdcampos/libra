@@ -85,7 +85,7 @@ se n != 1 entao
     erro("Erro com instrução romper! n = " + texto(n) + " ao invés de 1")
 fim
 exibir("Testando Funções")
-funcao foo(bar)
+funcao foo(bar: Objeto): Objeto
     retornar bar
 fim
 
@@ -107,7 +107,7 @@ real("1")
 tamanho("abc")
 
 exibir("Testando Recursividade")
-funcao testarPot(b, n)
+funcao testarPot(b: Int, n: Int): Int
     se n == 0 entao
         retornar 1
     fim

@@ -88,7 +88,7 @@ const GB = 1024 * 1024 * 1024
 ///   indice: índice da raiz (ex: 2 para raiz quadrada, 3 para cúbica, etc).
 /// Retorna:
 ///   A raiz enésima do número fornecido.
-funcao raiz(numero: Real, indice: Int) -> Real
+funcao raiz(numero: Real, indice: Int): Real
     retornar __csraiz__(numero, indice)
 fim
 
@@ -97,7 +97,7 @@ fim
 ///   x: número real positivo do qual se deseja extrair a raiz quadrada.
 /// Retorna:
 ///   A raiz quadrada do número fornecido.
-funcao raizq(x: Real) -> Real
+funcao raizq(x: Real): Real
     retornar __csraizq__(x)
 fim
 
@@ -106,7 +106,7 @@ fim
 ///   n: número inteiro não negativo.
 /// Retorna:
 ///   O valor do fatorial de n (n!), como número real.
-funcao fatorial(n: Int) -> Real
+funcao fatorial(n: Int): Real
     var resultado = 1
     var contador = n
     enquanto contador > 0 repetir
@@ -122,7 +122,7 @@ fim
 ///   x: número real.
 /// Retorna:
 ///   O valor absoluto de x (positivo ou zero).
-funcao abs(x: Real) -> Real
+funcao abs(x: Real): Real
     se x > 0 entao
         retornar x
     fim
@@ -136,7 +136,7 @@ fim
 ///   b: segundo número real.
 /// Retorna:
 ///   O maior valor entre a e b.
-funcao topo(a: Real, b: Real) -> Real
+funcao topo(a: Real, b: Real): Real
     se a > b entao
         retornar a
     fim
@@ -150,7 +150,7 @@ fim
 ///   b: segundo número real.
 /// Retorna:
 ///   O menor valor entre a e b.
-funcao chao(a: Real, b: Real) -> Real
+funcao chao(a: Real, b: Real): Real
     se a < b entao
         retornar a
     fim
@@ -163,7 +163,7 @@ fim
 ///   x: número real a ser arredondado.
 /// Retorna:
 ///   Um número inteiro que mais se aproxima de x.
-funcao arrendondar(x: Real) -> Int
+funcao arrendondar(x: Real): Int
     se x > real(int(x)) + 0.5 entao
         retornar int(x+1)
     fim
@@ -176,7 +176,7 @@ fim
 ///   b: comprimento do segundo cateto.
 /// Retorna:
 ///   O comprimento da hipotenusa, calculado por √(a² + b²).
-funcao hipotenusa(a: Real, b: Real) -> Real
+funcao hipotenusa(a: Real, b: Real): Real
     retornar raizq(a*a + b*b)
 fim
 
@@ -185,7 +185,7 @@ fim
 ///   x: ângulo em radianos.
 /// Retorna:
 ///   O valor do seno do ângulo fornecido.
-funcao sen(x: Real) -> Real
+funcao sen(x: Real): Real
     retornar __cssen__(x)
 fim
 
@@ -194,7 +194,7 @@ fim
 ///   x: ângulo em radianos.
 /// Retorna:
 ///   O valor do cosseno do ângulo fornecido.
-funcao cos(x: Real) -> Real
+funcao cos(x: Real): Real
     retornar __cscos__(x)
 fim
 
@@ -203,7 +203,7 @@ fim
 ///   x: ângulo em radianos.
 /// Retorna:
 ///   O valor da tangente do ângulo fornecido.
-funcao tan(x: Real) -> Real
+funcao tan(x: Real): Real
     retornar __cstan__(x)
 fim
 
@@ -212,7 +212,7 @@ fim
 ///   x: valor real no intervalo [-1, 1].
 /// Retorna:
 ///   O ângulo em radianos cujo seno é x.
-funcao arcsen(x: Real) -> Real
+funcao arcsen(x: Real): Real
     retornar sen(x)^-1
 fim
 
@@ -221,7 +221,7 @@ fim
 ///   x: valor real no intervalo [-1, 1].
 /// Retorna:
 ///   O ângulo em radianos cujo cosseno é x.
-funcao arccos(x: Real) -> Real
+funcao arccos(x: Real): Real
     retornar cos(x)^-1
 fim
 
@@ -230,7 +230,7 @@ fim
 ///   x: valor real.
 /// Retorna:
 ///   O ângulo em radianos cuja tangente é x.
-funcao arctan(x: Real) -> Real
+funcao arctan(x: Real): Real
     retornar tan(x)^-1
 fim
 
@@ -240,7 +240,7 @@ fim
 ///   n: base do logaritmo (real positivo, diferente de 1).
 /// Retorna:
 ///   O logaritmo de x na base n.
-funcao log(x: Real, n: Real) -> Real
+funcao log(x: Real, n: Real): Real
     retornar __cslog__(x, n)
 fim
 
@@ -249,7 +249,7 @@ fim
 ///   x: número real positivo.
 /// Retorna:
 ///   O logaritmo natural (ln) de x.
-funcao ln(x: Real) -> Real
+funcao ln(x: Real): Real
     retornar log(x, E)
 fim
 
@@ -258,7 +258,7 @@ fim
 ///   x: número real positivo.
 /// Retorna:
 ///   O logaritmo de x na base 2.
-funcao log2(x: Real) -> Real
+funcao log2(x: Real): Real
     retornar log(x, 2)
 fim
 
@@ -267,7 +267,7 @@ fim
 ///   x: expoente real.
 /// Retorna:
 ///   O valor de e^x.
-funcao exp(x: Real) -> Real
+funcao exp(x: Real): Real
     retornar E^x
 fim
 
@@ -276,7 +276,7 @@ fim
 ///   x: expoente real.
 /// Retorna:
 ///   O valor de 2^x.
-funcao exp2(x: Real) -> Real
+funcao exp2(x: Real): Real
     retornar 2^x
 fim
 
@@ -286,7 +286,7 @@ fim
 ///   max: valor máximo do intervalo.
 /// Retorna:
 ///   Um número real aleatório entre min (inclusivo) e max (exclusivo).
-funcao aleatorio(min: Real, max: Real) -> Real
+funcao aleatorio(min: Real, max: Real): Real
     min = real(min)
     max = real(max)
 

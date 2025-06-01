@@ -10,7 +10,7 @@
 /// Retorna:
 ///   Um vetor contendo os elementos da PA, respeitando a direção (crescente ou decrescente)
 ///   e parando antes de atingir o valor limite.
-funcao intervalo(a, n, r)
+funcao intervalo(a: Int, n: Int, r: Int): Vetor
     var i = 0
     se r > 0 entao
         var tamanho = int((n-a) / r)
@@ -38,7 +38,7 @@ fim
 ///   vetor: vetor cujos elementos serão exibidos.
 /// Retorna:
 ///   Nulo (procedimento apenas para exibição dos elementos).
-funcao mostrarVetor(vetor: Vetor)
+funcao mostrarVetor(vetor: Vetor): Vetor
     var n = 0
     exibir("{ ", "")
 
@@ -56,7 +56,7 @@ fim
 ///   elemento: objeto a ser adicionado ao final do vetor.
 /// Retorna:
 ///   Um novo vetor contendo todos os elementos originais e o novo elemento no final.
-funcao incluir(vetor: Vetor, elemento: Objeto) -> Vetor
+funcao incluir(vetor: Vetor, elemento: Objeto): Vetor
     var temp = [tamanho(vetor)+1]
     var n = 0
 
@@ -75,7 +75,7 @@ fim
 ///   indice: posição do elemento a ser removido.
 /// Retorna:
 ///   Um novo vetor sem o elemento da posição informada.
-funcao remover(vetor: Vetor, indice: Int) -> Vetor
+funcao remover(vetor: Vetor, indice: Int): Vetor
     var temp = [tamanho(vetor) - 1]
     var n = 0
     var m = 0
@@ -96,7 +96,7 @@ fim
 ///   vetor: vetor a ser verificado.
 /// Retorna:
 ///   1 se o vetor estiver vazio, 0 caso contrário.
-funcao estaVazio(vetor: Vetor) -> Int
+funcao estaVazio(vetor: Vetor): Int
     retornar tamanho(vetor) == 0
 fim
 
@@ -106,7 +106,7 @@ fim
 ///   elemento: objeto a ser adicionado no início do vetor.
 /// Retorna:
 ///   Um novo vetor com o elemento na primeira posição, seguido pelos elementos originais.
-funcao adicionarInicio(vetor: Vetor, elemento: Objeto) -> Vetor
+funcao adicionarInicio(vetor: Vetor, elemento: Objeto): Vetor
     var temp = [tamanho(vetor) + 1]
     temp[0] = elemento
     var n = 0
@@ -124,7 +124,7 @@ fim
 ///   vetor: vetor a ser invertido.
 /// Retorna:
 ///   Um novo vetor com os elementos em ordem inversa ao vetor original.
-funcao reverter(vetor: Vetor) -> Vetor
+funcao reverter(vetor: Vetor): Vetor
     var temp = [tamanho(vetor)]
     var n = 0
     
@@ -141,7 +141,7 @@ fim
 ///   vetor: vetor de onde será encontrado o maior valor.
 /// Retorna:
 ///   O maior elemento presente no vetor.
-funcao maiorElemento(vetor: Vetor)
+funcao maiorElemento(vetor: Vetor): Real
     se tamanho(vetor) == 0 entao
         retornar nulo
     fim
@@ -164,7 +164,7 @@ fim
 ///   vetor: vetor original.
 /// Retorna:
 ///   Um novo vetor com os elementos em ordem crescente.
-funcao ordenar(vetor: Vetor) -> Vetor
+funcao ordenar(vetor: Vetor): Vetor
     var i = 0
     enquanto i < tamanho(vetor) repetir
         var j = 0
