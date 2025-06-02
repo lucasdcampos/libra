@@ -14,7 +14,6 @@
     -   [Mais exemplos](#mais-exemplos)
     -   [Como contribuir?](#como-contribuir)
 
-
 ## O que é a Libra?
 
 Libra é uma linguagem de programação interpretada simples em português, ideal para quem está aprendendo.
@@ -102,7 +101,7 @@ Vetores
 ```js
 importar vetores
 var x = {1, 2, 3}
-x = incluir(x, 4) // x agora é {1, 2, 3, 4}
+x = v_incluir(x, 4) // x agora é {1, 2, 3, 4}
 
 exibir(x[0]) // 1
 ```
@@ -123,5 +122,5 @@ Contribua para o código, depois crie um *Pull Request*. Caso for uma contribui�
 
 **Dúvidas?**
 
-Me mande um e-mail: <a href="mailto:lucas.campos44@fatec.sp.gov.br">lucasm.campos@hotmail.com.br</a>
+Me mande um e-mail: <a href="mailto:lucasm.campos@hotmail.com.br">lucasm.campos@hotmail.com.br</a>
 ou entre no Discord: https://discord.gg/mnGkSD4CsA
