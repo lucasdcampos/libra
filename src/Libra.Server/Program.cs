@@ -9,6 +9,10 @@ class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddOpenApi();
+        builder.WebHost.ConfigureKestrel(serverOptions =>
+        {
+            serverOptions.ListenAnyIP(5102);
+        });
 
         builder.Services.AddCors(options =>
         {
