@@ -2,16 +2,15 @@
 
 # Diretórios
 sourceDir="biblioteca"
-destinationDir="bin/linux-x64/biblioteca"
+destinationDir="$HOME/.local/share/Libra"
 
 # Verifica se o diretório de destino existe, cria se não existir
 if [ ! -d "$destinationDir" ]; then
     mkdir -p "$destinationDir"
 fi
 
-# Copia os arquivos da pasta biblioteca para bin/linux-x64/biblioteca
-cp -r "$sourceDir/"* "$destinationDir/"
+# Copia os arquivos da pasta biblioteca para ~/.local/share/Libra/
+cp -r "$sourceDir/"* "$destinationDir"
 
-# Executa o comando dotnet publish
+# Publicação do projeto .NET para Linux x64
 dotnet publish --runtime linux-x64 --output bin/linux-x64/
-
