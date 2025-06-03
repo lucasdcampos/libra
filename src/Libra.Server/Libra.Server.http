@@ -1,0 +1,9 @@
+@Libra_Server_HostAddress = http://localhost:5102
+POST {{Libra_Server_HostAddress}}/executar
+Content-Type: application/json
+
+{
+  "codigo": "exibir(\"Olá, Mundo!\")"
+}
+
+###

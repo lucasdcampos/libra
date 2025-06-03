@@ -13,6 +13,9 @@ public class Ambiente
 
     private PilhaDeEscopos _pilha;
     public static PilhaDeEscopos Pilha => _ambienteAtual._pilha;
+    private string _textoSaida = "";
+    public static string TextoSaida => _ambienteAtual._textoSaida;
+
     private Ambiente() { }
 
     public static Ambiente ConfigurarAmbiente(ILogger logger, bool seguro)
@@ -49,6 +52,8 @@ public class Ambiente
     {
         if (_ambienteAtual == null)
             ConfigurarAmbiente(null, false);
+
+        _ambienteAtual._textoSaida += msg += final;
 
         var loggerReal = Logger == null ? new ConsoleLogger() : Logger;
         loggerReal.Msg(msg, final);

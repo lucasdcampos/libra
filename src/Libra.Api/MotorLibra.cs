@@ -76,7 +76,7 @@ public class MotorLibra
     /// </summary>
     /// <param name="codigo">Código a ser executado.</param>
     /// <returns>Resultado da execução, se houver; caso contrário, null.</returns>
-    public object? Executar(string codigo, string arquivo="", string caminho="")
+    public LibraResultado Executar(string codigo, string arquivo="", string caminho="")
     {
         try
         {
@@ -124,6 +124,6 @@ public class MotorLibra
             Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
         }
 
-        return Interpretador.Saida.ObterValor();
+        return new LibraResultado(Interpretador.Saida.ObterValor(), Ambiente.TextoSaida);
     }
 }
