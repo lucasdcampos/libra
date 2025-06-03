@@ -14,6 +14,14 @@ class Program
             serverOptions.ListenAnyIP(5102);
         });
 
+        builder.WebHost.ConfigureKestrel(serverOptions =>
+        {
+            serverOptions.ListenAnyIP(5102, listenOptions =>
+            {
+                listenOptions.UseHttps("/caminho/para/cert.pfx", "sua-senha");
+            });
+        });
+
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("LiberaGeral", policy =>
@@ -23,9 +31,13 @@ class Program
                     .AllowAnyMethod();
             });
         });
+
+        builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
         
+
         var app = builder.Build();
 
+        app.UseHttpsRedirection();
         app.UseCors("LiberaGeral");
 
         // Configure the HTTP request pipeline.
