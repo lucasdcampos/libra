@@ -36,7 +36,11 @@ class Program
 
         app.MapPost("/executar", (ExecutarRequest req) =>
         {
-            var motor = new MotorLibra();
+            var opcoes = new OpcoesMotorLibra();
+            opcoes.ModoSeguro = true;
+            opcoes.PermitirEntrada = false; // bloqueia interação com usuário
+
+            var motor = new MotorLibra(opcoes);
             try
             {
                 var resultado = motor.Executar(req.codigo).Saida;

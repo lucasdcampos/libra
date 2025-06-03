@@ -73,5 +73,8 @@ namespace Libra.Api
         /// Se null, pode usar o diretório de trabalho atual da aplicação.
         /// </summary>
         public string? DiretorioBase { get; set; } = null;
+
+        public bool ModoSeguro { get; set; } = false;
+        public bool PermitirEntrada { get; set; } = true;
     }
 }

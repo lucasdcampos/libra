@@ -27,7 +27,6 @@ public class LibraBase : IModulo
         Ambiente.DefinirGlobal("tipo", new FuncaoNativa(tipo));
         Ambiente.DefinirGlobal("garantir", new FuncaoNativa(garantir));
         Ambiente.DefinirGlobal("tamanho", new FuncaoNativa(tamanho));
-        Ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
         Ambiente.DefinirGlobal("concat", new FuncaoNativa(concat));
         Ambiente.DefinirGlobal("pausar", new FuncaoNativa(pausar));
         Ambiente.DefinirGlobal("real", new FuncaoNativa(real));
@@ -39,9 +38,10 @@ public class LibraBase : IModulo
         Ambiente.DefinirGlobal("erro", new FuncaoNativa(erro));
 
         // Impedir uso de funções potencialmente perigosas
-        if (Ambiente.AmbienteSeguro)
+        if (Ambiente.AmbienteSeguro || Interpretador.Flags.ModoSeguro)
             return;
 
+        Ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
         Ambiente.DefinirGlobal("registrarCSharp", new FuncaoNativa(registrarCSharp));
         Ambiente.DefinirGlobal("registrardll", new FuncaoNativa(registrardll));
         Ambiente.DefinirGlobal("libra", new FuncaoNativa(libra));
@@ -286,6 +286,11 @@ public class LibraBase : IModulo
 
     public object entrada(object[] args)
     {
+        if (Interpretador.Flags.ModoSeguro)
+        {
+            throw new ErroAcessoNulo(" entrada não disponível nesse modo");
+        }
+
         exibir(args);
         return Console.ReadLine();
     }
