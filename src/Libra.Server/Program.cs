@@ -9,16 +9,19 @@ class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.AddOpenApi();
+
+        // Configura Kestrel para usar os endpoints definidos no appsettings.json (HTTP e HTTPS)
         builder.WebHost.ConfigureKestrel(serverOptions =>
         {
-            serverOptions.ListenAnyIP(5102);
+            serverOptions.Configure(builder.Configuration.GetSection("Kestrel"));
         });
-        
+
+        // CORS
         builder.Services.AddCors(options =>
         {
             options.AddPolicy("LiberaGeral", policy =>
             {
-                policy.WithOrigins("https://libra.lucasof.com")
+                policy.AllowAnyOrigin()
                       .AllowAnyHeader()
                       .AllowAnyMethod();
             });
@@ -26,10 +29,10 @@ class Program
 
         var app = builder.Build();
 
-        app.UseCors("LiberaGeral");
+        // Redireciona HTTP para HTTPS
+        app.UseHttpsRedirection();
 
-        // Responde a preflight OPTIONS para /executar
-        app.MapMethods("/executar", new[] { "OPTIONS" }, () => Results.Ok());
+        app.UseCors("LiberaGeral");
 
         if (app.Environment.IsDevelopment())
         {
