@@ -18,17 +18,19 @@ class Program
         {
             options.AddPolicy("LiberaGeral", policy =>
             {
-                policy.AllowAnyOrigin()
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
+                policy.WithOrigins("https://libra.lucasof.com")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
             });
         });
-        
+
         var app = builder.Build();
 
         app.UseCors("LiberaGeral");
 
-        // Configure the HTTP request pipeline.
+        // Responde a preflight OPTIONS para /executar
+        app.MapMethods("/executar", new[] { "OPTIONS" }, () => Results.Ok());
+
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
@@ -38,7 +40,7 @@ class Program
         {
             var opcoes = new OpcoesMotorLibra();
             opcoes.ModoSeguro = true;
-            opcoes.PermitirEntrada = false; // bloqueia interação com usuário
+            opcoes.PermitirEntrada = false;
 
             var motor = new MotorLibra(opcoes);
             try
@@ -52,6 +54,8 @@ class Program
             }
         })
         .WithName("ExecutarCodigo");
+
+        app.MapGet("/", () => Results.Text("API Libra rodando!", "text/plain"));
 
         app.Run();
     }
