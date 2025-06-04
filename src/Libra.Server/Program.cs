@@ -29,9 +29,6 @@ class Program
 
         var app = builder.Build();
 
-        // Redireciona HTTP para HTTPS
-        app.UseHttpsRedirection();
-
         app.UseCors("LiberaGeral");
 
         if (app.Environment.IsDevelopment())
