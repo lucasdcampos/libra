@@ -2,7 +2,7 @@ using Libra.Arvore;
 
 namespace Libra;
 
-public class r
+public class Parser
 {
     private Token[] _tokens;
     private int _posicao;
@@ -77,13 +77,13 @@ public class r
             case TokenTipo.Const: return DeclVar();
             case TokenTipo.Funcao: return DeclFuncao();
             case TokenTipo.Classe: return DeclClasse();
-            case TokenTipo.Se: return InstrucaoSe();
-            case TokenTipo.Enquanto: return InstrucaoEnquanto();
-            case TokenTipo.Para: return InstrucaoParaCada();
-            case TokenTipo.Romper: Passar(); return new InstrucaoRomper(_local);
-            case TokenTipo.Continuar: Passar(); return new InstrucaoContinuar(_local);
-            case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, Expressao());
-            case TokenTipo.Tentar: return InstrucaoTentar();
+            case TokenTipo.Se: return Se();
+            case TokenTipo.Enquanto: return Enquanto();
+            case TokenTipo.Para: return ParaCada();
+            case TokenTipo.Romper: Passar(); return new Romper(_local);
+            case TokenTipo.Continuar: Passar(); return new Continuar(_local);
+            case TokenTipo.Retornar: Passar(); return new Retornar(_local, Expressao());
+            case TokenTipo.Tentar: return Tentar();
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                     return ChamadaFuncao();
@@ -119,7 +119,7 @@ public class r
 
         return new AtribuicaoPropriedade(_local, alvo, expr);
     }
-    private Instrucao? InstrucaoTentar()
+    private Instrucao? Tentar()
     {
         ConsumirToken(TokenTipo.Tentar);
 
@@ -129,7 +129,7 @@ public class r
 
         Instrucao[] blocoCapturar = Instrucoes();
 
-        return new InstrucaoTentar(_local, blocoTentar, variavelErro, blocoCapturar);
+        return new Tentar(_local, blocoTentar, variavelErro, blocoCapturar);
     }
 
     private Instrucao? AtribVar()
@@ -286,7 +286,7 @@ public class r
         return new DefinicaoFuncao(_local, identificador, instrucoes, parametros, tipoRetorno);
     }
     
-    private InstrucaoSe? InstrucaoSe()
+    private Se? Se()
     {
         ConsumirToken(TokenTipo.Se);
 
@@ -295,23 +295,23 @@ public class r
         ConsumirToken(TokenTipo.Entao);
 
         Instrucao[] corpoSe = CorpoSe();
-        List<InstrucaoSenaoSe> listaSenaoSe = new();
+        List<SenaoSe> listaSenaoSe = new();
 
         while(Atual().Tipo == TokenTipo.SenaoSe || Atual().Tipo == TokenTipo.Senao)
         {
-            listaSenaoSe.Add(InstrucaoSenaoSe());
+            listaSenaoSe.Add(SenaoSe());
         }
 
-        return new InstrucaoSe(_local, expressao, corpoSe, listaSenaoSe.Count > 0 ? listaSenaoSe.ToArray() : null);
+        return new Se(_local, expressao, corpoSe, listaSenaoSe.Count > 0 ? listaSenaoSe.ToArray() : null);
     }
 
-    private InstrucaoSenaoSe? InstrucaoSenaoSe()
+    private SenaoSe? SenaoSe()
     {
         
         // Senao será convertido para um "senao se 1", que é uma expressão sempre verdadeira
         if(TentarConsumirToken(TokenTipo.Senao))
         {
-            return new InstrucaoSenaoSe(_local, ExpressaoLiteral.CriarInt(_local, 1), CorpoSe());
+            return new SenaoSe(_local, ExpressaoLiteral.CriarInt(_local, 1), CorpoSe());
         }
 
         while(TentarConsumirToken(TokenTipo.SenaoSe))
@@ -320,7 +320,7 @@ public class r
             ConsumirToken(TokenTipo.Entao);
             List<Instrucao> corpo = new();
 
-            return new InstrucaoSenaoSe(_local, expr, CorpoSe());
+            return new SenaoSe(_local, expr, CorpoSe());
         }
 
         return null;
@@ -338,7 +338,7 @@ public class r
         return corpoSe.ToArray();
     }
 
-    private InstrucaoEnquanto? InstrucaoEnquanto()
+    private Enquanto? Enquanto()
     {
         ConsumirToken(TokenTipo.Enquanto);
 
@@ -347,10 +347,10 @@ public class r
 
         var instrucoes = Instrucoes();
 
-        return new InstrucaoEnquanto(_local, expressao, instrucoes);
+        return new Enquanto(_local, expressao, instrucoes);
     }
     
-    private InstrucaoParaCada? InstrucaoParaCada()
+    private ParaCada? ParaCada()
     {
         ConsumirToken(TokenTipo.Para);
         ConsumirToken(TokenTipo.Cada);
@@ -359,7 +359,7 @@ public class r
         var vetor = Expressao(); // TODO: Conferir se a expressão é enumerável
         var instrucoes = Instrucoes(); // até encontrar "fim"
 
-        return new InstrucaoParaCada(_local, identificador, vetor, instrucoes);
+        return new ParaCada(_local, identificador, vetor, instrucoes);
     }
 
     private Expressao Expressao(int precedenciaMinima = 0)
@@ -425,7 +425,7 @@ public class r
                 }
                 else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
                 {
-                    return ExpressaoAcessoVetor();
+                    return AcessoVetor();
                 }
                 return new ExpressaoVariavel(_local, ConsumirToken());
 
@@ -476,7 +476,7 @@ public class r
         }
         return argumentos.ToArray();
     }
-    private Expressao? ExpressaoAcessoVetor()
+    private Expressao? AcessoVetor()
     {
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
         ConsumirToken(TokenTipo.AbrirCol);
@@ -486,7 +486,7 @@ public class r
         return new ExpressaoAcessoVetor(_local, identificador, indice);
     }
 
-    private ChamadaFuncao? ChamadaFuncao()
+    private ExpressaoChamadaFuncao? ChamadaFuncao()
     {
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
         ConsumirToken(TokenTipo.AbrirParen);
@@ -497,7 +497,7 @@ public class r
             throw new Erro($"Função {identificador} passou de 255 argumentos", _local, 255, "Procure ajuda.");
 
         ConsumirToken(TokenTipo.FecharParen);
-        return new ChamadaFuncao(_local, identificador, argumentos);
+        return new ExpressaoChamadaFuncao(_local, identificador, argumentos);
     }
 
     private int? PrioridadeOperador(Token token)

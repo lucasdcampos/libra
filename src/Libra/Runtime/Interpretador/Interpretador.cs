@@ -91,14 +91,14 @@ public class Interpretador
             { TipoInstrucao.DeclClasse, () => InterpretarInstrucaoClasse((DefinicaoTipo)instrucao) },
             { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
             { TipoInstrucao.AtribProp, () => InterpretarAtribProp((AtribuicaoPropriedade)instrucao) },
-            { TipoInstrucao.Enquanto, () => InterpretarEnquanto((InstrucaoEnquanto)instrucao) },
-            { TipoInstrucao.ParaCada, () => InterpretarParaCada((InstrucaoParaCada)instrucao) },
-            { TipoInstrucao.Se, () => InterpretarSe((InstrucaoSe)instrucao) },
+            { TipoInstrucao.Enquanto, () => InterpretarEnquanto((Enquanto)instrucao) },
+            { TipoInstrucao.ParaCada, () => InterpretarParaCada((ParaCada)instrucao) },
+            { TipoInstrucao.Se, () => InterpretarSe((Se)instrucao) },
             { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
             { TipoInstrucao.AtribIndice, () => InterpretarAtribIndice((AtribuicaoIndice)instrucao) },
-            { TipoInstrucao.Retornar, () => InterpretarRetorno((InstrucaoRetornar)instrucao) },
+            { TipoInstrucao.Retornar, () => InterpretarRetorno((Retornar)instrucao) },
             { TipoInstrucao.Romper, () => throw new ExcecaoRomper() },
-            {TipoInstrucao.Tentar, () => InterpretarTentar((InstrucaoTentar)instrucao)}
+            {TipoInstrucao.Tentar, () => InterpretarTentar((Tentar)instrucao)}
         };
 
         // Executa a ação associada ao tipo, se existir.
@@ -114,7 +114,7 @@ public class Interpretador
         _ultimoRetorno = InterpretarExpressao(instrucao.Expressao);
     }
 
-    public void InterpretarTentar(InstrucaoTentar instrucao)
+    public void InterpretarTentar(Tentar instrucao)
     {
         try
         {
@@ -150,14 +150,14 @@ public class Interpretador
         Ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
     }
 
-    public void InterpretarRetorno(InstrucaoRetornar instrucao)
+    public void InterpretarRetorno(Retornar instrucao)
     {
-        object resultadoExpressao = InterpretarExpressao(((InstrucaoRetornar)instrucao).Expressao);
+        object resultadoExpressao = InterpretarExpressao(((Retornar)instrucao).Expressao);
         _ultimoRetorno = LibraObjeto.ParaLibraObjeto(resultadoExpressao);
         throw new ExcecaoRetorno(resultadoExpressao);
     }
 
-    public void InterpretarSe(InstrucaoSe se)
+    public void InterpretarSe(Se se)
     {
         if (InterpretarExpressao<LibraInt>(se.Condicao).Valor != 0)
         {
@@ -183,7 +183,7 @@ public class Interpretador
         }
     }
 
-    public void InterpretarEnquanto(InstrucaoEnquanto enquanto)
+    public void InterpretarEnquanto(Enquanto enquanto)
     {
         // TODO: Otimizar casos em que não é necessário calcular a expressão toda vez,
         // como em "enquanto 1", por exemplo.
@@ -207,7 +207,7 @@ public class Interpretador
         }
     }
 
-    public void InterpretarParaCada(InstrucaoParaCada instrucao)
+    public void InterpretarParaCada(ParaCada instrucao)
     {
         var expr = instrucao.Vetor;
 

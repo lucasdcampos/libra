@@ -134,9 +134,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoSe : Instrucao
+    public class Se : Instrucao
     {
-        public InstrucaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo, InstrucaoSenaoSe[] listaSenaoSe = null)
+        public Se(LocalToken local, Expressao condicao, Instrucao[] corpo, SenaoSe[] listaSenaoSe = null)
         {
             Tipo = TipoInstrucao.Se;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
@@ -147,7 +147,7 @@ namespace Libra.Arvore
 
         public Expressao Condicao { get; private set; }
         public IReadOnlyList<Instrucao> Corpo { get; private set; }
-        public IReadOnlyList<InstrucaoSenaoSe> ListaSenaoSe { get; private set; }
+        public IReadOnlyList<SenaoSe> ListaSenaoSe { get; private set; }
 
         public override object Aceitar(IVisitor visitor)
         {
@@ -155,9 +155,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoSenaoSe : Instrucao
+    public class SenaoSe : Instrucao
     {
-        public InstrucaoSenaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo)
+        public SenaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo)
         {
             Tipo = TipoInstrucao.SenaoSe;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
@@ -174,9 +174,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoEnquanto : Instrucao
+    public class Enquanto : Instrucao
     {
-        public InstrucaoEnquanto(LocalToken local, Expressao expressao, Instrucao[] instrucoes)
+        public Enquanto(LocalToken local, Expressao expressao, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.Enquanto;
             Expressao = expressao;
@@ -193,9 +193,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoParaCada : Instrucao
+    public class ParaCada : Instrucao
     {
-        public InstrucaoParaCada(LocalToken local, Token ident, Expressao vetor, Instrucao[] instrucoes)
+        public ParaCada(LocalToken local, Token ident, Expressao vetor, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.ParaCada;
             Identificador = ident;
@@ -214,9 +214,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoRomper : Instrucao
+    public class Romper : Instrucao
     {
-        public InstrucaoRomper(LocalToken local)
+        public Romper(LocalToken local)
         {
             Local = local;
             Tipo = TipoInstrucao.Romper;
@@ -228,9 +228,9 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoContinuar : Instrucao
+    public class Continuar : Instrucao
     {
-        public InstrucaoContinuar(LocalToken local)
+        public Continuar(LocalToken local)
         {
             Local = local;
             Tipo = TipoInstrucao.Continuar;
@@ -242,11 +242,11 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoRetornar : Instrucao
+    public class Retornar : Instrucao
     {
         public Expressao Expressao { get; private set; }
 
-        public InstrucaoRetornar(LocalToken local, Expressao expressao)
+        public Retornar(LocalToken local, Expressao expressao)
         {
             Tipo = TipoInstrucao.Retornar;
             Expressao = expressao;
@@ -259,13 +259,13 @@ namespace Libra.Arvore
         }
     }
 
-    public class InstrucaoTentar : Instrucao
+    public class Tentar : Instrucao
     {
         public Instrucao[] InstrucoesTentar { get; private set; }
         public string VariavelErro { get; private set; }
         public Instrucao[] InstrucoesCapturar { get; private set; }
 
-        public InstrucaoTentar(LocalToken local, Instrucao[] tentar, string variavelErro, Instrucao[] capturar)
+        public Tentar(LocalToken local, Instrucao[] tentar, string variavelErro, Instrucao[] capturar)
         {
             Local = local;
             InstrucoesTentar = tentar;
