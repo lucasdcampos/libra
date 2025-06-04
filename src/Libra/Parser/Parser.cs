@@ -2,7 +2,7 @@ using Libra.Arvore;
 
 namespace Libra;
 
-public class Parser
+public class r
 {
     private Token[] _tokens;
     private int _posicao;
@@ -47,10 +47,10 @@ public class Parser
             Array.Copy(extra, 0, _tokens, tokens.Length, extra.Length);
         }
 
-        return new Programa(ParseInstrucoes(TokenTipo.FimDoArquivo));
+        return new Programa(Instrucoes(TokenTipo.FimDoArquivo));
     }
 
-    public Instrucao[] ParseInstrucoes(TokenTipo fim = TokenTipo.Fim)
+    public Instrucao[] Instrucoes(TokenTipo fim = TokenTipo.Fim)
     {
         // Inicia uma lista com um pouco de espaço alocado
         var instrucoes = new List<Instrucao>(_tokens.Length / 3);
@@ -60,41 +60,41 @@ public class Parser
             if(TentarConsumirToken(TokenTipo.FimDoArquivo))
                 break;
 
-            instrucoes.Add(ParseInstrucaoAtual());
+            instrucoes.Add(InstrucaoAtual());
         }
         
         return instrucoes.ToArray();
     }
 
-    private Instrucao? ParseInstrucaoAtual()
+    private Instrucao? InstrucaoAtual()
     {   
         var atual = Atual();
         _local = atual.Local;
 
         switch (atual.Tipo)
         {
-            case TokenTipo.Var: return ParseDeclVar();
-            case TokenTipo.Const: return ParseDeclVar();
-            case TokenTipo.Funcao: return ParseDeclFuncao();
-            case TokenTipo.Classe: return ParseDeclClasse();
-            case TokenTipo.Se: return ParseInstrucaoSe();
-            case TokenTipo.Enquanto: return ParseInstrucaoEnquanto();
-            case TokenTipo.Para: return ParseInstrucaoParaCada();
+            case TokenTipo.Var: return DeclVar();
+            case TokenTipo.Const: return DeclVar();
+            case TokenTipo.Funcao: return DeclFuncao();
+            case TokenTipo.Classe: return DeclClasse();
+            case TokenTipo.Se: return InstrucaoSe();
+            case TokenTipo.Enquanto: return InstrucaoEnquanto();
+            case TokenTipo.Para: return InstrucaoParaCada();
             case TokenTipo.Romper: Passar(); return new InstrucaoRomper(_local);
             case TokenTipo.Continuar: Passar(); return new InstrucaoContinuar(_local);
-            case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, ParseExpressao());
-            case TokenTipo.Tentar: return ParseInstrucaoTentar();
+            case TokenTipo.Retornar: Passar(); return new InstrucaoRetornar(_local, Expressao());
+            case TokenTipo.Tentar: return InstrucaoTentar();
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
-                    return ParseExpressaoChamadaFuncao();
+                    return ChamadaFuncao();
                 else if (Proximo(1).Tipo == TokenTipo.AbrirCol)
-                    return ParseAtribIndice();
+                    return AtribIndice();
                 else if (Proximo(1).Tipo == TokenTipo.OperadorDefinir)
-                    return ParseAtribVar();
+                    return AtribVar();
                 break;
         }
 
-        var expr = ParseExpressao();
+        var expr = Expressao();
 
         if (expr != null)
         {
@@ -103,7 +103,7 @@ public class Parser
             {
                 ConsumirToken(TokenTipo.OperadorDefinir);
 
-                return ParseAtribProp((ExpressaoPropriedade)expr);
+                return AtribProp((ExpressaoPropriedade)expr);
             }
 
             return new InstrucaoExpressao(_local, expr);
@@ -113,47 +113,47 @@ public class Parser
         throw new Erro($"Instrução inválida {atual}", _local);
     }
 
-    private Instrucao? ParseAtribProp(ExpressaoPropriedade alvo)
+    private Instrucao? AtribProp(ExpressaoPropriedade alvo)
     {
-        var expr = ParseExpressao();
+        var expr = Expressao();
 
         return new AtribuicaoPropriedade(_local, alvo, expr);
     }
-    private Instrucao? ParseInstrucaoTentar()
+    private Instrucao? InstrucaoTentar()
     {
         ConsumirToken(TokenTipo.Tentar);
 
-        Instrucao[] blocoTentar = ParseInstrucoes(TokenTipo.Capturar);
+        Instrucao[] blocoTentar = Instrucoes(TokenTipo.Capturar);
 
         string variavelErro = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
-        Instrucao[] blocoCapturar = ParseInstrucoes();
+        Instrucao[] blocoCapturar = Instrucoes();
 
         return new InstrucaoTentar(_local, blocoTentar, variavelErro, blocoCapturar);
     }
 
-    private Instrucao? ParseAtribVar()
+    private Instrucao? AtribVar()
     {
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
         ConsumirToken(TokenTipo.OperadorDefinir);
-        var expr = ParseExpressao();
+        var expr = Expressao();
 
         return new AtribuicaoVar(_local, identificador, expr);
     }
 
-    private Instrucao? ParseAtribIndice()
+    private Instrucao? AtribIndice()
     {
         string ident = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
         ConsumirToken(TokenTipo.AbrirCol);
-        var exprIndice = ParseExpressao();
+        var exprIndice = Expressao();
         ConsumirToken(TokenTipo.FecharCol);
         ConsumirToken(TokenTipo.OperadorDefinir);
-        var expressao = ParseExpressao();
+        var expressao = Expressao();
         
         return new AtribuicaoIndice(_local, ident, exprIndice, expressao);
     }
 
-    private Instrucao? ParseDeclVar()
+    private Instrucao? DeclVar()
     {
         bool constante = false;
         if(TentarConsumirToken(TokenTipo.Const))
@@ -181,12 +181,12 @@ public class Parser
 
         ConsumirToken(TokenTipo.OperadorDefinir);
         
-        var expressao = ParseExpressao();
+        var expressao = Expressao();
 
         return new DeclaracaoVar(_local, identificador, expressao, tipo, constante);
     }
 
-    private ExpressaoNovoVetor? ParseVetor()
+    private ExpressaoNovoVetor? Vetor()
     {
         ConsumirToken(TokenTipo.AbrirCol);
 
@@ -196,12 +196,12 @@ public class Parser
             return new ExpressaoNovoVetor(_local, ExpressaoLiteral.CriarInt(_local, 0));
         }
 
-        Expressao expr = ParseExpressao();
+        Expressao expr = Expressao();
         ConsumirToken(TokenTipo.FecharCol);
         return new ExpressaoNovoVetor(_local, expr);
     }
 
-    private DefinicaoTipo? ParseDeclClasse()
+    private DefinicaoTipo? DeclClasse()
     {
         ConsumirToken(TokenTipo.Classe);
         bool estatica = TentarConsumirToken(TokenTipo.Anotacao);
@@ -216,7 +216,7 @@ public class Parser
                 throw new ErroEsperado(TokenTipo.Fim, TokenTipo.FimDoArquivo, _local);
 
             TentarConsumirToken(TokenTipo.Anotacao);
-            var atual = ParseInstrucaoAtual();
+            var atual = InstrucaoAtual();
             if(atual.Tipo == TipoInstrucao.DeclVar)
                 variaveis.Add((DeclaracaoVar)atual);
             else if(atual.Tipo == TipoInstrucao.DeclFunc)
@@ -229,7 +229,7 @@ public class Parser
         return new DefinicaoTipo(_local, identificador, variaveis.ToArray(), funcoes.ToArray());
     }
 
-    private Parametro[] ParseParametros()
+    private Parametro[] Parametros()
     {
         var parametros = new List<Parametro>();
         while(Atual().Tipo != TokenTipo.FecharParen)
@@ -258,12 +258,12 @@ public class Parser
 
         return parametros.ToArray();
     }
-    private DefinicaoFuncao? ParseDeclFuncao()
+    private DefinicaoFuncao? DeclFuncao()
     {
         ConsumirToken(TokenTipo.Funcao);
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
         ConsumirToken(TokenTipo.AbrirParen);
-        var parametros = ParseParametros();
+        var parametros = Parametros();
 
         // Chamem um psiquiatra pra esse cidadão
         if(parametros.Length > 255)
@@ -281,90 +281,90 @@ public class Parser
             tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Nulo : TiposPadrao.Objeto;
         }
 
-        var instrucoes = ParseInstrucoes();
+        var instrucoes = Instrucoes();
 
         return new DefinicaoFuncao(_local, identificador, instrucoes, parametros, tipoRetorno);
     }
     
-    private InstrucaoSe? ParseInstrucaoSe()
+    private InstrucaoSe? InstrucaoSe()
     {
         ConsumirToken(TokenTipo.Se);
 
-        var expressao = ParseExpressao();
+        var expressao = Expressao();
 
         ConsumirToken(TokenTipo.Entao);
 
-        Instrucao[] corpoSe = ParseCorpoSe();
+        Instrucao[] corpoSe = CorpoSe();
         List<InstrucaoSenaoSe> listaSenaoSe = new();
 
         while(Atual().Tipo == TokenTipo.SenaoSe || Atual().Tipo == TokenTipo.Senao)
         {
-            listaSenaoSe.Add(ParseInstrucaoSenaoSe());
+            listaSenaoSe.Add(InstrucaoSenaoSe());
         }
 
         return new InstrucaoSe(_local, expressao, corpoSe, listaSenaoSe.Count > 0 ? listaSenaoSe.ToArray() : null);
     }
 
-    private InstrucaoSenaoSe? ParseInstrucaoSenaoSe()
+    private InstrucaoSenaoSe? InstrucaoSenaoSe()
     {
         
         // Senao será convertido para um "senao se 1", que é uma expressão sempre verdadeira
         if(TentarConsumirToken(TokenTipo.Senao))
         {
-            return new InstrucaoSenaoSe(_local, ExpressaoLiteral.CriarInt(_local, 1), ParseCorpoSe());
+            return new InstrucaoSenaoSe(_local, ExpressaoLiteral.CriarInt(_local, 1), CorpoSe());
         }
 
         while(TentarConsumirToken(TokenTipo.SenaoSe))
         {
-            var expr = ParseExpressao();
+            var expr = Expressao();
             ConsumirToken(TokenTipo.Entao);
             List<Instrucao> corpo = new();
 
-            return new InstrucaoSenaoSe(_local, expr, ParseCorpoSe());
+            return new InstrucaoSenaoSe(_local, expr, CorpoSe());
         }
 
         return null;
     }
 
-    private Instrucao[] ParseCorpoSe()
+    private Instrucao[] CorpoSe()
     {
         List<Instrucao> corpoSe = new();
         while (!TentarConsumirToken(TokenTipo.Fim) && 
         Atual().Tipo != TokenTipo.Senao &&
         Atual().Tipo != TokenTipo.SenaoSe)
         {
-            corpoSe.Add(ParseInstrucaoAtual());
+            corpoSe.Add(InstrucaoAtual());
         }
         return corpoSe.ToArray();
     }
 
-    private InstrucaoEnquanto? ParseInstrucaoEnquanto()
+    private InstrucaoEnquanto? InstrucaoEnquanto()
     {
         ConsumirToken(TokenTipo.Enquanto);
 
-        var expressao = ParseExpressao();
+        var expressao = Expressao();
         ConsumirToken(TokenTipo.Repetir);
 
-        var instrucoes = ParseInstrucoes();
+        var instrucoes = Instrucoes();
 
         return new InstrucaoEnquanto(_local, expressao, instrucoes);
     }
     
-    private InstrucaoParaCada? ParseInstrucaoParaCada()
+    private InstrucaoParaCada? InstrucaoParaCada()
     {
         ConsumirToken(TokenTipo.Para);
         ConsumirToken(TokenTipo.Cada);
         var identificador = ConsumirToken(TokenTipo.Identificador);
         ConsumirToken(TokenTipo.Em);
-        var vetor = ParseExpressao(); // TODO: Conferir se a expressão é enumerável
-        var instrucoes = ParseInstrucoes(); // até encontrar "fim"
+        var vetor = Expressao(); // TODO: Conferir se a expressão é enumerável
+        var instrucoes = Instrucoes(); // até encontrar "fim"
 
         return new InstrucaoParaCada(_local, identificador, vetor, instrucoes);
     }
 
-    private Expressao ParseExpressao(int precedenciaMinima = 0)
+    private Expressao Expressao(int precedenciaMinima = 0)
     {
-        var expr_esq = ParseExpressaoTermo();
+        var expr_esq = Primaria();
 
         while (Atual().Tipo == TokenTipo.Ponto)
         {
@@ -383,7 +383,7 @@ public class Parser
 
             var opr = ConsumirToken();
             int proxPrecedenciaMinima = precedenciaMinima + 1; // ESQ -> DIR
-            var expr_dir = ParseExpressao(proxPrecedenciaMinima);
+            var expr_dir = Expressao(proxPrecedenciaMinima);
 
             // Detectando problemas em tempo de compilação
             if (opr.Tipo == TokenTipo.OperadorDiv && expr_dir is ExpressaoLiteral exprLit)
@@ -401,40 +401,18 @@ public class Parser
 
         return expr_esq;
     }
-
-    private ExpressaoInicializacaoVetor ParseInicializacaoVetor()
-    {
-        ConsumirToken(TokenTipo.AbrirChave);
-        if(TentarConsumirToken(TokenTipo.FecharChave))
-        {
-            return new ExpressaoInicializacaoVetor(_local, new List<Expressao>());
-        }
-        
-        var expressoes = new List<Expressao>();
-        while(true)
-        {
-            expressoes.Add(ParseExpressao());
-
-            TentarConsumirToken(TokenTipo.Virgula);
-
-            if(TentarConsumirToken(TokenTipo.FecharChave))
-                break;
-        }
-
-        return new ExpressaoInicializacaoVetor(_local, expressoes);
-    }
-
-    private Expressao ParseExpressaoTermo()
+    
+    private Expressao Primaria()
     {
         switch (Atual().Tipo)
         {
             case TokenTipo.OperadorNeg:
             case TokenTipo.OperadorSub:
-                return new ExpressaoUnaria(_local, ConsumirToken(), ParseExpressao());
+                return new ExpressaoUnaria(_local, ConsumirToken(), Expressao());
             case TokenTipo.AbrirCol:
-                return ParseVetor();
+                return Vetor();
             case TokenTipo.AbrirChave:
-                return ParseInicializacaoVetor();
+                return InicializacaoVetor();
             case TokenTipo.NumeroLiteral:
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
@@ -443,30 +421,52 @@ public class Parser
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                 {
-                    return ParseExpressaoChamadaFuncao();
+                    return ChamadaFuncao();
                 }
                 else if(Proximo(1).Tipo == TokenTipo.AbrirCol)
                 {
-                    return ParseExpressaoAcessoVetor();
+                    return ExpressaoAcessoVetor();
                 }
                 return new ExpressaoVariavel(_local, ConsumirToken());
 
             case TokenTipo.AbrirParen:
                 Passar();
-                var exprDentroParenteses = ParseExpressao();
+                var exprDentroParenteses = Expressao();
                 ConsumirToken(TokenTipo.FecharParen);
                 return exprDentroParenteses;
         }
 
-        throw new ErroAcessoNulo($" Não foi possível parsear a expressão: {Atual().Tipo}", _local);
+        throw new Erro($" Não foi possível parsear a expressão: {Atual().Tipo}", _local);
     }
 
-    private Expressao[] ParseArgumentos()
+    private ExpressaoInicializacaoVetor InicializacaoVetor()
+    {
+        ConsumirToken(TokenTipo.AbrirChave);
+        if (TentarConsumirToken(TokenTipo.FecharChave))
+        {
+            return new ExpressaoInicializacaoVetor(_local, new List<Expressao>());
+        }
+
+        var expressoes = new List<Expressao>();
+        while (true)
+        {
+            expressoes.Add(Expressao());
+
+            TentarConsumirToken(TokenTipo.Virgula);
+
+            if (TentarConsumirToken(TokenTipo.FecharChave))
+                break;
+        }
+
+        return new ExpressaoInicializacaoVetor(_local, expressoes);
+    }
+
+    private Expressao[] Argumentos()
     {
         var argumentos = new List<Expressao>();
         while(Atual().Tipo != TokenTipo.FecharParen)
         {
-            var expr = ParseExpressao();
+            var expr = Expressao();
             argumentos.Add(expr);
 
             if(expr == null)
@@ -476,28 +476,28 @@ public class Parser
         }
         return argumentos.ToArray();
     }
-    private Expressao? ParseExpressaoAcessoVetor()
+    private Expressao? ExpressaoAcessoVetor()
     {
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
         ConsumirToken(TokenTipo.AbrirCol);
-        var indice = ParseExpressao();
+        var indice = Expressao();
         ConsumirToken(TokenTipo.FecharCol);
 
         return new ExpressaoAcessoVetor(_local, identificador, indice);
     }
 
-    private ExpressaoChamadaFuncao? ParseExpressaoChamadaFuncao()
+    private ChamadaFuncao? ChamadaFuncao()
     {
         string identificador = (string)ConsumirToken(TokenTipo.Identificador).Valor;
         ConsumirToken(TokenTipo.AbrirParen);
 
-        var argumentos = ParseArgumentos();
+        var argumentos = Argumentos();
         
         if(argumentos.Length > 255)
             throw new Erro($"Função {identificador} passou de 255 argumentos", _local, 255, "Procure ajuda.");
 
         ConsumirToken(TokenTipo.FecharParen);
-        return new ExpressaoChamadaFuncao(_local, identificador, argumentos);
+        return new ChamadaFuncao(_local, identificador, argumentos);
     }
 
     private int? PrioridadeOperador(Token token)
