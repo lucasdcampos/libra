@@ -21,7 +21,7 @@ namespace Libra
             if(mensagem.StartsWith("Aviso: "))
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 
-            Console.Write(mensagem + final);
+            Console.Write(mensagem); // TODO: Arrumar
             Console.ResetColor();
         }
     }
