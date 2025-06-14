@@ -27,7 +27,7 @@ namespace Libra.Arvore
         public Token Operador { get; private set; }
         public Expressao Operando { get; private set; }
 
-        public ExpressaoUnaria(LocalToken local, Token operador, Expressao operando)
+        public ExpressaoUnaria(LocalFonte local, Token operador, Expressao operando)
         {
             Local = local;
             Operador = operador;
@@ -40,7 +40,7 @@ namespace Libra.Arvore
 
     public class ExpressaoLiteral : Expressao
     {
-        public ExpressaoLiteral(LocalToken local, Token token)
+        public ExpressaoLiteral(LocalFonte local, Token token)
         {
             Local = local;
             Token = token;
@@ -52,7 +52,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
 
-        public static ExpressaoLiteral CriarInt(LocalToken local, int valor)
+        public static ExpressaoLiteral CriarInt(LocalFonte local, int valor)
         {
             return new ExpressaoLiteral(local, new Token(TokenTipo.NumeroLiteral, local, valor));
         }
@@ -62,7 +62,7 @@ namespace Libra.Arvore
     {
         public Token Identificador { get; private set ;}
 
-        public ExpressaoVariavel(LocalToken local, Token identificador)
+        public ExpressaoVariavel(LocalFonte local, Token identificador)
         {
             Local = local;
             Identificador = identificador;
@@ -76,7 +76,7 @@ namespace Libra.Arvore
     {
         public Expressao Alvo { get; private set ;}
         public string Propriedade { get; private set ;}
-        public ExpressaoPropriedade(LocalToken local, Expressao alvo, string prop)
+        public ExpressaoPropriedade(LocalFonte local, Expressao alvo, string prop)
         {
             Local = local;
             Alvo = alvo;
@@ -92,7 +92,7 @@ namespace Libra.Arvore
         public string Identificador { get; private set; }
         public Expressao[] Argumentos { get; private set; }
 
-        public ExpressaoChamadaFuncao(LocalToken local, string ident, Expressao[] argumentos = null)
+        public ExpressaoChamadaFuncao(LocalFonte local, string ident, Expressao[] argumentos = null)
         {
             Local = local;
             Tipo = TipoInstrucao.Chamada;
@@ -115,7 +115,7 @@ namespace Libra.Arvore
         public Expressao Alvo { get; private set; }
         public ExpressaoChamadaFuncao Chamada { get; private set ;}
 
-        public ExpressaoChamadaMetodo(LocalToken local, Expressao alvo, ExpressaoChamadaFuncao chamada)
+        public ExpressaoChamadaMetodo(LocalFonte local, Expressao alvo, ExpressaoChamadaFuncao chamada)
         {
             Local = local;
             Tipo = TipoInstrucao.ChamadaMetodo;
@@ -129,7 +129,7 @@ namespace Libra.Arvore
 
     public class ExpressaoAcessoVetor : Expressao
     {
-        public ExpressaoAcessoVetor(LocalToken local, string ident, Expressao expr)
+        public ExpressaoAcessoVetor(LocalFonte local, string ident, Expressao expr)
         {
             Local = local;
             Identificador = ident;
@@ -144,7 +144,7 @@ namespace Libra.Arvore
 
     public class ExpressaoNovoVetor : Expressao
     {
-        public ExpressaoNovoVetor(LocalToken local, Expressao expr)
+        public ExpressaoNovoVetor(LocalFonte local, Expressao expr)
         {
             Local = local;
             Expressao = expr;
@@ -158,7 +158,7 @@ namespace Libra.Arvore
 
     public class ExpressaoInicializacaoVetor : Expressao
     {
-        public ExpressaoInicializacaoVetor(LocalToken local, List<Expressao> expressoes)
+        public ExpressaoInicializacaoVetor(LocalFonte local, List<Expressao> expressoes)
         {
             Local = local;
             Expressoes = expressoes;
@@ -176,7 +176,7 @@ namespace Libra.Arvore
         public Token Operador { get; private set; }
         public Expressao Direita { get; private set; }
 
-        public ExpressaoBinaria(LocalToken local, Expressao esquerda, Token operador, Expressao direita)
+        public ExpressaoBinaria(LocalFonte local, Expressao esquerda, Token operador, Expressao direita)
         {
             Local = local;
             Esquerda = esquerda;

@@ -79,7 +79,7 @@ public class LibraObjeto
             throw new ErroFuncaoNaoDefinida(chamada.Identificador);
         var args = chamada.Argumentos.ToList<Expressao>();
         if(!string.IsNullOrEmpty(quemChamou))
-            args.Insert(0, new ExpressaoVariavel(chamada.Local, new Token(TokenTipo.Identificador, new LocalToken(), quemChamou)));
+            args.Insert(0, new ExpressaoVariavel(chamada.Local, new Token(TokenTipo.Identificador, new LocalFonte(), quemChamou)));
         
         return new Interpretador().ExecutarFuncao((Funcao)Propriedades[chamada.Identificador].Valor, args.ToArray());
     }

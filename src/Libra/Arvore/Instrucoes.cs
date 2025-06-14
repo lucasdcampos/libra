@@ -28,7 +28,7 @@ namespace Libra.Arvore
     public abstract class Instrucao
     {
         public TipoInstrucao Tipo { get; protected set; }
-        public LocalToken Local { get; protected set; }
+        public LocalFonte Local { get; protected set; }
         
         public abstract object Aceitar(IVisitor visitor);
     }
@@ -37,7 +37,7 @@ namespace Libra.Arvore
     {
         public Expressao Expressao { get; private set; }
 
-        public InstrucaoExpressao(LocalToken local, Expressao expressao)
+        public InstrucaoExpressao(LocalFonte local, Expressao expressao)
         {
             Tipo = TipoInstrucao.Expressao;
             Expressao = expressao;
@@ -52,7 +52,7 @@ namespace Libra.Arvore
 
     public class DeclaracaoVar : Instrucao
     {
-        public DeclaracaoVar(LocalToken local, string identificador, Expressao expressao, string tipo, bool constante)
+        public DeclaracaoVar(LocalFonte local, string identificador, Expressao expressao, string tipo, bool constante)
         {
             Tipo = TipoInstrucao.DeclVar;
             Identificador = identificador;
@@ -76,7 +76,7 @@ namespace Libra.Arvore
     {
         public string Identificador { get; }
         public Expressao Expressao { get; }
-        public AtribuicaoVar(LocalToken local, string identificador, Expressao expr)
+        public AtribuicaoVar(LocalFonte local, string identificador, Expressao expr)
         {
             Identificador = identificador;
             Expressao = expr;
@@ -92,7 +92,7 @@ namespace Libra.Arvore
 
     public class DefinicaoFuncao : Instrucao
     {
-        public DefinicaoFuncao(LocalToken local, string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, string tipoRetorno = "Objeto")
+        public DefinicaoFuncao(LocalFonte local, string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, string tipoRetorno = "Objeto")
         {
             Tipo = TipoInstrucao.DeclFunc;
             Instrucoes = instrucoes;
@@ -115,7 +115,7 @@ namespace Libra.Arvore
 
     public class DefinicaoTipo : Instrucao
     {
-        public DefinicaoTipo(LocalToken local, string identificador, DeclaracaoVar[] variaveis, DefinicaoFuncao[] funcoes)
+        public DefinicaoTipo(LocalFonte local, string identificador, DeclaracaoVar[] variaveis, DefinicaoFuncao[] funcoes)
         {
             Tipo = TipoInstrucao.DeclClasse;
             Variaveis = variaveis;
@@ -136,7 +136,7 @@ namespace Libra.Arvore
 
     public class Se : Instrucao
     {
-        public Se(LocalToken local, Expressao condicao, Instrucao[] corpo, SenaoSe[] listaSenaoSe = null)
+        public Se(LocalFonte local, Expressao condicao, Instrucao[] corpo, SenaoSe[] listaSenaoSe = null)
         {
             Tipo = TipoInstrucao.Se;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
@@ -157,7 +157,7 @@ namespace Libra.Arvore
 
     public class SenaoSe : Instrucao
     {
-        public SenaoSe(LocalToken local, Expressao condicao, Instrucao[] corpo)
+        public SenaoSe(LocalFonte local, Expressao condicao, Instrucao[] corpo)
         {
             Tipo = TipoInstrucao.SenaoSe;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
@@ -176,7 +176,7 @@ namespace Libra.Arvore
 
     public class Enquanto : Instrucao
     {
-        public Enquanto(LocalToken local, Expressao expressao, Instrucao[] instrucoes)
+        public Enquanto(LocalFonte local, Expressao expressao, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.Enquanto;
             Expressao = expressao;
@@ -195,7 +195,7 @@ namespace Libra.Arvore
 
     public class ParaCada : Instrucao
     {
-        public ParaCada(LocalToken local, Token ident, Expressao vetor, Instrucao[] instrucoes)
+        public ParaCada(LocalFonte local, Token ident, Expressao vetor, Instrucao[] instrucoes)
         {
             Tipo = TipoInstrucao.ParaCada;
             Identificador = ident;
@@ -216,7 +216,7 @@ namespace Libra.Arvore
 
     public class Romper : Instrucao
     {
-        public Romper(LocalToken local)
+        public Romper(LocalFonte local)
         {
             Local = local;
             Tipo = TipoInstrucao.Romper;
@@ -230,7 +230,7 @@ namespace Libra.Arvore
 
     public class Continuar : Instrucao
     {
-        public Continuar(LocalToken local)
+        public Continuar(LocalFonte local)
         {
             Local = local;
             Tipo = TipoInstrucao.Continuar;
@@ -246,7 +246,7 @@ namespace Libra.Arvore
     {
         public Expressao Expressao { get; private set; }
 
-        public Retornar(LocalToken local, Expressao expressao)
+        public Retornar(LocalFonte local, Expressao expressao)
         {
             Tipo = TipoInstrucao.Retornar;
             Expressao = expressao;
@@ -265,7 +265,7 @@ namespace Libra.Arvore
         public string VariavelErro { get; private set; }
         public Instrucao[] InstrucoesCapturar { get; private set; }
 
-        public Tentar(LocalToken local, Instrucao[] tentar, string variavelErro, Instrucao[] capturar)
+        public Tentar(LocalFonte local, Instrucao[] tentar, string variavelErro, Instrucao[] capturar)
         {
             Local = local;
             InstrucoesTentar = tentar;
@@ -283,7 +283,7 @@ namespace Libra.Arvore
 
     public class AtribuicaoIndice : Instrucao
     {
-        public AtribuicaoIndice(LocalToken local, string identificador, Expressao indiceExpr, Expressao expressao)
+        public AtribuicaoIndice(LocalFonte local, string identificador, Expressao indiceExpr, Expressao expressao)
         {
             Tipo = TipoInstrucao.AtribIndice;
             Expressao = expressao;
@@ -304,7 +304,7 @@ namespace Libra.Arvore
 
     public class AtribuicaoPropriedade : Instrucao
     {
-        public AtribuicaoPropriedade(LocalToken local, ExpressaoPropriedade alvo, Expressao expressao)
+        public AtribuicaoPropriedade(LocalFonte local, ExpressaoPropriedade alvo, Expressao expressao)
         {
             Tipo = TipoInstrucao.AtribProp;
             Expressao = expressao;

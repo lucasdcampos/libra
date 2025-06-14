@@ -1,11 +1,11 @@
 namespace Libra;
 
-public struct LocalToken
+public struct LocalFonte
 {
     public string Arquivo = "";
     public int Linha = 1;
     public string CaminhoCompleto = "";
-    public LocalToken(string caminho, string arquivo, int linha)
+    public LocalFonte(string caminho, string arquivo, int linha)
     {
         Arquivo = arquivo;
         Linha = linha;
@@ -18,76 +18,9 @@ public struct LocalToken
     }
 }
 
-public enum TokenTipo
-{
-    
-    // Tipos
-    NumeroLiteral,
-    CaractereLiteral,
-    TextoLiteral,
-    Identificador,
-    Anotacao,
-    Vetor,
-    Nulo,
-    TokenInvalido,
-
-    // Operadores
-    OperadorSoma,
-    OperadorSub,
-    OperadorMult, 
-    OperadorDiv,
-    OperadorPot,
-    OperadorComparacao,
-    OperadorDefinir,
-    OperadorMaiorQue,
-    OperadorMenorQue,
-    OperadorMaiorIgualQue,
-    OperadorMenorIgualQue,
-    OperadorE,
-    OperadorOu,
-    OperadorOuExclusivo,
-    OperadorDiferente,
-    OperadorNeg,
-    OperadorResto,
-
-    // Simbolos
-    AbrirParen, 
-    FecharParen,
-    AbrirCol,
-    FecharCol,
-    AbrirChave,
-    FecharChave,
-    PontoEVirgula,
-    Virgula,
-    Ponto,
-    DoisPontos,
-    FimDoArquivo,
-
-    // Palavras Reservadas
-    Var,
-    Const,
-    Funcao,
-    Classe,
-    Se,
-    Senao,
-    SenaoSe,
-    Entao,
-    Enquanto,
-    Para,
-    Cada,
-    Em,
-    Repetir,
-    Romper,
-    Continuar,
-    Retornar,
-    Tentar,
-    Capturar,
-    Fim,    
-}
-
 public class Token
 {
-    public Token(TokenTipo tipo, LocalToken local, object valor = null)
+    public Token(TokenTipo tipo, LocalFonte local, object valor = null)
     {
         Tipo = tipo;
         Valor = valor;
@@ -96,7 +29,7 @@ public class Token
 
     public TokenTipo Tipo { get; private set; }
     public object Valor { get; internal set; }
-    public LocalToken Local { get; private set; }
+    public LocalFonte Local { get; private set; }
 
     public override string ToString()
     {
@@ -141,5 +74,4 @@ public class Token
                 return tipo.ToString();
         }
     }
-
 }

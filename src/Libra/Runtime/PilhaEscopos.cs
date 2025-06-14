@@ -10,11 +10,11 @@ public class PilhaDeEscopos
     public PilhaDeEscopos()
     {
         // Adiciona o escopo global ao iniciar
-        EmpilharEscopo("Global", new LocalToken());
+        EmpilharEscopo("Global", new LocalFonte());
     }
 
     // Adiciona um novo escopo à pilha (usado para blocos locais, funções, etc.)
-    public void EmpilharEscopo(string nome = "", LocalToken local = new())
+    public void EmpilharEscopo(string nome = "", LocalFonte local = new())
     {
         if (escopos.Count < 1000)
         {

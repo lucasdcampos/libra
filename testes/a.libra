@@ -1,1 +1,3 @@
-var x = 1
+repetir
+    exibir("Olá mundo!")
+fim

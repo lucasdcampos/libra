@@ -12,7 +12,7 @@ public class Tokenizador
     private string? _fonte;
     private List<Token>? _tokens;
     private HashSet<string> _arquivosImportados = new();
-    private LocalToken _local;
+    private LocalFonte _local;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
         { "var", TokenTipo.Var },
@@ -44,7 +44,7 @@ public class Tokenizador
     {
         _fonte = source.ReplaceLineEndings("\n");
         _tokens = new();
-        _local = new LocalToken(caminho, arquivo, 1);
+        _local = new LocalFonte(caminho, arquivo, 1);
         _posicao = 0;
         var texto = "";
  

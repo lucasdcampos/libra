@@ -4,9 +4,9 @@ public class Escopo
 {
     internal Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
     public string Nome { get; private set; }
-    public LocalToken Local { get; private set; }
+    public LocalFonte Local { get; private set; }
 
-    public Escopo(string nome, LocalToken local)
+    public Escopo(string nome, LocalFonte local)
     {
         Nome = nome;
         Local = local;

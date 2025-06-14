@@ -28,10 +28,10 @@ public class InterpretadorFlags
 public class Interpretador
 {
     public static int NivelDebug = 0;
-    public static LocalToken LocalAtual => ObterLocalAtual();
+    public static LocalFonte LocalAtual => ObterLocalAtual();
     public static InterpretadorFlags Flags => _instancia == null ? InterpretadorFlags.Padrao() : _instancia._flags;
     private InterpretadorFlags _flags;
-    private LocalToken _local = new LocalToken();
+    private LocalFonte _local = new LocalFonte();
     private bool _shell = false;
     private VisitorExpressoes _visitorExpressoes;
     private static Interpretador _instancia;
@@ -45,17 +45,17 @@ public class Interpretador
         _flags = flags == null ? InterpretadorFlags.Padrao() : flags;
     }
 
-    private static LocalToken ObterLocalAtual()
+    private static LocalFonte ObterLocalAtual()
     {
         if (_instancia == null)
-            return new LocalToken();
+            return new LocalFonte();
 
         return _instancia._local;
     }
 
     public void Resetar()
     {
-        _local = new LocalToken();
+        _local = new LocalFonte();
     }
 
     public int ExecutarPrograma(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)

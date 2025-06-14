@@ -6,7 +6,7 @@ public class Parser
 {
     private Token[] _tokens;
     private int _posicao;
-    private LocalToken _local;
+    private LocalFonte _local;
 
     private static readonly Dictionary<TokenTipo, int> _precedenciaOperadores = new()
     {
@@ -29,7 +29,7 @@ public class Parser
     public void Resetar()
     {
         _posicao = 0;
-        _local = new LocalToken();
+        _local = new LocalFonte();
     }
 
     public Programa Parse(Token[] tokens, Token[] extra = null)
@@ -79,6 +79,7 @@ public class Parser
             case TokenTipo.Classe: return DeclClasse();
             case TokenTipo.Se: return Se();
             case TokenTipo.Enquanto: return Enquanto();
+            case TokenTipo.Repetir: return Repetir();
             case TokenTipo.Para: return ParaCada();
             case TokenTipo.Romper: Passar(); return new Romper(_local);
             case TokenTipo.Continuar: Passar(); return new Continuar(_local);
@@ -111,6 +112,14 @@ public class Parser
             
 
         throw new Erro($"Instrução inválida {atual}", _local);
+    }
+
+    private Instrucao? Repetir()
+    {
+        ConsumirToken(TokenTipo.Repetir);
+        Expressao verdadeira = new ExpressaoLiteral(_local, new Token(TokenTipo.NumeroLiteral, _local, 1));
+        var instrucoes = Instrucoes();
+        return new Enquanto(_local, verdadeira, instrucoes); // repetir é basicamente um "enquanto 1"
     }
 
     private Instrucao? AtribProp(ExpressaoPropriedade alvo)
