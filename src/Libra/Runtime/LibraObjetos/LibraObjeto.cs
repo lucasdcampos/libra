@@ -25,14 +25,14 @@ public class LibraObjeto
 
     public virtual LibraObjeto Converter(string novoTipo)
     {
-        throw new ErroConversao(Nome, novoTipo, Interpretador.LocalAtual);
+        throw new ErroConversao(Nome, novoTipo, new LocalFonte() /* TODO: Arrumar! */);
     }
 
     internal void Construtor(string ident)
     {
         if(Propriedades.ContainsKey(Nome) && Propriedades[Nome].Valor is Funcao)
         {
-            ChamarMetodo(new ExpressaoChamadaFuncao(Interpretador.LocalAtual, Nome, _argsConstrutor), ident);
+            ChamarMetodo(new ExpressaoChamadaFuncao(new LocalFonte() /* TODO: Arrumar! */, Nome, _argsConstrutor), ident);
         }
     }
 
@@ -62,7 +62,7 @@ public class LibraObjeto
     public LibraObjeto AcessarPropriedade(string prop)
     {
         if(!Propriedades.ContainsKey(prop))
-            throw new ErroVariavelNaoDeclarada($"{Nome}.{prop}", Interpretador.LocalAtual);
+            throw new ErroVariavelNaoDeclarada($"{Nome}.{prop}", new LocalFonte() /* TODO: Arrumar! */);
         return Propriedades[prop].Valor;
     }
 

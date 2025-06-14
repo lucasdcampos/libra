@@ -38,7 +38,7 @@ public class LibraBase : IModulo
         Ambiente.DefinirGlobal("erro", new FuncaoNativa(erro));
 
         // Impedir uso de funções potencialmente perigosas
-        if (Ambiente.AmbienteSeguro || Interpretador.Flags.ModoSeguro)
+        if (Ambiente.AmbienteSeguro /* TODO: Arrumar! || Interpretador.Flags.ModoSeguro*/)
             return;
 
         Ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
@@ -55,7 +55,7 @@ public class LibraBase : IModulo
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 1, args.Length);
 
         if (args[0] is not string str)
-            throw new ErroAcessoNulo(" Esperava Texto", Interpretador.LocalAtual);
+            throw new ErroAcessoNulo(" Esperava Texto", new LocalFonte() /* TODO: Arrumar! */);
 
         switch (str)
         {
@@ -130,7 +130,7 @@ public class LibraBase : IModulo
         else if(args[0] is Assembly)
             assembly = (Assembly)args[0];
         else
-            throw new Erro("Esperado um caminho para DLL", Interpretador.LocalAtual);
+            throw new Erro("Esperado um caminho para DLL", new LocalFonte() /* TODO: Arrumar! */);
             
         foreach (var tipo in assembly.GetTypes())
         {
@@ -155,7 +155,7 @@ public class LibraBase : IModulo
 
         // Compilar o código do usuário
         var assembly = CompilarCodigo(codigo);
-        if (assembly == null) throw new Erro("Erro ao compilar o código.", Interpretador.LocalAtual);
+        if (assembly == null) throw new Erro("Erro ao compilar o código.", new LocalFonte() /* TODO: Arrumar! */);
         registrardll(new object[] {assembly});
 
         return null;
@@ -208,7 +208,7 @@ public class LibraBase : IModulo
     public object _int(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
+            new Erro("Esperava 1 argumento", new LocalFonte() /* TODO: Arrumar! */);
 
         var r = (int?)tentarInt(args);
         if(r == null)
@@ -220,7 +220,7 @@ public class LibraBase : IModulo
     public object tentarInt(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
+            new Erro("Esperava 1 argumento", new LocalFonte() /* TODO: Arrumar! */);
 
         int resultado;
         try
@@ -238,11 +238,11 @@ public class LibraBase : IModulo
     public object tentarReal(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
+            new Erro("Esperava 1 argumento", new LocalFonte() /* TODO: Arrumar! */);
 
         var r = (double?)tentarInt(args);
         if(r == null)
-            throw new ErroAcessoNulo($" Não foi possível converter `{args[0]}` para Real", Interpretador.LocalAtual);
+            throw new ErroAcessoNulo($" Não foi possível converter `{args[0]}` para Real", new LocalFonte() /* TODO: Arrumar! */);
 
         return r;
     }
@@ -250,7 +250,7 @@ public class LibraBase : IModulo
     public object real(object[] args)
     {
         if(args.Length == 0)
-            new Erro("Esperava 1 argumento", Interpretador.LocalAtual);
+            new Erro("Esperava 1 argumento", new LocalFonte() /* TODO: Arrumar! */);
 
         double resultado;
         try
@@ -272,7 +272,7 @@ public class LibraBase : IModulo
         var tamanho = LibraObjeto.ParaLibraObjeto(args[0]).ObterTamanhoEmBytes();
 
         if(tamanho.Valor < 0)
-            throw new Erro($"Não é possível calcular diretamente o tamanho de {args[0]}", Interpretador.LocalAtual);
+            throw new Erro($"Não é possível calcular diretamente o tamanho de {args[0]}", new LocalFonte() /* TODO: Arrumar! */);
         
         return tamanho;
     }
@@ -286,7 +286,7 @@ public class LibraBase : IModulo
 
     public object entrada(object[] args)
     {
-        if (Interpretador.Flags.ModoSeguro)
+        if (true /*TODO: Arrumar! Interpretador.Flags.ModoSeguro*/)
         {
             throw new ErroAcessoNulo(" entrada não disponível nesse modo");
         }
@@ -308,7 +308,7 @@ public class LibraBase : IModulo
         if(args[0] is LibraVetor vetor)
             return vetor.Valor.Length;
 
-        throw new Erro("Argumento inválido para tamanho().", Interpretador.LocalAtual);
+        throw new Erro("Argumento inválido para tamanho().", new LocalFonte() /* TODO: Arrumar! */);
 
         return null;
     }
@@ -345,7 +345,7 @@ public class LibraBase : IModulo
         {
             throw new Erro("Erro!");
         }
-        throw new Erro(args[0].ToString(), Interpretador.LocalAtual);
+        throw new Erro(args[0].ToString(), new LocalFonte() /* TODO: Arrumar! */);
     }
 
     private Assembly CompilarCodigo(string codigo)

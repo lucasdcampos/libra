@@ -31,16 +31,6 @@ public class PilhaDeEscopos
     {
         if (escopos.Count > 1)
         {
-            // TODO: Não é a melhor forma
-            /*for(int i = 0; i < escopos.Peek()._variaveis.Count; i++)
-            {
-                Variavel var = escopos.Peek()._variaveis.ElementAt(i).Value;
-                if(!var.Referenciada && Interpretador.Flags.MostrarAvisos && var.Valor is not Funcao)
-                {
-                    Ambiente.Msg($"Aviso: Variável `{var.Identificador}` foi declarada mas nunca foi usada.\n{Interpretador.LocalAtual}");
-                }
-            }*/
-
             escopos.Pop();
         }
     }
@@ -75,9 +65,10 @@ public class PilhaDeEscopos
                 return escopos.ElementAt(i)?.ObterVariavel(identificador);
         }
 
-        if(identificador.Length > 20)
+        // TODO: Voltar Local do Erro!
+        if (identificador.Length > 20)
         {
-            throw new Erro($"Parece que você dormiu e bateu no teclado.\n\n      {identificador}\n      {new String('^',identificador.Length)} você dormiu por aqui.", Interpretador.LocalAtual, 1, $"Tente melhorar sua qualidade de sono e evitar estresse,\nou declare `{identificador}`.");
+            throw new Erro($"Parece que você dormiu e bateu no teclado.\n\n      {identificador}\n      {new String('^', identificador.Length)} você dormiu por aqui.", new LocalFonte(), 1, $"Tente melhorar sua qualidade de sono e evitar estresse,\nou declare `{identificador}`.");
         }
             
         throw new ErroVariavelNaoDeclarada(identificador);

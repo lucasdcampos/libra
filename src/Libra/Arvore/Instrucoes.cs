@@ -4,34 +4,7 @@ using Libra.Runtime;
 
 namespace Libra.Arvore
 {
-    public enum TipoInstrucao
-    {
-        Expressao, // InstrucaoExpressao
-        DeclVar,
-        DeclFunc,
-        DeclClasse,
-        AtribVar,
-        AtribIndice,
-        AtribProp,
-        Chamada,
-        ChamadaMetodo,
-        Se,
-        SenaoSe,
-        Enquanto,
-        ParaCada,
-        Romper,
-        Continuar,
-        Retornar,
-        Tentar
-    }
-
-    public abstract class Instrucao
-    {
-        public TipoInstrucao Tipo { get; protected set; }
-        public LocalFonte Local { get; protected set; }
-        
-        public abstract object Aceitar(IVisitor visitor);
-    }
+    public abstract class Instrucao : Nodo<object> { }
 
     public class InstrucaoExpressao : Instrucao
     {
@@ -39,7 +12,6 @@ namespace Libra.Arvore
 
         public InstrucaoExpressao(LocalFonte local, Expressao expressao)
         {
-            Tipo = TipoInstrucao.Expressao;
             Expressao = expressao;
             Local = local;
         }
@@ -54,7 +26,6 @@ namespace Libra.Arvore
     {
         public DeclaracaoVar(LocalFonte local, string identificador, Expressao expressao, string tipo, bool constante)
         {
-            Tipo = TipoInstrucao.DeclVar;
             Identificador = identificador;
             Expressao = expressao;
             TipoVar = tipo;
@@ -68,7 +39,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarDeclVar(this);
         }
     }
 
@@ -80,13 +51,12 @@ namespace Libra.Arvore
         {
             Identificador = identificador;
             Expressao = expr;
-            Tipo = TipoInstrucao.AtribVar;
             Local = local;
         }
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarAtribVar(this);
         }
     }
 
@@ -94,7 +64,6 @@ namespace Libra.Arvore
     {
         public DefinicaoFuncao(LocalFonte local, string identificador, Instrucao[] instrucoes, Parametro[] parametros = null, string tipoRetorno = "Objeto")
         {
-            Tipo = TipoInstrucao.DeclFunc;
             Instrucoes = instrucoes;
             Identificador = identificador;
             Parametros = parametros;
@@ -109,7 +78,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarFuncao(this);
         }
     }
 
@@ -117,7 +86,6 @@ namespace Libra.Arvore
     {
         public DefinicaoTipo(LocalFonte local, string identificador, DeclaracaoVar[] variaveis, DefinicaoFuncao[] funcoes)
         {
-            Tipo = TipoInstrucao.DeclClasse;
             Variaveis = variaveis;
             Funcoes = funcoes;
             Identificador = identificador;
@@ -130,7 +98,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarClasse(this);
         }
     }
 
@@ -138,7 +106,6 @@ namespace Libra.Arvore
     {
         public Se(LocalFonte local, Expressao condicao, Instrucao[] corpo, SenaoSe[] listaSenaoSe = null)
         {
-            Tipo = TipoInstrucao.Se;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
             ListaSenaoSe = listaSenaoSe;
@@ -151,7 +118,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarSe(this);
         }
     }
 
@@ -159,7 +126,6 @@ namespace Libra.Arvore
     {
         public SenaoSe(LocalFonte local, Expressao condicao, Instrucao[] corpo)
         {
-            Tipo = TipoInstrucao.SenaoSe;
             Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
             Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
             Local = local;
@@ -170,7 +136,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarSenaoSe(this);
         }
     }
 
@@ -178,7 +144,6 @@ namespace Libra.Arvore
     {
         public Enquanto(LocalFonte local, Expressao expressao, Instrucao[] instrucoes)
         {
-            Tipo = TipoInstrucao.Enquanto;
             Expressao = expressao;
             Instrucoes = instrucoes;
             Local = local;
@@ -189,7 +154,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarEnquanto(this);
         }
     }
 
@@ -197,7 +162,6 @@ namespace Libra.Arvore
     {
         public ParaCada(LocalFonte local, Token ident, Expressao vetor, Instrucao[] instrucoes)
         {
-            Tipo = TipoInstrucao.ParaCada;
             Identificador = ident;
             Instrucoes = instrucoes;
             Local = local;
@@ -210,7 +174,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarParaCada(this);
         }
     }
 
@@ -219,12 +183,11 @@ namespace Libra.Arvore
         public Romper(LocalFonte local)
         {
             Local = local;
-            Tipo = TipoInstrucao.Romper;
         }
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarRomper(this);
         }
     }
 
@@ -233,12 +196,11 @@ namespace Libra.Arvore
         public Continuar(LocalFonte local)
         {
             Local = local;
-            Tipo = TipoInstrucao.Continuar;
         }
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarContinuar(this);
         }
     }
 
@@ -248,14 +210,13 @@ namespace Libra.Arvore
 
         public Retornar(LocalFonte local, Expressao expressao)
         {
-            Tipo = TipoInstrucao.Retornar;
             Expressao = expressao;
             Local = local;
         }
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarRetorno(this);
         }
     }
 
@@ -271,13 +232,11 @@ namespace Libra.Arvore
             InstrucoesTentar = tentar;
             VariavelErro = variavelErro;
             InstrucoesCapturar = capturar;
-
-            Tipo = TipoInstrucao.Tentar;
         }
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarTentar(this);
         }
     }
 
@@ -285,7 +244,6 @@ namespace Libra.Arvore
     {
         public AtribuicaoIndice(LocalFonte local, string identificador, Expressao indiceExpr, Expressao expressao)
         {
-            Tipo = TipoInstrucao.AtribIndice;
             Expressao = expressao;
             Identificador = identificador;
             ExpressaoIndice = indiceExpr;
@@ -298,7 +256,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarAtribIndice(this);
         }
     }
 
@@ -306,7 +264,6 @@ namespace Libra.Arvore
     {
         public AtribuicaoPropriedade(LocalFonte local, ExpressaoPropriedade alvo, Expressao expressao)
         {
-            Tipo = TipoInstrucao.AtribProp;
             Expressao = expressao;
             Alvo = alvo;
             Local = local;
@@ -317,7 +274,7 @@ namespace Libra.Arvore
 
         public override object Aceitar(IVisitor visitor)
         {
-            throw new NotImplementedException();
+            return visitor.VisitarAtribProp(this);
         }
     }
 }

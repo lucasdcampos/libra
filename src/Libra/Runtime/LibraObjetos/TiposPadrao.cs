@@ -10,5 +10,5 @@ public static class TiposPadrao
     public static string Texto = "Texto";
     public static string Vetor = "Vetor";
     public static string Func = "Func";
-    public static string Objeto = "Objeto"; // Pode ser qualquer tipo
+    public static string Objeto = "Objeto"; // Pode ser qualquer tipo. TODO: Renomear para "Qualquer"?
 }

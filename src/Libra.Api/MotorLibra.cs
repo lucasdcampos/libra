@@ -78,15 +78,17 @@ public class MotorLibra
     /// <returns>Resultado da execução, se houver; caso contrário, null.</returns>
     public LibraResultado Executar(string codigo, string arquivo="", string caminho="")
     {
-        _tokenizador = new Tokenizador(codigo, arquivo, caminho);
-        _parser = new Parser();
         try
         {
+            _tokenizador = new Tokenizador(codigo, arquivo, caminho);
             var tokens = _tokenizador.Tokenizar();
-            var programa = _parser.Parse(tokens.ToArray());
+            _parser = new Parser(tokens.ToArray());
+            var programa = _parser.Parse();
+            
             var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
             _interpretador = new Interpretador(flags);
-            _interpretador.ExecutarPrograma(programa);
+            _interpretador.VisitarPrograma(programa);
+            
         }
         catch (Erro e)
         {
@@ -113,7 +115,7 @@ public class MotorLibra
 
             string mensagemLog = "Ocorreu um erro interno na Libra, veja a descrição para mais detalhes:\n";
             mensagemLog += "Versão: Libra 1.0.0-Beta\n";
-            mensagemLog += $"Ultima local do Script Libra executada: {Interpretador.LocalAtual}\n";
+            mensagemLog += $"Ultima local do Script Libra executada: {_interpretador.LocalAtual}\n";
             mensagemLog += $"Problema:\n{ex.ToString()}\n";
             mensagemLog += "Por favor reportar em https://github.com/lucasdcampos/libra/issues/ (se possível incluir script que causou o problema)\n";
 
@@ -126,6 +128,6 @@ public class MotorLibra
             Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
         }
 
-        return new LibraResultado(Interpretador.Saida.ObterValor(), Ambiente.TextoSaida);
+        return new LibraResultado(_interpretador.Saida.ObterValor(), Ambiente.TextoSaida);
     }
 }

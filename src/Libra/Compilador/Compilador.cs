@@ -5,9 +5,9 @@ using Libra.Runtime;
 
 namespace Libra;
 
-public class Compilador : IVisitor
+public class Compilador
 {
-    public int[] Compilar(Programa programa)
+    /*public int[] Compilar(Programa programa)
     {
         List<int> bytecode = new List<int>();
         foreach (var instrucao in programa.Instrucoes)
@@ -123,4 +123,5 @@ public class Compilador : IVisitor
     {
         throw new NotImplementedException();
     }
+    */
 }

@@ -3,24 +3,7 @@ using Libra.Runtime;
 
 namespace Libra.Arvore
 {
-    public enum TipoExpressao
-    {
-        ExpressaoLiteral,
-        ExpressaoVariavel,
-        ExpressaoPropriedade,
-        ExpressaoChamadaFuncao,
-        ExpressaoChamadaMetodo,
-        ExpressaoNovoVetor,
-        ExpressaoInicializacaoVetor,
-        ExpressaoAcessoVetor,
-        ExpressaoUnaria,
-        ExpressaoBinaria
-    }
-
-    public abstract class Expressao : Instrucao
-    {
-        public TipoExpressao TipoExpr { get; protected set; }
-    }
+    public abstract class Expressao : Nodo<LibraObjeto> { }
 
     public class ExpressaoUnaria : Expressao
     {
@@ -32,29 +15,30 @@ namespace Libra.Arvore
             Local = local;
             Operador = operador;
             Operando = operando;
-
-            TipoExpr = TipoExpressao.ExpressaoUnaria;
         }
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoUnaria(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoUnaria(this);
     }
 
     public class ExpressaoLiteral : Expressao
     {
-        public ExpressaoLiteral(LocalFonte local, Token token)
+        public ExpressaoLiteral(LocalFonte local, LibraObjeto valor)
         {
             Local = local;
-            Token = token;
-            TipoExpr = TipoExpressao.ExpressaoLiteral;
+            Valor = valor;
         }
 
-        public Token Token { get; private set; }
-        public object Valor => Token.Valor;
+        public LibraObjeto Valor { get; private set; }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
 
         public static ExpressaoLiteral CriarInt(LocalFonte local, int valor)
         {
-            return new ExpressaoLiteral(local, new Token(TokenTipo.NumeroLiteral, local, valor));
+            return new ExpressaoLiteral(local, new LibraInt(valor));
+        }
+
+        public static ExpressaoLiteral CriarTexto(LocalFonte local, string valor)
+        {
+            return new ExpressaoLiteral(local, new LibraTexto(valor));
         }
     }
 
@@ -66,10 +50,9 @@ namespace Libra.Arvore
         {
             Local = local;
             Identificador = identificador;
-            TipoExpr = TipoExpressao.ExpressaoVariavel;
         }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoVariavel(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoVariavel(this);
     }
 
     public class ExpressaoPropriedade : Expressao
@@ -81,10 +64,9 @@ namespace Libra.Arvore
             Local = local;
             Alvo = alvo;
             Propriedade = prop;
-            TipoExpr = TipoExpressao.ExpressaoPropriedade;
         }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoPropriedade(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoPropriedade(this);
     }
 
     public class ExpressaoChamadaFuncao : Expressao
@@ -95,7 +77,6 @@ namespace Libra.Arvore
         public ExpressaoChamadaFuncao(LocalFonte local, string ident, Expressao[] argumentos = null)
         {
             Local = local;
-            Tipo = TipoInstrucao.Chamada;
             Identificador = ident;
             Argumentos = argumentos;
 
@@ -103,11 +84,9 @@ namespace Libra.Arvore
             {
                 Argumentos = new Expressao[0];
             }
-
-            TipoExpr = TipoExpressao.ExpressaoChamadaFuncao;
         }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaFuncao(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaFuncao(this);
     }
 
     public class ExpressaoChamadaMetodo : Expressao
@@ -118,13 +97,11 @@ namespace Libra.Arvore
         public ExpressaoChamadaMetodo(LocalFonte local, Expressao alvo, ExpressaoChamadaFuncao chamada)
         {
             Local = local;
-            Tipo = TipoInstrucao.ChamadaMetodo;
-            TipoExpr = TipoExpressao.ExpressaoChamadaMetodo;
             Alvo = alvo;
             Chamada = chamada;
         }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaMetodo(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaMetodo(this);
     }
 
     public class ExpressaoAcessoVetor : Expressao
@@ -134,12 +111,11 @@ namespace Libra.Arvore
             Local = local;
             Identificador = ident;
             Expressao = expr;
-            TipoExpr = TipoExpressao.ExpressaoAcessoVetor;
         }
         public string Identificador {  get; private set; }
         public Expressao Expressao { get; private set; }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoAcessoVetor(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoAcessoVetor(this);
     }
 
     public class ExpressaoNovoVetor : Expressao
@@ -148,12 +124,11 @@ namespace Libra.Arvore
         {
             Local = local;
             Expressao = expr;
-            TipoExpr = TipoExpressao.ExpressaoNovoVetor;
         }
 
         public Expressao Expressao { get; private set; }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoNovoVetor(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoNovoVetor(this);
     }
 
     public class ExpressaoInicializacaoVetor : Expressao
@@ -162,12 +137,11 @@ namespace Libra.Arvore
         {
             Local = local;
             Expressoes = expressoes;
-            TipoExpr = TipoExpressao.ExpressaoInicializacaoVetor;
         }
 
         public List<Expressao> Expressoes { get; private set; }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoInicializacaoVetor(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoInicializacaoVetor(this);
     }
 
     public class ExpressaoBinaria : Expressao
@@ -182,11 +156,9 @@ namespace Libra.Arvore
             Esquerda = esquerda;
             Operador = operador;
             Direita = direita;
-
-            TipoExpr = TipoExpressao.ExpressaoBinaria;
         }
 
-        public override object Aceitar(IVisitor visitor) => visitor.VisitarExpressaoBinaria(this);
+        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoBinaria(this);
 
         public override string ToString()
         {

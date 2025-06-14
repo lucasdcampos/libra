@@ -2,7 +2,13 @@ using Libra.Runtime;
 
 namespace Libra.Arvore
 {
-    public class Programa : Instrucao
+    public abstract class Nodo<T>
+    {
+        public LocalFonte Local { get; protected set; }
+        public abstract T Aceitar(IVisitor visitor);
+    }
+
+    public class Programa : Nodo<Object>
     {
         public Programa(Instrucao[] instrucoes)
         {
@@ -29,6 +35,5 @@ namespace Libra.Arvore
         {
             throw new NotImplementedException();
         }
-
     }
 }

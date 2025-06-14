@@ -36,7 +36,7 @@ public class LibraInt : LibraObjeto
             case "Real": return new LibraReal(Valor);
         }
 
-        throw new ErroConversao(Nome, novoTipo, Interpretador.LocalAtual);
+        throw new ErroConversao(Nome, novoTipo, new LocalFonte() /* TODO: Arrumar! */);
 
         return null;
     }

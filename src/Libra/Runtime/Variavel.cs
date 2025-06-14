@@ -25,7 +25,7 @@ namespace Libra
             Referenciada = true;
 
             if (Constante)
-                throw new ErroModificacaoConstante(Identificador, Interpretador.LocalAtual);
+                throw new ErroModificacaoConstante(Identificador);
 
             bool tiposDiferentes = novoValor.Nome != Valor.Nome;
             bool tipoModificavel = Tipo == TiposPadrao.Objeto;

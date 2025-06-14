@@ -26,27 +26,15 @@ public class Parser
         { TokenTipo.OperadorOu, 0 }
     };
 
-    public void Resetar()
+    public Parser(Token[] tokens)
     {
         _posicao = 0;
         _local = new LocalFonte();
+        _tokens = tokens;
     }
 
-    public Programa Parse(Token[] tokens, Token[] extra = null)
+    public Programa Parse()
     {
-        Resetar();
-        _tokens = tokens;
-
-        if(tokens == null)
-            throw new Erro("Falha ao gerar Tokens");
-
-        if (extra != null)
-        {
-            _tokens = new Token[tokens.Length + extra.Length];
-            Array.Copy(tokens, _tokens, tokens.Length);
-            Array.Copy(extra, 0, _tokens, tokens.Length, extra.Length);
-        }
-
         return new Programa(Instrucoes(TokenTipo.FimDoArquivo));
     }
 
@@ -59,7 +47,6 @@ public class Parser
         {
             if(TentarConsumirToken(TokenTipo.FimDoArquivo))
                 break;
-
             instrucoes.Add(InstrucaoAtual());
         }
         
@@ -86,38 +73,23 @@ public class Parser
             case TokenTipo.Retornar: Passar(); return new Retornar(_local, Expressao());
             case TokenTipo.Tentar: return Tentar();
             case TokenTipo.Identificador:
-                if (Proximo(1).Tipo == TokenTipo.AbrirParen)
-                    return ChamadaFuncao();
-                else if (Proximo(1).Tipo == TokenTipo.AbrirCol)
+                if (Proximo(1).Tipo == TokenTipo.AbrirCol)
                     return AtribIndice();
                 else if (Proximo(1).Tipo == TokenTipo.OperadorDefinir)
                     return AtribVar();
                 break;
         }
 
+        // Se não é nenhuma instrução, então pode ser uma Expressão
         var expr = Expressao();
 
-        if (expr != null)
-        {
-            if (expr.TipoExpr == TipoExpressao.ExpressaoPropriedade &&
-                Atual().Tipo == TokenTipo.OperadorDefinir)
-            {
-                ConsumirToken(TokenTipo.OperadorDefinir);
-
-                return AtribProp((ExpressaoPropriedade)expr);
-            }
-
-            return new InstrucaoExpressao(_local, expr);
-        }
-            
-
-        throw new Erro($"Instrução inválida {atual}", _local);
+        return new InstrucaoExpressao(_local, expr);
     }
 
     private Instrucao? Repetir()
     {
         ConsumirToken(TokenTipo.Repetir);
-        Expressao verdadeira = new ExpressaoLiteral(_local, new Token(TokenTipo.NumeroLiteral, _local, 1));
+        Expressao verdadeira = ExpressaoLiteral.CriarInt(_local, 1);
         var instrucoes = Instrucoes();
         return new Enquanto(_local, verdadeira, instrucoes); // repetir é basicamente um "enquanto 1"
     }
@@ -172,7 +144,9 @@ public class Parser
 
         string identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
 
-        string tipo = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Indefinido : TiposPadrao.Objeto;
+        // TODO: Arrumar!
+        //string tipo = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Indefinido : TiposPadrao.Objeto;
+        string tipo = TiposPadrao.Indefinido;
 
         if(TentarConsumirToken(TokenTipo.DoisPontos))
         {
@@ -226,9 +200,9 @@ public class Parser
 
             TentarConsumirToken(TokenTipo.Anotacao);
             var atual = InstrucaoAtual();
-            if(atual.Tipo == TipoInstrucao.DeclVar)
+            if(atual is DeclaracaoVar)
                 variaveis.Add((DeclaracaoVar)atual);
-            else if(atual.Tipo == TipoInstrucao.DeclFunc)
+            else if(atual is DefinicaoFuncao)
                 funcoes.Add((DefinicaoFuncao)atual);
             else
                 throw new Erro("Instruções esperadas: Declaração de Variável e Definição de Função.", _local);
@@ -255,7 +229,7 @@ public class Parser
             }
             else
             {
-                if (Interpretador.Flags.ForcarTiposEstaticos)
+                if (true /*TODO: Arrumar! Interpretador.Flags.ForcarTiposEstaticos*/)
                     throw new Erro("Obrigatório especificar tipo quando a flag --estrito estiver marcada.", _local);
             }
             parametros.Add(new Parametro(ident, tipo));
@@ -279,7 +253,7 @@ public class Parser
             throw new Erro($"Função {identificador} passou de 255 parâmetros", _local, 255, "Procure ajuda.");
 
         string tipoRetorno = TiposPadrao.Objeto;
-        if(TentarConsumirToken(TokenTipo.DoisPontos))
+        if (TentarConsumirToken(TokenTipo.DoisPontos))
         {
             tipoRetorno = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
         }
@@ -287,7 +261,8 @@ public class Parser
         {
             // Quando tipos estáticos são forçados, se não especificar o tipo de retorno, ele será interpretado como nulo.
             // Em casos normais, o tipo de retorno poderá ser qualquer objeto
-            tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Nulo : TiposPadrao.Objeto;
+            //tipoRetorno = Interpretador.Flags.ForcarTiposEstaticos ? TiposPadrao.Nulo : TiposPadrao.Objeto;
+            tipoRetorno = TiposPadrao.Nulo; // TODO: Arrumar!
         }
 
         var instrucoes = Instrucoes();
@@ -394,17 +369,6 @@ public class Parser
             int proxPrecedenciaMinima = precedenciaMinima + 1; // ESQ -> DIR
             var expr_dir = Expressao(proxPrecedenciaMinima);
 
-            // Detectando problemas em tempo de compilação
-            if (opr.Tipo == TokenTipo.OperadorDiv && expr_dir is ExpressaoLiteral exprLit)
-            {
-                if ((exprLit.Valor is int intValue && intValue == 0) ||
-                    (exprLit.Valor is double doubleValue && doubleValue == 0.0))
-                {
-                    throw new ErroDivisaoPorZero(_local);
-                }
-
-            }
-
             expr_esq = new ExpressaoBinaria(_local, expr_esq, opr, expr_dir);
         }
 
@@ -426,7 +390,7 @@ public class Parser
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
             case TokenTipo.Nulo:
-                return new ExpressaoLiteral(_local, ConsumirToken());
+                return new ExpressaoLiteral(_local, LibraObjeto.ParaLibraObjeto(ConsumirToken().Valor));
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                 {

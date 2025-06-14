@@ -1,4 +1,5 @@
 using Libra.Arvore;
+using Libra.Runtime;
 using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Linq.Expressions;
@@ -6,120 +7,50 @@ using System.Reflection;
 
 namespace Libra;
 
-public class InterpretadorFlags
+public sealed class Interpretador : IVisitor
 {
-    public bool ModoSeguro { get; private set; }
-    public bool ForcarTiposEstaticos { get; private set; }
-    public bool MostrarAvisos { get; private set; }
-
-    public InterpretadorFlags(bool seguro, bool tiposEstaticos, bool avisos)
-    {
-        ModoSeguro = seguro;
-        ForcarTiposEstaticos = tiposEstaticos;
-        MostrarAvisos = avisos;
-    }
-
-    public static InterpretadorFlags Padrao()
-    {
-        return new InterpretadorFlags(true, true, true);
-    }
-}
-
-public class Interpretador
-{
-    public static int NivelDebug = 0;
-    public static LocalFonte LocalAtual => ObterLocalAtual();
-    public static InterpretadorFlags Flags => _instancia == null ? InterpretadorFlags.Padrao() : _instancia._flags;
-    private InterpretadorFlags _flags;
+    public LocalFonte LocalAtual => _local;
+    public InterpretadorFlags Flags { get; }
+    public LibraObjeto Saida => _ultimoRetorno ?? LibraObjeto.Inicializar("Nulo");
     private LocalFonte _local = new LocalFonte();
-    private bool _shell = false;
-    private VisitorExpressoes _visitorExpressoes;
-    private static Interpretador _instancia;
-    private static LibraObjeto _ultimoRetorno;
-    public static LibraObjeto Saida => _ultimoRetorno ?? LibraObjeto.Inicializar("Nulo");
-
+    private LibraObjeto _ultimoRetorno;
+    
     public Interpretador(InterpretadorFlags flags = null)
     {
-        _instancia = this;
-        _visitorExpressoes = new VisitorExpressoes(this);
-        _flags = flags == null ? InterpretadorFlags.Padrao() : flags;
+        Flags = flags == null ? InterpretadorFlags.Padrao() : flags;
     }
 
-    private static LocalFonte ObterLocalAtual()
+    public object VisitarPrograma(Programa programa)
     {
-        if (_instancia == null)
-            return new LocalFonte();
+        VisitarInstrucoes(programa.Instrucoes);
 
-        return _instancia._local;
+        return _ultimoRetorno;
     }
 
-    public void Resetar()
-    {
-        _local = new LocalFonte();
-    }
-
-    public int ExecutarPrograma(Programa programa, bool ambienteSeguro = true, ILogger logger = null, bool shell = false)
-    {
-        Resetar();
-        _shell = shell;
-
-        InterpretarInstrucoes(programa.Instrucoes);
-
-        return 0;
-    }
-
-    public void InterpretarInstrucoes(Instrucao[] instrucoes)
+    public void VisitarInstrucoes(Instrucao[] instrucoes)
     {
         for (int i = 0; i < instrucoes.Length; i++)
         {
-            InterpretarInstrucao(instrucoes[i]);
+            instrucoes[i].Aceitar(this);
         }
     }
 
-    public void InterpretarInstrucao(Instrucao instrucao)
-    {
-        if (instrucao is null)
-            return;
-
-        _local = instrucao.Local;
-
-        var acoes = new Dictionary<TipoInstrucao, Action>
-        {
-            { TipoInstrucao.Expressao, () => InterpretarInstrucaoExpressao((InstrucaoExpressao)instrucao) },
-            { TipoInstrucao.DeclVar, () => InterpretarDeclVar((DeclaracaoVar)instrucao) },
-            { TipoInstrucao.DeclFunc, () => InterpretarFuncao((DefinicaoFuncao)instrucao) },
-            { TipoInstrucao.DeclClasse, () => InterpretarInstrucaoClasse((DefinicaoTipo)instrucao) },
-            { TipoInstrucao.AtribVar, () => InterpretarAtribVar((AtribuicaoVar)instrucao) },
-            { TipoInstrucao.AtribProp, () => InterpretarAtribProp((AtribuicaoPropriedade)instrucao) },
-            { TipoInstrucao.Enquanto, () => InterpretarEnquanto((Enquanto)instrucao) },
-            { TipoInstrucao.ParaCada, () => InterpretarParaCada((ParaCada)instrucao) },
-            { TipoInstrucao.Se, () => InterpretarSe((Se)instrucao) },
-            { TipoInstrucao.Chamada, () => InterpretarChamadaFuncao((ExpressaoChamadaFuncao)instrucao) },
-            { TipoInstrucao.AtribIndice, () => InterpretarAtribIndice((AtribuicaoIndice)instrucao) },
-            { TipoInstrucao.Retornar, () => InterpretarRetorno((Retornar)instrucao) },
-            { TipoInstrucao.Romper, () => throw new ExcecaoRomper() },
-            {TipoInstrucao.Tentar, () => InterpretarTentar((Tentar)instrucao)}
-        };
-
-        // Executa a ação associada ao tipo, se existir.
-        if (acoes.TryGetValue(instrucao.Tipo, out var acao))
-            acao();
-    }
-
-    public void InterpretarInstrucaoExpressao(InstrucaoExpressao instrucao)
+    public object VisitarInstrucaoExpressao(InstrucaoExpressao instrucao)
     {
         if (instrucao.Expressao == null)
-            return;
+            return null;
 
-        _ultimoRetorno = InterpretarExpressao(instrucao.Expressao);
+        _ultimoRetorno = VisitarExpressao(instrucao.Expressao);
+
+        return null;
     }
 
-    public void InterpretarTentar(Tentar instrucao)
+    public object VisitarTentar(Tentar instrucao)
     {
         try
         {
             Ambiente.Pilha.EmpilharEscopo();
-            InterpretarInstrucoes(instrucao.InstrucoesTentar);
+            VisitarInstrucoes(instrucao.InstrucoesTentar);
             Ambiente.Pilha.DesempilharEscopo();
         }
         catch (Erro err)
@@ -128,90 +59,103 @@ public class Interpretador
 
             Ambiente.Pilha.EmpilharEscopo();
             Ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem), TiposPadrao.Texto, true);
-            InterpretarInstrucoes(instrucao.InstrucoesCapturar);
+            VisitarInstrucoes(instrucao.InstrucoesCapturar);
             Ambiente.Pilha.DesempilharEscopo();
         }
 
+        return null;
+
     }
 
-    public void InterpretarAtribProp(AtribuicaoPropriedade instrucao)
+    public object VisitarAtribProp(AtribuicaoPropriedade instrucao)
     {
-        var obj = LibraObjeto.ParaLibraObjeto(InterpretarExpressao(instrucao.Alvo));
+        var obj = LibraObjeto.ParaLibraObjeto(VisitarExpressao(instrucao.Alvo));
 
-        obj.AtribuirPropriedade(instrucao.Alvo.Propriedade, InterpretarExpressao(instrucao.Expressao));
+        obj.AtribuirPropriedade(instrucao.Alvo.Propriedade, VisitarExpressao(instrucao.Expressao));
+
+        return null;
     }
 
-    public void InterpretarAtribIndice(AtribuicaoIndice instrucao)
+    public object VisitarAtribIndice(AtribuicaoIndice instrucao)
     {
         string identificador = instrucao.Identificador;
-        int indice = InterpretarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
-        LibraObjeto expressao = InterpretarExpressao(instrucao.Expressao);
+        int indice = VisitarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
+        LibraObjeto expressao = VisitarExpressao(instrucao.Expressao);
 
         Ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
+
+        return null;
     }
 
-    public void InterpretarRetorno(Retornar instrucao)
+    public object VisitarRetorno(Retornar instrucao)
     {
-        object resultadoExpressao = InterpretarExpressao(((Retornar)instrucao).Expressao);
+        object resultadoExpressao = VisitarExpressao(((Retornar)instrucao).Expressao);
         _ultimoRetorno = LibraObjeto.ParaLibraObjeto(resultadoExpressao);
         throw new ExcecaoRetorno(resultadoExpressao);
+
+
+        return null;
     }
 
-    public void InterpretarSe(Se se)
+    public object VisitarSe(Se se)
     {
-        if (InterpretarExpressao<LibraInt>(se.Condicao).Valor != 0)
+        if (VisitarExpressao<LibraInt>(se.Condicao).Valor != 0)
         {
             Ambiente.Pilha.EmpilharEscopo();
-            InterpretarInstrucoes(se.Corpo.ToArray());
+            VisitarInstrucoes(se.Corpo.ToArray());
             Ambiente.Pilha.DesempilharEscopo();
-            return;
+            return null;
         }
 
         if (se.ListaSenaoSe == null || se.ListaSenaoSe.Count == 0)
-            return;
+            return null;
 
         foreach (var inst in se.ListaSenaoSe)
         {
-            if (InterpretarExpressao<LibraInt>(inst.Condicao).Valor != 0)
+            if (VisitarExpressao<LibraInt>(inst.Condicao).Valor != 0)
             {
                 Ambiente.Pilha.EmpilharEscopo();
-                InterpretarInstrucoes(inst.Corpo.ToArray());
+                VisitarInstrucoes(inst.Corpo.ToArray());
                 Ambiente.Pilha.DesempilharEscopo();
 
-                return;
+                return null;
             }
         }
+
+        return null;
     }
 
-    public void InterpretarEnquanto(Enquanto enquanto)
+    public object VisitarEnquanto(Enquanto enquanto)
     {
         // TODO: Otimizar casos em que não é necessário calcular a expressão toda vez,
         // como em "enquanto 1", por exemplo.
-        while (InterpretarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
+        while (VisitarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
             Ambiente.Pilha.EmpilharEscopo();
             foreach (var i in enquanto.Instrucoes)
             {
                 try
                 {
-                    InterpretarInstrucao(i);
+                    i.Aceitar(this);
                 }
                 catch (ExcecaoRomper e)
                 {
                     Ambiente.Pilha.DesempilharEscopo();
-                    return;
+                    return null;
                 }
                 // TODO: Adicionar 'continuar'
             }
             Ambiente.Pilha.DesempilharEscopo();
         }
+
+        return null;
     }
 
-    public void InterpretarParaCada(ParaCada instrucao)
+    public object VisitarParaCada(ParaCada instrucao)
     {
         var expr = instrucao.Vetor;
 
-        var vetor = InterpretarExpressao<LibraVetor>(expr);
+        var vetor = VisitarExpressao<LibraVetor>(expr);
 
         foreach (var item in vetor.Valor)
         {
@@ -219,20 +163,22 @@ public class Interpretador
             try
             {
                 Ambiente.DefinirGlobal(instrucao.Identificador.Valor.ToString(), item);
-                InterpretarInstrucoes(instrucao.Instrucoes);
+                VisitarInstrucoes(instrucao.Instrucoes);
             }
             catch (ExcecaoRomper e)
             {
                 Ambiente.Pilha.DesempilharEscopo();
-                return;
+                return null;
             }
             // TODO: Adicionar 'continuar'
         }
 
         Ambiente.Pilha.DesempilharEscopo();
+
+        return null;
     }
 
-    public void InterpretarFuncao(DefinicaoFuncao funcao)
+    public object VisitarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
 
@@ -242,6 +188,8 @@ public class Interpretador
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
         Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, TiposPadrao.Func, true);
+
+        return null;
     }
 
     public LibraObjeto ExecutarFuncaoEmbutida(FuncaoNativa funcao, Expressao[] argumentos) 
@@ -250,7 +198,7 @@ public class Interpretador
 
         for(int i = 0; i < argumentos.Length; i++)
         {
-            valoresArgumentos.Add(InterpretarExpressao(argumentos[i]).ObterValor());
+            valoresArgumentos.Add(VisitarExpressao(argumentos[i]).ObterValor());
         }
 
         var resultadoFuncao = funcao.Executar(valoresArgumentos.ToArray());
@@ -259,7 +207,7 @@ public class Interpretador
         return objeto;
     }
 
-    public LibraObjeto InterpretarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
+    public LibraObjeto VisitarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
         // TODO: Pode dar erro!
         Classe tipo = (Classe)Ambiente.Pilha.ObterVariavel(nome).Valor;
@@ -268,7 +216,7 @@ public class Interpretador
         List<Variavel> vars = new();
         foreach(var i in tipo.Variaveis)
         {
-            vars.Add(new Variavel(i.Identificador, InterpretarExpressao(i.Expressao), i.TipoVar, i.Constante));
+            vars.Add(new Variavel(i.Identificador, VisitarExpressao(i.Expressao), i.TipoVar, i.Constante));
         }
         foreach(var i in tipo.Funcoes)
         {
@@ -305,7 +253,7 @@ public class Interpretador
             for (int i = 0; i < argumentos.Length; i++)
             {
                 string ident = funcao.Parametros[i].Identificador;
-                var obj = InterpretarExpressao(argumentos[i]);
+                var obj = VisitarExpressao(argumentos[i]);
                 
                 if(funcao.Parametros[i].Tipo != TiposPadrao.Objeto && funcao.Parametros[i].Tipo != obj.Nome)
                     obj = obj.Converter(funcao.Parametros[i].Tipo);
@@ -313,7 +261,7 @@ public class Interpretador
                 Ambiente.Pilha.DefinirVariavel(ident, obj, funcao.Parametros[i].Tipo);
             }
 
-            InterpretarInstrucoes(funcao.Instrucoes);
+            VisitarInstrucoes(funcao.Instrucoes);
         }
         catch(ExcecaoRetorno retorno)
         {
@@ -334,30 +282,32 @@ public class Interpretador
         return LibraObjeto.Inicializar(TiposPadrao.Nulo);
     }
 
-    public LibraObjeto InterpretarChamadaFuncao(ExpressaoChamadaFuncao chamada)
+    public LibraObjeto VisitarChamadaFuncao(ExpressaoChamadaFuncao chamada)
     {
         var argumentos = chamada.Argumentos;
 
         var v = Ambiente.Pilha.ObterVariavel(chamada.Identificador);
 
         if(v.Valor is Classe)
-            return InterpretarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
+            return VisitarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
 
         return ExecutarFuncao((Funcao)v.Valor, chamada.Argumentos);
     }
 
     // TODO: É isso?
-    public void InterpretarInstrucaoClasse(DefinicaoTipo i)
+    public object VisitarClasse(DefinicaoTipo i)
     {
-       Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
+        Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
+
+        return null;
     }
 
-    public LibraObjeto InterpretarAtribVar(AtribuicaoVar i)
+    public object VisitarAtribVar(AtribuicaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
             throw new Erro("Identificador inválido!", _local);
 
-        LibraObjeto resultado = InterpretarExpressao(i.Expressao);
+        LibraObjeto resultado = VisitarExpressao(i.Expressao);
 
         Ambiente.Pilha.AtualizarVariavel(i.Identificador, resultado);
 
@@ -366,12 +316,12 @@ public class Interpretador
         return resultado;
     }
 
-    public LibraObjeto InterpretarDeclVar(DeclaracaoVar i)
+    public object VisitarDeclVar(DeclaracaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
             throw new Erro("Identificador inválido!", _local);
 
-        LibraObjeto resultado = InterpretarExpressao(i.Expressao);
+        LibraObjeto resultado = VisitarExpressao(i.Expressao);
 
         Ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.TipoVar, i.Constante);
 
@@ -380,41 +330,166 @@ public class Interpretador
         return resultado;
     }
 
-    public object[] InterpretarVetor(ExpressaoNovoVetor expressao)
+    public object[] VisitarVetor(ExpressaoNovoVetor expressao)
     {
-        int indice = InterpretarExpressao<LibraInt>(expressao.Expressao).Valor;
+        int indice = VisitarExpressao<LibraInt>(expressao.Expressao).Valor;
         return new LibraObjeto[indice];
     }
 
-    public object[] InterpretarInicializacaoVetor(ExpressaoInicializacaoVetor expressao)
+    public object[] VisitarInicializacaoVetor(ExpressaoInicializacaoVetor expressao)
     {
         int tamanho = expressao.Expressoes.Count;
         var vetor = new object[tamanho];
 
         for(int i = 0; i < tamanho; i++)
         {
-            vetor[i] = InterpretarExpressao(expressao.Expressoes[i]);
+            vetor[i] = VisitarExpressao(expressao.Expressoes[i]);
         }
 
         return vetor;
     }
 
-    public LibraObjeto InterpretarExpressao(Expressao expressao)
+    public LibraObjeto VisitarExpressao(Expressao expressao)
     {
         if(expressao == null)
             return new LibraNulo();
 
         _local = expressao.Local;
         
-        return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(_visitorExpressoes));
+        return LibraObjeto.ParaLibraObjeto(expressao.Aceitar(this));
     }
 
-    public T InterpretarExpressao<T>(Expressao expressao)
+    public T VisitarExpressao<T>(Expressao expressao)
     {
-        var resultado = InterpretarExpressao(expressao);
+        var resultado = VisitarExpressao(expressao);
 
         if (resultado is T t) return t;
 
         throw new ErroAcessoNulo($" Expressão retornou {resultado.GetType()} ao invés do esperado", _local);
+    }
+
+    public LibraObjeto VisitarExpressaoLiteral(ExpressaoLiteral expressao)
+    {
+        return expressao.Valor;
+    }
+    
+    public LibraObjeto VisitarExpressaoBinaria(ExpressaoBinaria expressao)
+    {
+        var a = VisitarExpressao(expressao.Esquerda);
+        var b = VisitarExpressao(expressao.Direita);
+
+        return expressao.Operador.Tipo switch
+        {
+            TokenTipo.OperadorSoma => a.Soma(b),
+            TokenTipo.OperadorSub => a.Sub(b),
+            TokenTipo.OperadorMult => a.Mult(b),
+            TokenTipo.OperadorDiv => a.Div(b),
+            TokenTipo.OperadorPot => a.Pot(b),
+            TokenTipo.OperadorResto => a.Resto(b),
+            TokenTipo.OperadorComparacao => a.Igual(b),
+            TokenTipo.OperadorDiferente => new LibraInt(LibraUtil.NegarInteiroLogico(a.Igual(b).Valor)), // Vendo isso aqui meses depois, genial!
+            TokenTipo.OperadorMaiorQue => a.MaiorQue(b),
+            TokenTipo.OperadorMaiorIgualQue => a.MaiorIgualQue(b),
+            TokenTipo.OperadorMenorQue => a.MenorQue(b),
+            TokenTipo.OperadorMenorIgualQue => a.MenorIgualQue(b),
+            TokenTipo.OperadorE => a.E(b),
+            TokenTipo.OperadorOu => a.Ou(b),
+            _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}", expressao.Operador.Local)
+        };
+    }
+
+    public LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao)
+    {
+        var v = Ambiente.Pilha.ObterVariavel(expressao.Identificador.Valor.ToString());
+        return v.Valor;
+    }
+
+    public LibraObjeto VisitarExpressaoNovoVetor(ExpressaoNovoVetor expressao)
+    {
+        var vetor = new LibraObjeto[VisitarExpressao<LibraInt>(expressao.Expressao).Valor];
+        return LibraObjeto.ParaLibraObjeto(vetor); // Converte para LibraVetor
+    }
+
+    public LibraObjeto VisitarExpressaoInicializacaoVetor(ExpressaoInicializacaoVetor expressao)
+    {
+        var arr = new LibraObjeto[expressao.Expressoes.Count];
+
+        for(int i = 0; i < expressao.Expressoes.Count; i++)
+        {
+            arr[i] = VisitarExpressao(expressao.Expressoes[i]);
+        }
+
+        return LibraObjeto.ParaLibraObjeto(arr);
+    }
+
+    public LibraObjeto VisitarExpressaoUnaria(ExpressaoUnaria expressao)
+    {
+        switch(expressao.Operador.Tipo)
+        {
+            case TokenTipo.OperadorNeg:
+                return LibraObjeto.ParaLibraObjeto(VisitarExpressao<LibraInt>(expressao.Operando).Valor);
+            case TokenTipo.OperadorSub:
+                return LibraObjeto.ParaLibraObjeto(VisitarExpressao(expressao.Operando).Mult(new LibraInt(-1)));
+        }
+
+        throw new Erro("Operador unário não implementado", expressao.Operador.Local);
+    }
+
+    public LibraObjeto VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao)
+    {
+        string ident = expressao.Identificador;
+        int indice = VisitarExpressao<LibraInt>(expressao.Expressao).Valor;
+
+        var variavel = Ambiente.Pilha.ObterVariavel(ident);
+
+        if(variavel.Valor is LibraVetor vetor)
+        {
+            if (indice < 0 || indice >= vetor.Valor.Length)
+                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", _local);
+            return vetor.Valor[indice];
+        }
+        if(variavel.Valor is LibraTexto texto)
+        {
+            if (indice < 0 || indice >= texto.Valor.Length)
+                throw new ErroIndiceForaVetor($"{ident}[{indice.ToString()}]", _local);
+            return new LibraTexto(texto.Valor[indice].ToString());
+        }
+
+        throw new ErroAcessoNulo($" {variavel.Valor} não é um Vetor");
+    }
+
+    public LibraObjeto VisitarExpressaoChamadaFuncao(ExpressaoChamadaFuncao expressao)
+    {
+        return VisitarChamadaFuncao(expressao);
+    }
+
+    public LibraObjeto VisitarExpressaoPropriedade(ExpressaoPropriedade expressao)
+    {
+        var obj = LibraObjeto.ParaLibraObjeto(expressao.Alvo.Aceitar(this));
+
+        return obj.AcessarPropriedade(expressao.Propriedade);
+    }
+
+    public LibraObjeto VisitarExpressaoChamadaMetodo(ExpressaoChamadaMetodo expressao)
+    {
+        var obj = LibraObjeto.ParaLibraObjeto(expressao.Alvo.Aceitar(this));
+
+        return obj.ChamarMetodo(expressao.Chamada);
+
+    }
+
+    public object VisitarRomper(Romper instrucao)
+    {
+        throw new ExcecaoRomper();
+    }
+
+    public object VisitarContinuar(Continuar instrucao)
+    {
+        throw new NotImplementedException();
+    }
+
+    public object VisitarSenaoSe(SenaoSe instrucao)
+    {
+        throw new NotImplementedException();
     }
 }

@@ -68,8 +68,9 @@ public class Erro : Exception
 
     public override string ToString()
     {
-        if(Local.Linha == 0)
-            Local = Interpretador.LocalAtual;
+        if (Local.Linha == 0)
+            //Local = Interpretador.LocalAtual TODO: Arrumar!;
+            Local = new LocalFonte();
 
         string msg = "";
         string categoria = $"{Categoria}: ";
