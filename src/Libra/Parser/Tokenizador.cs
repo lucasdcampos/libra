@@ -552,9 +552,8 @@ public class Tokenizador
         Console.WriteLine($"Tokens {_local.Arquivo}:");
         foreach(var token in _tokens)
         {
-            Ambiente.Msg("    " + token.ToString());
+            Console.WriteLine("    " + token.ToString());
         }
-        Ambiente.Msg("\n");
     }
 
     private char Atual() 
