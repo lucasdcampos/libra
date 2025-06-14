@@ -6,8 +6,8 @@ namespace Libra.Api;
 public class MotorLibra
 {
     private readonly OpcoesMotorLibra _opcoes;
-    private Tokenizador _tokenizador = new Tokenizador();
-    private Parser _parser = new Parser();
+    private Tokenizador _tokenizador;
+    private Parser _parser;
     private Interpretador? _interpretador;
     private Compilador? _compilador;
     private Ambiente? _ambiente;
@@ -78,9 +78,11 @@ public class MotorLibra
     /// <returns>Resultado da execução, se houver; caso contrário, null.</returns>
     public LibraResultado Executar(string codigo, string arquivo="", string caminho="")
     {
+        _tokenizador = new Tokenizador(codigo, arquivo, caminho);
+        _parser = new Parser();
         try
         {
-            var tokens = _tokenizador.Tokenizar(codigo.ReplaceLineEndings("\n"), arquivo, caminho);
+            var tokens = _tokenizador.Tokenizar();
             var programa = _parser.Parse(tokens.ToArray());
             var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
             _interpretador = new Interpretador(flags);

@@ -40,48 +40,32 @@ public class Tokenizador
         { "nao", TokenTipo.OperadorNeg }
     };
 
-    public List<Token> Tokenizar(string source, string arquivo = "", string caminho = "") 
+    public Tokenizador(string fonte, string nomeArquivo, string caminho)
     {
-        _fonte = source.ReplaceLineEndings("\n");
+        _fonte = fonte.ReplaceLineEndings("\n");
         _tokens = new();
-        _local = new LocalFonte(caminho, arquivo, 1);
+        _local = new LocalFonte(caminho, nomeArquivo, 1);
         _posicao = 0;
-        var texto = "";
- 
+    }
+
+    public List<Token> Tokenizar()
+    {
         while (Atual() != '\0')
         {
-            if(Atual() == '0')
-            {
-                if(Proximo(1) == 'b')
-                {
-                    ConsumirChar();
-                    ConsumirChar();
-                    TokenizarBinario();
-                    continue;
-                }
-                if(Proximo(1) == 'x')
-                {
-                    ConsumirChar();
-                    ConsumirChar();
-                    TokenizarHexa();
-                    continue;
-                }
-            }
-            if(char.IsDigit(Atual()))
+            if (char.IsDigit(Atual()))
             {
                 TokenizarNumero();
             }
-
-            else if(char.IsLetter(Atual()) || Atual() == '_')
+            else if (char.IsLetter(Atual()) || Atual() == '_')
             {
                 TokenizarPalavra();
             }
-            else 
+            else
             {
                 TokenizarSimbolo();
             }
         }
-        
+
         AdicionarTokenALista(TokenTipo.FimDoArquivo);
 
         return _tokens;
@@ -116,49 +100,28 @@ public class Tokenizador
 
     private bool DigitoHexadecimal(char c)
     {
-        switch(c.ToString().ToUpper()[0])
-        {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-                return true;
-                break;
-            default:
-                return false;
-            break;
-        }
+        c = char.ToUpper(c);
+        return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'F');
     }
+    
     private void TokenizarHexa()
     {
         var buffer = new StringBuilder();
-        
-        if(DigitoHexadecimal(Atual()))
+
+        if (DigitoHexadecimal(Atual()))
             buffer.Append(ConsumirChar());
         else
             throw new Erro("Esperado digito Hexadecimal, recebido: " + Atual(), _local);
-        
+
         while (DigitoHexadecimal(Atual()))
         {
             buffer.Append(ConsumirChar());
-            if(buffer.Length >= 7)
+            if (buffer.Length >= 7)
                 break;
         }
 
         int resultado = 0;
-        try 
+        try
         {
             resultado = Convert.ToInt32(buffer.ToString(), 16);
         }
@@ -171,8 +134,27 @@ public class Tokenizador
 
     private void TokenizarNumero()
     {
+        if (Atual() == '0')
+        {
+            if (Proximo() == 'b')
+            {
+                ConsumirChar();
+                ConsumirChar();
+                TokenizarBinario();
+                return;
+            }
+            if (Proximo() == 'x')
+            {
+                ConsumirChar();
+                ConsumirChar();
+                TokenizarHexa();
+                return;
+            }
+        }
+
         var buffer = new StringBuilder();
         var ponto = false;
+
         while (char.IsDigit(Atual()) || Atual() == '_')
         {
             // Ignorando underscores em números, facilita visualização
@@ -262,7 +244,7 @@ public class Tokenizador
         {
             ConsumirEspacos();
 
-            if(Atual() == 's' && Proximo(1) == 'e')
+            if(Atual() == 's' && Proximo() == 'e')
             {
                 ConsumirChar();
                 ConsumirChar();
@@ -323,7 +305,7 @@ public class Tokenizador
                 ConsumirChar();
                 break;
             case '>':
-                if (Proximo(1) == '=')
+                if (Proximo() == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorMaiorIgualQue);
                     ConsumirChar();
@@ -335,7 +317,7 @@ public class Tokenizador
                 ConsumirChar();
                 break;
             case '<':
-                if (Proximo(1) == '=')
+                if (Proximo() == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorMenorIgualQue);
                     ConsumirChar();
@@ -347,7 +329,7 @@ public class Tokenizador
                 ConsumirChar();
                 break;
             case '!':
-                if (Proximo(1) == '=')
+                if (Proximo() == '=')
                 {
                     AdicionarTokenALista(TokenTipo.OperadorDiferente);
                     ConsumirChar();
@@ -414,7 +396,7 @@ public class Tokenizador
 
                 while (Atual() != '"')
                 {
-                    if (Atual() == '\\' && Proximo(1) == '"')
+                    if (Atual() == '\\' && Proximo() == '"')
                     {
                         ConsumirChar();
                     }
@@ -519,9 +501,9 @@ public class Tokenizador
     private void ConsumirComentarioBloco()
     {
         ConsumirChar();
-        while (Proximo(1) != '\0')
+        while (Proximo() != '\0')
         {
-            if (Atual() == '*' && Proximo(1) == '/')
+            if (Atual() == '*' && Proximo() == '/')
             {
                 ConsumirChar(); // Consome '*'
                 ConsumirChar(); // Consome '/'
@@ -557,7 +539,7 @@ public class Tokenizador
 
         string codigoArquivo = File.ReadAllText(arquivoCompleto).ReplaceLineEndings("\n");
 
-        var novosTokens = new Tokenizador().Tokenizar(codigoArquivo, caminho, arquivoCompleto);
+        var novosTokens = new Tokenizador(codigoArquivo, caminho, arquivoCompleto).Tokenizar();
 
         for (int i = 0; i < novosTokens.Count - 1; i++)
         {
@@ -580,7 +562,7 @@ public class Tokenizador
         return Proximo(0);
     }
     
-    private char Proximo(int offset)
+    private char Proximo(int offset = 1)
     {
         if(_posicao + offset < _fonte.Length)
         {
