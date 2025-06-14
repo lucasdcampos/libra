@@ -122,6 +122,7 @@ namespace Libra.Arvore
         }
     }
 
+    // TODO: Isso é necessário?
     public class SenaoSe : Instrucao
     {
         public SenaoSe(LocalFonte local, Expressao condicao, Instrucao[] corpo)

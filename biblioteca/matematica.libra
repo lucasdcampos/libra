@@ -65,7 +65,7 @@ const SEN_60 = 0.8660254037844386
 const COS_60 = 0.5
 
 /// Valor máximo aproximado de um inteiro de 32 bits (signed).
-const MAX_INT = 2147483646
+const MAX_INT = 2147483647
 
 /// Valor mínimo aproximado de um inteiro de 32 bits (signed).
 const MIN_INT = -2147483647
