@@ -286,6 +286,8 @@ public class LibraBase : IModulo
 
     public object entrada(object[] args)
     {
+        if(args.Length > 0)
+            Ambiente.Msg(args[0].ToString());
         return Console.ReadLine();
     }
 
