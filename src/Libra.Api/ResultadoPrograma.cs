@@ -2,12 +2,18 @@ namespace Libra.Api;
 
 public sealed class LibraResultado
 {
+    /// <summary>
+    /// O valor retornado pela execução do programa, se houver.
+    /// </summary>
     public object? Valor;
-    public string Saida;
+    /// <summary>
+    /// Conteúdo da saída do terminal.
+    /// </summary>
+    public string SaidaTerminal;
 
-    public LibraResultado(object? valor, string saida)
+    public LibraResultado(object? valor, string saidaTerminal)
     {
         Valor = valor;
-        Saida = saida;
+        SaidaTerminal = saidaTerminal;
     }
 }

@@ -46,11 +46,11 @@ public class Repl
             try
             {
                 var motor = new MotorLibra(_opcoesMotorBase);
-                var saida = motor.Executar(linha); 
+                var resultado = motor.Executar($"exibir({linha})"); // TODO: Melhorar isso 
                 
-                if (saida != null)
+                if (resultado != null)
                 {
-                    Console.WriteLine(saida.ToString());
+                    //Console.WriteLine(resultado.Valor ?? "Nulo"); // TODO: Melhorar saída
                 }
             }
             catch (Exception e)
