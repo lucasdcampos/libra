@@ -163,26 +163,14 @@ public class LibraBase : IModulo
 
     public object exibir(object[] args)
     {
-        int qtd = args.Length;
-        
-        for(int i = 0; i < args.Length; i++)
-        {
-            if(args[i] == null)
-                return null;
-        }
+        if (args == null || args.Length == 0)
+            return null;
 
-        switch(qtd)
-        {
-            case 0:
-                Ambiente.Msg($"{args[0]}");
-                break;
-            case 1:
-                Ambiente.Msg($"{args[0]}");
-                break;
-            case 2:
-                Ambiente.Msg(args[0].ToString(), args[1].ToString());
-                break;
-        }
+        // Converte todos os argumentos em strings e junta com espaço
+        var output = string.Join(" ", args.Select(a => a?.ToString() ?? "null"));
+
+        // Envia para o ambiente/console
+        Ambiente.Msg(output);
 
         return null;
     }

@@ -53,9 +53,9 @@ public class Ambiente
         if (_ambienteAtual == null)
             ConfigurarAmbiente(null, false);
 
-        _ambienteAtual._textoSaida += msg += final;
+        _ambienteAtual._textoSaida += msg + final;
 
-        var loggerReal = Logger == null ? new ConsoleLogger() : Logger;
+        var loggerReal = Logger ?? new ConsoleLogger();
         loggerReal.Msg(msg, final);
     }
 

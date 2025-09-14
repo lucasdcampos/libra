@@ -15,15 +15,18 @@ namespace Libra
     {
         public void Msg(string mensagem, string final = "\n")
         {
-            if(string.IsNullOrEmpty(mensagem))
+            if (string.IsNullOrEmpty(mensagem))
                 mensagem = "Nulo";
-            
-            if(mensagem.StartsWith("Aviso: "))
+
+            if (mensagem.StartsWith("Aviso: "))
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                
-            Console.Write(mensagem); // TODO: Arrumar
+
+            // Escreve a mensagem + final de forma imediata
+            Console.Write(mensagem + final);
             Console.ResetColor();
+
+            // Força envio imediato para stdout
+            Console.Out.Flush();
         }
     }
-
 }
