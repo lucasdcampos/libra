@@ -18,6 +18,8 @@
 
 Libra é uma linguagem de programação interpretada simples em português, ideal para quem está aprendendo.
 
+> Experimente a linguagem agora direto do seu navegador: https://testar.libra.lucasof.com
+
 ## O que eu consigo criar com a Libra?
 
 Essencialmente, qualquer programa pode ser escrito em Libra, mas ela foi projetada para servir de aprendizado para estudantes de programação
@@ -124,3 +126,4 @@ Contribua para o código, depois crie um *Pull Request*. Caso for uma contribui�
 
 Me mande um e-mail: <a href="mailto:lucasm.campos@hotmail.com.br">lucasm.campos@hotmail.com.br</a>
 ou entre no Discord: https://discord.gg/mnGkSD4CsA
+
