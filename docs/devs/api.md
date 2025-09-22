@@ -73,7 +73,7 @@ public ModoExecucao ModoExecucao { get; set; }
 É a classe central da API para interagir com a linguagem Libra.
 
 ```csharp
-namespace Libra.Api { public class MotorLibra
+namespace Libra.Motor { public class MotorLibra
 { 
     // ... membros privados ... 
 }
@@ -149,7 +149,7 @@ Parâmetros:
 
 ### Exemplo de Uso
 ```csharp
-using Libra.Api;
+using Libra.Motor;
 
 var motor = new MotorLibra();
 

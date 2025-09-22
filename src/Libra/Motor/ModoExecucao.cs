@@ -1,4 +1,4 @@
-namespace Libra.Api;
+namespace Libra.Motor;
 
 public enum ModoExecucao
 {

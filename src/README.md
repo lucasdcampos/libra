@@ -5,7 +5,7 @@ O código fonte da Libra fica em `Libra/`. Outros projetos secundários que util
 ## Libra/
 Projeto principal (DLL), responsável pelo *front-end e backend* da Libra, isto é, seu Tokenizador, Parser e Interpretador.
 
-## Libra.Api/
+## Libra.Motor/
 API para se comunicar com a Libra e executar scripts.
 
 ## Libra.CLI/

@@ -7,12 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libra", "src\Libra\Libra.cs
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Libra.CLI", "src\Libra.CLI\Libra.CLI.csproj", "{047CE082-F3EB-4A2D-BD04-C2ED4DCD073C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libra.Api", "src\Libra.Api\Libra.Api.csproj", "{7FBA8E2D-1DCF-470A-BB8D-DEDF24D8E2C2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Libra.Testes", "src\Libra.Testes\Libra.Testes.csproj", "{4AABA6A8-3E93-4F82-8256-280B1BF18BB4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,8 +70,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{7FBA8E2D-1DCF-470A-BB8D-DEDF24D8E2C2} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{4AABA6A8-3E93-4F82-8256-280B1BF18BB4} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AAE83A92-6901-4779-8C91-64ED50564BF8}

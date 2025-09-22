@@ -1,4 +1,4 @@
-namespace Libra.Api
+namespace Libra.Motor
 {
     /// <summary>
     /// Define o nível de detalhamento para logs de depuração.

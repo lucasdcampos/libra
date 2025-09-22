@@ -13,7 +13,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Libra.Api\Libra.Api.csproj" />
     <ProjectReference Include="..\Libra\Libra.csproj" />
   </ItemGroup>
 

@@ -35,7 +35,7 @@ internal static class RodarProjetoLibra
 
         string codigo = File.ReadAllText(caminho);
 
-        var motor = new Libra.Api.MotorLibra();
+        var motor = new Libra.Motor.MotorLibra();
         motor.Executar(codigo, codigoPrincipal, caminho);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Libra;
 using Libra.Runtime;
 
-namespace Libra.Api;
+namespace Libra.Motor;
 
 public class MotorLibra
 {
