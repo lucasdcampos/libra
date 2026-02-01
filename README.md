@@ -118,7 +118,7 @@ var desconhecido: Objeto   // Aceita qualquer valor
 ## Como contribuir?
 
 Se você deseja contribuir para o projeto, pode fazer um *fork* do repositório, depois cloná-lo para sua máquina local com o seguinte comando:
-`git clone https://github.com/<SEU_USUARIO>/libra.git`
+`git clone https://github.com/lucasdcampos/libra.git`
 
 Contribua para o código, depois crie um *Pull Request*. Caso for uma contribuição válida, a aceitaremos ao projeto.
 
@@ -126,4 +126,5 @@ Contribua para o código, depois crie um *Pull Request*. Caso for uma contribui�
 
 Me mande um e-mail: <a href="mailto:lucasm.campos@hotmail.com.br">lucasm.campos@hotmail.com.br</a>
 ou entre no Discord: https://discord.gg/mnGkSD4CsA
+
 
