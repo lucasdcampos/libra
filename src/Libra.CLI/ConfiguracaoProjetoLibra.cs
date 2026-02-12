@@ -7,6 +7,6 @@ public class ConfiguracaoProjetoLibra
     public List<string>? Autores { get; set; }
     public string? CodigoPrincipal { get; set; }
     public OpcoesMotorLibra? OpcoesPadraoMotor { get; set; }
-    public string Descricao { get; internal set; }
-    public string Licenca { get; internal set; }
+    public string Descricao { get; internal set; } = "";
+    public string Licenca { get; internal set; } = "";
 }
