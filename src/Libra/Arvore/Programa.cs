@@ -2,12 +2,6 @@ using Libra.Runtime;
 
 namespace Libra.Arvore
 {
-    public abstract class Nodo<T>
-    {
-        public LocalFonte Local { get; protected set; }
-        public abstract T Aceitar(IVisitor visitor);
-    }
-
     public class Programa : Nodo<Object>
     {
         public Programa(Instrucao[] instrucoes)
@@ -16,7 +10,6 @@ namespace Libra.Arvore
             PilhaEscopos = new PilhaDeEscopos();
         }
 
-        public string Saida { get; internal set; }
         public int CodigoSaida { get; private set; }
         public PilhaDeEscopos PilhaEscopos { get; private set; }
         public Instrucao[] Instrucoes;
