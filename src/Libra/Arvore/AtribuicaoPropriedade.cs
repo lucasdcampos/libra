@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class AtribuicaoPropriedade : Instrucao
@@ -14,7 +12,7 @@ public class AtribuicaoPropriedade : Instrucao
     public ExpressaoPropriedade Alvo { get; private set; }
     public Expressao Expressao { get; private set; }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return visitor.VisitarAtribProp(this);
     }

@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class ExpressaoPropriedade : Expressao
@@ -13,5 +11,5 @@ public class ExpressaoPropriedade : Expressao
         Propriedade = prop;
     }
 
-    public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoPropriedade(this);
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoPropriedade(this);
 }

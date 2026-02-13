@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class Romper : Instrucao
@@ -9,7 +7,7 @@ public class Romper : Instrucao
         Local = local;
     }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return visitor.VisitarRomper(this);
     }

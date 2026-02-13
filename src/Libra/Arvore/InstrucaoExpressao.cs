@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class InstrucaoExpressao : Instrucao
@@ -12,7 +10,7 @@ public class InstrucaoExpressao : Instrucao
         Local = local;
     }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return Expressao.Aceitar(visitor);
     }

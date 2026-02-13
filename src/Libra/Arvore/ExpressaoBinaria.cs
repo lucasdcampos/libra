@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class ExpressaoBinaria : Expressao
@@ -16,7 +14,7 @@ public class ExpressaoBinaria : Expressao
             Direita = direita;
         }
 
-        public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoBinaria(this);
+        public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoBinaria(this);
 
         public override string ToString()
         {

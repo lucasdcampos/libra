@@ -1,6 +1,5 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
+
 public class ExpressaoVariavel : Expressao
 {
     public Token Identificador { get; private set ;}
@@ -11,5 +10,5 @@ public class ExpressaoVariavel : Expressao
         Identificador = identificador;
     }
 
-    public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoVariavel(this);
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoVariavel(this);
 }

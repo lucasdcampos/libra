@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class DeclaracaoVar : Instrucao
@@ -17,7 +15,7 @@ public class DeclaracaoVar : Instrucao
     internal string TipoVar;
     public bool Constante { get; private set; }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return visitor.VisitarDeclVar(this);
     }

@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class Tentar : Instrucao
@@ -16,7 +14,7 @@ public class Tentar : Instrucao
         InstrucoesCapturar = capturar;
     }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return visitor.VisitarTentar(this);
     }

@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class AtribuicaoVar : Instrucao
@@ -13,7 +11,7 @@ public class AtribuicaoVar : Instrucao
             Local = local;
         }
 
-        public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
         {
             return visitor.VisitarAtribVar(this);
         }

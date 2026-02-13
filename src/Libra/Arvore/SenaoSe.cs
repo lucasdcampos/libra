@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class SenaoSe : Instrucao
@@ -14,7 +12,7 @@ public class SenaoSe : Instrucao
     public Expressao Condicao { get; private set; }
     public IReadOnlyList<Instrucao> Corpo { get; private set; }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return visitor.VisitarSenaoSe(this);
     }

@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class DefinicaoTipo : Instrucao
@@ -16,7 +14,7 @@ public class DefinicaoTipo : Instrucao
     public DefinicaoFuncao[] Funcoes { get; private set; }
     public string Identificador {get; private set; }
 
-    public override object Aceitar(IVisitor visitor)
+    public override T Aceitar<T>(IVisitor<T> visitor)
     {
         return visitor.VisitarClasse(this);
     }

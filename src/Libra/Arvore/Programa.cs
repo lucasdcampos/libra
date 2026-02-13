@@ -1,8 +1,6 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore
 {
-    public class Programa : Nodo<Object>
+    public class Programa : Nodo
     {
         public Programa(Instrucao[] instrucoes)
         {
@@ -24,7 +22,7 @@ namespace Libra.Arvore
             CodigoSaida = codigo;
         }
 
-        public override object Aceitar(IVisitor visitor)
+        public override T Aceitar<T>(IVisitor<T> visitor)
         {
             throw new NotImplementedException();
         }

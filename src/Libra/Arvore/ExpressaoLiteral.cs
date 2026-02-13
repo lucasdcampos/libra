@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class ExpressaoLiteral : Expressao
@@ -12,7 +10,7 @@ public class ExpressaoLiteral : Expressao
 
     public LibraObjeto Valor { get; private set; }
 
-    public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoLiteral(this);
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoLiteral(this);
 
     public static ExpressaoLiteral CriarInt(LocalFonte local, int valor)
     {

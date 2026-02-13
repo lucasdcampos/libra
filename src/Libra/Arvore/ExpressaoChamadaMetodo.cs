@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class ExpressaoChamadaMetodo : Expressao
@@ -14,5 +12,5 @@ public class ExpressaoChamadaMetodo : Expressao
         Chamada = chamada;
     }
 
-    public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaMetodo(this);
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoChamadaMetodo(this);
 }

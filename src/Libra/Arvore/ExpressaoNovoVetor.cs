@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class ExpressaoNovoVetor : Expressao
@@ -12,5 +10,5 @@ public class ExpressaoNovoVetor : Expressao
 
     public Expressao Expressao { get; private set; }
 
-    public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoNovoVetor(this);
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoNovoVetor(this);
 }

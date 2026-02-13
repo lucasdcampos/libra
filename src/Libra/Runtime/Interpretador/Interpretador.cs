@@ -1,13 +1,15 @@
+// O Interpretador da Libra será descontinuado em favor do novo Compilador
+// Será mantido apenas para compatibilidade com versões antigas, mas não receberá mais atualizações ou correções de bugs
+
 using Libra.Arvore;
-using Libra.Runtime;
 using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Libra;
+namespace Libra.Runtime;
 
-public sealed class Interpretador : IVisitor
+public sealed class Interpretador : IVisitor<LibraObjeto>
 {
     public LocalFonte LocalAtual => _local;
     public InterpretadorFlags Flags { get; }
@@ -20,7 +22,7 @@ public sealed class Interpretador : IVisitor
         Flags = flags == null ? InterpretadorFlags.Padrao() : flags;
     }
 
-    public object VisitarPrograma(Programa programa)
+    public LibraObjeto VisitarPrograma(Programa programa)
     {
         VisitarInstrucoes(programa.Instrucoes);
 
@@ -35,7 +37,7 @@ public sealed class Interpretador : IVisitor
         }
     }
 
-    public object VisitarInstrucaoExpressao(InstrucaoExpressao instrucao)
+    public LibraObjeto VisitarInstrucaoExpressao(InstrucaoExpressao instrucao)
     {
         if (instrucao.Expressao == null)
             return null;
@@ -45,7 +47,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarTentar(Tentar instrucao)
+    public LibraObjeto VisitarTentar(Tentar instrucao)
     {
         try
         {
@@ -67,7 +69,7 @@ public sealed class Interpretador : IVisitor
 
     }
 
-    public object VisitarAtribProp(AtribuicaoPropriedade instrucao)
+    public LibraObjeto VisitarAtribProp(AtribuicaoPropriedade instrucao)
     {
         var obj = LibraObjeto.ParaLibraObjeto(VisitarExpressao(instrucao.Alvo));
 
@@ -76,7 +78,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarAtribIndice(AtribuicaoIndice instrucao)
+    public LibraObjeto VisitarAtribIndice(AtribuicaoIndice instrucao)
     {
         string identificador = instrucao.Identificador;
         int indice = VisitarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
@@ -87,7 +89,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarRetorno(Retornar instrucao)
+    public LibraObjeto VisitarRetorno(Retornar instrucao)
     {
         object resultadoExpressao = VisitarExpressao(((Retornar)instrucao).Expressao);
         _ultimoRetorno = LibraObjeto.ParaLibraObjeto(resultadoExpressao);
@@ -97,7 +99,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarSe(Se se)
+    public LibraObjeto VisitarSe(Se se)
     {
         if (VisitarExpressao<LibraInt>(se.Condicao).Valor != 0)
         {
@@ -125,7 +127,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarEnquanto(Enquanto enquanto)
+    public LibraObjeto VisitarEnquanto(Enquanto enquanto)
     {
         // TODO: Otimizar casos em que não é necessário calcular a expressão toda vez,
         // como em "enquanto 1", por exemplo.
@@ -151,7 +153,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarParaCada(ParaCada instrucao)
+    public LibraObjeto VisitarParaCada(ParaCada instrucao)
     {
         var expr = instrucao.Vetor;
 
@@ -178,7 +180,7 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarFuncao(DefinicaoFuncao funcao)
+    public LibraObjeto VisitarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
 
@@ -295,14 +297,14 @@ public sealed class Interpretador : IVisitor
     }
 
     // TODO: É isso?
-    public object VisitarClasse(DefinicaoTipo i)
+    public LibraObjeto VisitarClasse(DefinicaoTipo i)
     {
         Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
 
         return null;
     }
 
-    public object VisitarAtribVar(AtribuicaoVar i)
+    public LibraObjeto VisitarAtribVar(AtribuicaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
             throw new Erro("Identificador inválido!", _local);
@@ -316,7 +318,7 @@ public sealed class Interpretador : IVisitor
         return resultado;
     }
 
-    public object VisitarDeclVar(DeclaracaoVar i)
+    public LibraObjeto VisitarDeclVar(DeclaracaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
             throw new Erro("Identificador inválido!", _local);
@@ -478,17 +480,17 @@ public sealed class Interpretador : IVisitor
 
     }
 
-    public object VisitarRomper(Romper instrucao)
+    public LibraObjeto VisitarRomper(Romper instrucao)
     {
         throw new ExcecaoRomper();
     }
 
-    public object VisitarContinuar(Continuar instrucao)
+    public LibraObjeto VisitarContinuar(Continuar instrucao)
     {
         throw new NotImplementedException();
     }
 
-    public object VisitarSenaoSe(SenaoSe instrucao)
+    public LibraObjeto VisitarSenaoSe(SenaoSe instrucao)
     {
         throw new NotImplementedException();
     }

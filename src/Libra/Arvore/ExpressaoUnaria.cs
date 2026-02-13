@@ -1,5 +1,3 @@
-using Libra.Runtime;
-
 namespace Libra.Arvore;
 
 public class ExpressaoUnaria : Expressao
@@ -13,5 +11,5 @@ public class ExpressaoUnaria : Expressao
         Operador = operador;
         Operando = operando;
     }
-    public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoUnaria(this);
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarExpressaoUnaria(this);
 }
