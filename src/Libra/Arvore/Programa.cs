@@ -1,3 +1,5 @@
+using Libra.Runtime; // TODO: remover
+
 namespace Libra.Arvore
 {
     public class Programa : Nodo

@@ -372,7 +372,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
 
     public LibraObjeto VisitarExpressaoLiteral(ExpressaoLiteral expressao)
     {
-        return expressao.Valor;
+        return LibraObjeto.ParaLibraObjeto(expressao.Valor);
     }
     
     public LibraObjeto VisitarExpressaoBinaria(ExpressaoBinaria expressao)

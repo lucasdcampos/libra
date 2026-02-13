@@ -1,7 +1,7 @@
 using System.Text;
 using Libra.Arvore;
 
-namespace Libra; 
+namespace Libra.Runtime; 
 
 public class PilhaDeEscopos
 {

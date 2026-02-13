@@ -1,6 +1,6 @@
 using Libra.Arvore;
 
-namespace Libra;
+namespace Libra.Runtime;
 
 public class LibraObjeto
 {
@@ -75,7 +75,7 @@ public class LibraObjeto
 
     public virtual LibraObjeto ChamarMetodo(ExpressaoChamadaFuncao chamada, string quemChamou = "")
     {
-        if(!Propriedades.ContainsKey(chamada.Identificador) && Propriedades[chamada.Identificador].Valor is not Funcao)
+        if(!Propriedades.ContainsKey(chamada.Identificador) || Propriedades[chamada.Identificador].Valor is not Funcao)
             throw new ErroFuncaoNaoDefinida(chamada.Identificador);
         var args = chamada.Argumentos.ToList<Expressao>();
         if(!string.IsNullOrEmpty(quemChamou))

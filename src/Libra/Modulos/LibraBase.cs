@@ -2,6 +2,7 @@
 // Contém a lista de funções embutidas
 using Libra;
 using Libra.Arvore;
+using Libra.Runtime;
 using System;
 using System.Reflection;
 using System.Collections.Generic;

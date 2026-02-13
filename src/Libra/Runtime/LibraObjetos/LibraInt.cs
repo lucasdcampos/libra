@@ -1,4 +1,4 @@
-namespace Libra;
+namespace Libra.Runtime;
 
 public class LibraInt : LibraObjeto
 {

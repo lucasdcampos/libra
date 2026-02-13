@@ -1,5 +1,6 @@
 using System.Reflection;
 using Libra.Arvore;
+using Libra.Runtime;
 
 namespace Libra.Modulos;
 

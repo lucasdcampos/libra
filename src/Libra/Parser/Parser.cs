@@ -1,3 +1,4 @@
+using Libra.Runtime;    // TODO: remover
 using Libra.Arvore;
 
 namespace Libra;
@@ -389,7 +390,7 @@ public class Parser
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
             case TokenTipo.Nulo:
-                return new ExpressaoLiteral(_local, LibraObjeto.ParaLibraObjeto(ConsumirToken().Valor));
+                return new ExpressaoLiteral(_local, ConsumirToken().Valor);
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                 {
