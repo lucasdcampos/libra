@@ -65,10 +65,7 @@ public class Ambiente
             return;
             
         if (e is Erro)
-        {
             Ambiente.Msg(e.ToString());
-            return;
-        }
     }
 
     public static void Encerrar(int codigo)

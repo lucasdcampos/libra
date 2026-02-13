@@ -78,12 +78,7 @@ namespace Libra.Arvore
         {
             Local = local;
             Identificador = ident;
-            Argumentos = argumentos;
-
-            if(Argumentos == null)
-            {
-                Argumentos = new Expressao[0];
-            }
+            Argumentos = argumentos ?? new Expressao[0];
         }
 
         public override LibraObjeto Aceitar(IVisitor visitor) => visitor.VisitarExpressaoChamadaFuncao(this);

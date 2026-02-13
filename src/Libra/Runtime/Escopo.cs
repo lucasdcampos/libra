@@ -61,9 +61,7 @@ public class Escopo
             variavel.AtualizarValor(novoValor);
         }
         else
-        {
             throw new ErroVariavelNaoDeclarada(identificador);
-        }
     }
 
     public void ModificarVetor(string identificador, int indice, LibraObjeto novoValor)
@@ -75,8 +73,6 @@ public class Escopo
             variavel.AtualizarValor(vetor);
         }
         else
-        {
             throw new ErroVariavelNaoDeclarada(identificador);
-        }
     }
 }

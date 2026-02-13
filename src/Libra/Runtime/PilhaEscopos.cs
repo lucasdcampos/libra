@@ -9,7 +9,6 @@ public class PilhaDeEscopos
 
     public PilhaDeEscopos()
     {
-        // Adiciona o escopo global ao iniciar
         EmpilharEscopo("Global", new LocalFonte());
     }
 
@@ -17,22 +16,16 @@ public class PilhaDeEscopos
     public void EmpilharEscopo(string nome = "", LocalFonte local = new())
     {
         if (escopos.Count < 1000)
-        {
             escopos.Push(new Escopo(nome, local));
-        }
-            
         else
             throw new ErroTransbordoDePilha();
-        
     }
 
     // Remove o escopo atual da pilha, caso não seja o global
     public void DesempilharEscopo()
     {
         if (escopos.Count > 1)
-        {
             escopos.Pop();
-        }
     }
 
     // Define uma variável no escopo atual
