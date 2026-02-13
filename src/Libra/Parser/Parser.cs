@@ -60,7 +60,7 @@ public class Parser
 
         switch (atual.Tipo)
         {
-            case TokenTipo.Var: return DeclVar();
+            case TokenTipo.Var:
             case TokenTipo.Const: return DeclVar();
             case TokenTipo.Funcao: return DeclFuncao();
             case TokenTipo.Classe: return DeclClasse();
@@ -291,7 +291,6 @@ public class Parser
 
     private SenaoSe? SenaoSe()
     {
-        
         // Senao será convertido para um "senao se 1", que é uma expressão sempre verdadeira
         if(TentarConsumirToken(TokenTipo.Senao))
         {

@@ -9,8 +9,8 @@ namespace Libra;
 public class Tokenizador 
 {
     private int _posicao;
-    private string? _fonte;
-    private List<Token>? _tokens;
+    private string _fonte;
+    private List<Token> _tokens = new();
     private HashSet<string> _arquivosImportados = new();
     private LocalFonte _local;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
@@ -43,7 +43,6 @@ public class Tokenizador
     public Tokenizador(string fonte, string nomeArquivo, string caminho)
     {
         _fonte = fonte.ReplaceLineEndings("\n");
-        _tokens = new();
         _local = new LocalFonte(caminho, nomeArquivo, 1);
         _posicao = 0;
     }
@@ -53,17 +52,11 @@ public class Tokenizador
         while (Atual() != '\0')
         {
             if (char.IsDigit(Atual()))
-            {
                 TokenizarNumero();
-            }
             else if (char.IsLetter(Atual()) || Atual() == '_')
-            {
                 TokenizarPalavra();
-            }
             else
-            {
                 TokenizarSimbolo();
-            }
         }
 
         AdicionarTokenALista(TokenTipo.FimDoArquivo);

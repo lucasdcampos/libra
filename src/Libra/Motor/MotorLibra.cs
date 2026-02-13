@@ -9,7 +9,6 @@ public class MotorLibra
     private Tokenizador _tokenizador;
     private Parser _parser;
     private Interpretador? _interpretador;
-    private Compilador? _compilador;
     private Ambiente? _ambiente;
 
     /// <summary>
