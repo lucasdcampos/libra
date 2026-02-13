@@ -6,17 +6,17 @@ namespace Libra.Modulos;
 
 public class LibraSistema : IModulo
 {
-    public void RegistrarFuncoes(Programa programa = null)
+    public void RegistrarFuncoes(Ambiente ambiente)
     {
-        Ambiente.DefinirGlobal("criar_dir", new FuncaoNativa(criar_dir));
-        Ambiente.DefinirGlobal("excluir_dir", new FuncaoNativa(excluir_dir));
-        Ambiente.DefinirGlobal("eh_dir", new FuncaoNativa(eh_dir));
-        Ambiente.DefinirGlobal("eh_arquivo", new FuncaoNativa(eh_arquivo));
-        Ambiente.DefinirGlobal("caminho_existe", new FuncaoNativa(caminho_existe));
-        Ambiente.DefinirGlobal("ler_arquivo", new FuncaoNativa(ler_arquivo));
-        Ambiente.DefinirGlobal("excluir_arquivo", new FuncaoNativa(excluir_arquivo));
-        Ambiente.DefinirGlobal("criar_arquivo", new FuncaoNativa(criar_arquivo));
-        Ambiente.DefinirGlobal("escrever_arquivo", new FuncaoNativa(escrever_arquivo));
+        ambiente.DefinirGlobal("criar_dir", new FuncaoNativa(criar_dir));
+        ambiente.DefinirGlobal("excluir_dir", new FuncaoNativa(excluir_dir));
+        ambiente.DefinirGlobal("eh_dir", new FuncaoNativa(eh_dir));
+        ambiente.DefinirGlobal("eh_arquivo", new FuncaoNativa(eh_arquivo));
+        ambiente.DefinirGlobal("caminho_existe", new FuncaoNativa(caminho_existe));
+        ambiente.DefinirGlobal("ler_arquivo", new FuncaoNativa(ler_arquivo));
+        ambiente.DefinirGlobal("excluir_arquivo", new FuncaoNativa(excluir_arquivo));
+        ambiente.DefinirGlobal("criar_arquivo", new FuncaoNativa(criar_arquivo));
+        ambiente.DefinirGlobal("escrever_arquivo", new FuncaoNativa(escrever_arquivo));
     }
 
     public static object criar_dir(object[] args)

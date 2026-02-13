@@ -16,10 +16,12 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     public LibraObjeto Saida => _ultimoRetorno ?? LibraObjeto.Inicializar("Nulo");
     private LocalFonte _local = new LocalFonte();
     private LibraObjeto _ultimoRetorno;
-    
+    private Ambiente _ambiente;
+
     public Interpretador(InterpretadorFlags flags = null)
     {
         Flags = flags == null ? InterpretadorFlags.Padrao() : flags;
+        _ambiente = new Ambiente(new ConsoleLogger(), Flags.ModoSeguro);
     }
 
     public LibraObjeto VisitarPrograma(Programa programa)
@@ -51,18 +53,18 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     {
         try
         {
-            Ambiente.Pilha.EmpilharEscopo();
+            _ambiente.Pilha.EmpilharEscopo();
             VisitarInstrucoes(instrucao.InstrucoesTentar);
-            Ambiente.Pilha.DesempilharEscopo();
+            _ambiente.Pilha.DesempilharEscopo();
         }
         catch (Erro err)
         {
-            Ambiente.Pilha.DesempilharEscopo(); // Desempilhando escopo do "Tentar"
+            _ambiente.Pilha.DesempilharEscopo(); // Desempilhando escopo do "Tentar"
 
-            Ambiente.Pilha.EmpilharEscopo();
-            Ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem), TiposPadrao.Texto, true);
+            _ambiente.Pilha.EmpilharEscopo();
+            _ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem), TiposPadrao.Texto, true);
             VisitarInstrucoes(instrucao.InstrucoesCapturar);
-            Ambiente.Pilha.DesempilharEscopo();
+            _ambiente.Pilha.DesempilharEscopo();
         }
 
         return null;
@@ -84,7 +86,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         int indice = VisitarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
         LibraObjeto expressao = VisitarExpressao(instrucao.Expressao);
 
-        Ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
+        _ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
 
         return null;
     }
@@ -103,26 +105,26 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     {
         if (VisitarExpressao<LibraInt>(se.Condicao).Valor != 0)
         {
-            Ambiente.Pilha.EmpilharEscopo();
-            VisitarInstrucoes(se.Corpo.ToArray());
-            Ambiente.Pilha.DesempilharEscopo();
-            return null;
+            return se.Entao.Aceitar(this);
         }
-
-        if (se.ListaSenaoSe == null || se.ListaSenaoSe.Count == 0)
-            return null;
-
-        foreach (var inst in se.ListaSenaoSe)
+        else if (se.Senao != null)
         {
-            if (VisitarExpressao<LibraInt>(inst.Condicao).Valor != 0)
-            {
-                Ambiente.Pilha.EmpilharEscopo();
-                VisitarInstrucoes(inst.Corpo.ToArray());
-                Ambiente.Pilha.DesempilharEscopo();
-
-                return null;
-            }
+            return se.Senao.Aceitar(this);
         }
+
+        return null;
+    }
+
+    public LibraObjeto VisitarBloco(Bloco bloco)
+    {
+        _ambiente.Pilha.EmpilharEscopo();
+
+        foreach (var instrucao in bloco.Instrucoes)
+        {
+            instrucao.Aceitar(this);
+        }
+
+        _ambiente.Pilha.DesempilharEscopo();
 
         return null;
     }
@@ -133,8 +135,8 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         // como em "enquanto 1", por exemplo.
         while (VisitarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
-            Ambiente.Pilha.EmpilharEscopo();
-            foreach (var i in enquanto.Instrucoes)
+            _ambiente.Pilha.EmpilharEscopo();
+            foreach (var i in ((Bloco)enquanto.Corpo).Instrucoes)
             {
                 try
                 {
@@ -142,12 +144,12 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
                 }
                 catch (ExcecaoRomper e)
                 {
-                    Ambiente.Pilha.DesempilharEscopo();
+                    _ambiente.Pilha.DesempilharEscopo();
                     return null;
                 }
                 // TODO: Adicionar 'continuar'
             }
-            Ambiente.Pilha.DesempilharEscopo();
+            _ambiente.Pilha.DesempilharEscopo();
         }
 
         return null;
@@ -161,21 +163,21 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
 
         foreach (var item in vetor.Valor)
         {
-            Ambiente.Pilha.EmpilharEscopo();
+            _ambiente.Pilha.EmpilharEscopo();
             try
             {
-                Ambiente.DefinirGlobal(instrucao.Identificador.Valor.ToString(), item);
+                _ambiente.DefinirGlobal(instrucao.Identificador.Valor.ToString(), item);
                 VisitarInstrucoes(instrucao.Instrucoes);
             }
             catch (ExcecaoRomper e)
             {
-                Ambiente.Pilha.DesempilharEscopo();
+                _ambiente.Pilha.DesempilharEscopo();
                 return null;
             }
             // TODO: Adicionar 'continuar'
         }
 
-        Ambiente.Pilha.DesempilharEscopo();
+        _ambiente.Pilha.DesempilharEscopo();
 
         return null;
     }
@@ -189,7 +191,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
 
         var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
 
-        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, TiposPadrao.Func, true);
+        _ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, TiposPadrao.Func, true);
 
         return null;
     }
@@ -212,7 +214,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     public LibraObjeto VisitarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
         // TODO: Pode dar erro!
-        Classe tipo = (Classe)Ambiente.Pilha.ObterVariavel(nome).Valor;
+        Classe tipo = (Classe)_ambiente.Pilha.ObterVariavel(nome).Valor;
 
         // TODO: Arrumar, nunca vi um código tão porcaria em toda a minha vida
         List<Variavel> vars = new();
@@ -247,7 +249,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         if (argumentos.Length != qtdParametros)
             throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Length, _local);
 
-        Ambiente.Pilha.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
+        _ambiente.Pilha.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
 
         try 
         {
@@ -260,7 +262,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
                 if(funcao.Parametros[i].Tipo != TiposPadrao.Objeto && funcao.Parametros[i].Tipo != obj.Nome)
                     obj = obj.Converter(funcao.Parametros[i].Tipo);
 
-                Ambiente.Pilha.DefinirVariavel(ident, obj, funcao.Parametros[i].Tipo);
+                _ambiente.Pilha.DefinirVariavel(ident, obj, funcao.Parametros[i].Tipo);
             }
 
             VisitarInstrucoes(funcao.Instrucoes);
@@ -277,7 +279,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         }
         finally
         {
-            Ambiente.Pilha.DesempilharEscopo(); // Removendo o Escopo da Pilha
+            _ambiente.Pilha.DesempilharEscopo(); // Removendo o Escopo da Pilha
         }
 
         // Caso a função não tenha um retorno explicito
@@ -288,7 +290,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     {
         var argumentos = chamada.Argumentos;
 
-        var v = Ambiente.Pilha.ObterVariavel(chamada.Identificador);
+        var v = _ambiente.Pilha.ObterVariavel(chamada.Identificador);
 
         if(v.Valor is Classe)
             return VisitarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
@@ -299,7 +301,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     // TODO: É isso?
     public LibraObjeto VisitarClasse(DefinicaoTipo i)
     {
-        Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
+        _ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
 
         return null;
     }
@@ -311,7 +313,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
 
         LibraObjeto resultado = VisitarExpressao(i.Expressao);
 
-        Ambiente.Pilha.AtualizarVariavel(i.Identificador, resultado);
+        _ambiente.Pilha.AtualizarVariavel(i.Identificador, resultado);
 
         resultado.Construtor(i.Identificador);
         
@@ -325,7 +327,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
 
         LibraObjeto resultado = VisitarExpressao(i.Expressao);
 
-        Ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.TipoVar, i.Constante);
+        _ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.TipoVar, i.Constante);
 
         resultado.Construtor(i.Identificador);
 
@@ -402,7 +404,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
 
     public LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao)
     {
-        var v = Ambiente.Pilha.ObterVariavel(expressao.Identificador.Valor.ToString());
+        var v = _ambiente.Pilha.ObterVariavel(expressao.Identificador.Valor.ToString());
         return v.Valor;
     }
 
@@ -442,7 +444,7 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         string ident = expressao.Identificador;
         int indice = VisitarExpressao<LibraInt>(expressao.Expressao).Valor;
 
-        var variavel = Ambiente.Pilha.ObterVariavel(ident);
+        var variavel = _ambiente.Pilha.ObterVariavel(ident);
 
         if(variavel.Valor is LibraVetor vetor)
         {
@@ -486,11 +488,6 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     }
 
     public LibraObjeto VisitarContinuar(Continuar instrucao)
-    {
-        throw new NotImplementedException();
-    }
-
-    public LibraObjeto VisitarSenaoSe(SenaoSe instrucao)
     {
         throw new NotImplementedException();
     }

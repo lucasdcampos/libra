@@ -40,20 +40,22 @@ public class Erro : Exception
     {
         Console.ForegroundColor = ConsoleColor.Red;
         
-        Ambiente.Msg(Categoria.ToString()+"", ": ");
+        Console.WriteLine(Categoria.ToString()+"", ": ");
         Console.ResetColor();
-        Ambiente.Msg(Mensagem);
-        Ambiente.Msg(string.IsNullOrEmpty(Local.Arquivo) ? "" : $"  Arquivo \"{Local.Arquivo}\", linha {Local.Linha}");
+        Console.WriteLine(Mensagem);
+        Console.WriteLine(string.IsNullOrEmpty(Local.Arquivo) ? "" : $"  Arquivo \"{Local.Arquivo}\", linha {Local.Linha}");
 
-        string callStack =  Ambiente.Pilha.ObterCallStack();
-        Ambiente.Msg(string.IsNullOrEmpty(callStack) ? "\n": $"  Pilha de Chamadas:\n{callStack}", "");
+        // TODO: Reabilitar call stack
+        
+        //string callStack =  Ambiente.Pilha.ObterCallStack();
+        //Console.WriteLine(string.IsNullOrEmpty(callStack) ? "\n": $"  Pilha de Chamadas:\n{callStack}");
 
         if(!String.IsNullOrEmpty(dica))
         {
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Ambiente.Msg("Dica:", " ");
+            Console.WriteLine("Dica:", " ");
             Console.ResetColor();
-            Ambiente.Msg(dica.Replace("\n", "\n      ")+"\n");
+            Console.WriteLine(dica.Replace("\n", "\n      ")+"\n");
         }
         
     }

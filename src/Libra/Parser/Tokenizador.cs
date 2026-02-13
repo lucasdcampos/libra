@@ -40,7 +40,7 @@ public class Tokenizador
         { "nao", TokenTipo.OperadorNeg }
     };
 
-    public Tokenizador(string fonte, string nomeArquivo, string caminho)
+    public Tokenizador(string fonte, string nomeArquivo = "", string caminho = "")
     {
         _fonte = fonte.ReplaceLineEndings("\n");
         _local = new LocalFonte(caminho, nomeArquivo, 1);
@@ -231,19 +231,6 @@ public class Tokenizador
             ImportarArquivo(caminhoArquivo.ToString());
 
             return;
-        }
-
-        if(buffer.ToString() == "senao")
-        {
-            ConsumirEspacos();
-
-            if(Atual() == 's' && Proximo() == 'e')
-            {
-                ConsumirChar();
-                ConsumirChar();
-                AdicionarTokenALista(TokenTipo.SenaoSe);
-                return;
-            }
         }
         
         if (_palavrasReservadas.ContainsKey(buffer.ToString()))

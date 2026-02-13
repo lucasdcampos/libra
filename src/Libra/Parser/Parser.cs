@@ -48,13 +48,13 @@ public class Parser
         {
             if(TentarConsumirToken(TokenTipo.FimDoArquivo))
                 break;
-            instrucoes.Add(InstrucaoAtual());
+            instrucoes.Add(ParseInstrucao());
         }
         
         return instrucoes.ToArray();
     }
 
-    private Instrucao? InstrucaoAtual()
+    private Instrucao? ParseInstrucao()
     {   
         var atual = Atual();
         _local = atual.Local;
@@ -91,8 +91,8 @@ public class Parser
     {
         ConsumirToken(TokenTipo.Repetir);
         Expressao verdadeira = ExpressaoLiteral.CriarInt(_local, 1);
-        var instrucoes = Instrucoes();
-        return new Enquanto(_local, verdadeira, instrucoes); // repetir é basicamente um "enquanto 1"
+        var corpo = Bloco();
+        return new Enquanto(_local, verdadeira, corpo); // repetir é basicamente um "enquanto 1"
     }
 
     private Instrucao? AtribProp(ExpressaoPropriedade alvo)
@@ -200,7 +200,7 @@ public class Parser
                 throw new ErroEsperado(TokenTipo.Fim, TokenTipo.FimDoArquivo, _local);
 
             TentarConsumirToken(TokenTipo.Anotacao);
-            var atual = InstrucaoAtual();
+            var atual = ParseInstrucao();
             if(atual is DeclaracaoVar)
                 variaveis.Add((DeclaracaoVar)atual);
             else if(atual is DefinicaoFuncao)
@@ -271,7 +271,7 @@ public class Parser
         return new DefinicaoFuncao(_local, identificador, instrucoes, parametros, tipoRetorno);
     }
     
-    private Se? Se()
+    private Se Se()
     {
         ConsumirToken(TokenTipo.Se);
 
@@ -279,47 +279,39 @@ public class Parser
 
         ConsumirToken(TokenTipo.Entao);
 
-        Instrucao[] corpoSe = CorpoSe();
-        List<SenaoSe> listaSenaoSe = new();
+        var entao = Bloco();
 
-        while(Atual().Tipo == TokenTipo.SenaoSe || Atual().Tipo == TokenTipo.Senao)
+        Instrucao? senao = null;
+
+        if (TentarConsumirToken(TokenTipo.Senao))
         {
-            listaSenaoSe.Add(SenaoSe());
+            if (Atual().Tipo == TokenTipo.Se)
+            {
+                senao = Se(); // else if
+                return new Se(_local, expressao, entao, senao);
+            }
+            else
+            {
+                senao = Bloco();
+            }
         }
 
-        return new Se(_local, expressao, corpoSe, listaSenaoSe.Count > 0 ? listaSenaoSe.ToArray() : null);
+        ConsumirToken(TokenTipo.Fim);
+
+        return new Se(_local, expressao, entao, senao);
     }
 
-    private SenaoSe? SenaoSe()
+    private Bloco? Bloco()
     {
-        // Senao será convertido para um "senao se 1", que é uma expressão sempre verdadeira
-        if(TentarConsumirToken(TokenTipo.Senao))
+        List<Instrucao> instrucoes = new();
+        while(Atual().Tipo != TokenTipo.Fim && Atual().Tipo != TokenTipo.Senao)
         {
-            return new SenaoSe(_local, ExpressaoLiteral.CriarInt(_local, 1), CorpoSe());
+            if(Atual().Tipo == TokenTipo.FimDoArquivo)
+                throw new ErroEsperado(TokenTipo.Fim, TokenTipo.FimDoArquivo, _local);
+
+            instrucoes.Add(ParseInstrucao());
         }
-
-        while(TentarConsumirToken(TokenTipo.SenaoSe))
-        {
-            var expr = Expressao();
-            ConsumirToken(TokenTipo.Entao);
-            List<Instrucao> corpo = new();
-
-            return new SenaoSe(_local, expr, CorpoSe());
-        }
-
-        return null;
-    }
-
-    private Instrucao[] CorpoSe()
-    {
-        List<Instrucao> corpoSe = new();
-        while (!TentarConsumirToken(TokenTipo.Fim) && 
-        Atual().Tipo != TokenTipo.Senao &&
-        Atual().Tipo != TokenTipo.SenaoSe)
-        {
-            corpoSe.Add(InstrucaoAtual());
-        }
-        return corpoSe.ToArray();
+        return new Bloco(_local, instrucoes.ToArray());
     }
 
     private Enquanto? Enquanto()
@@ -329,9 +321,11 @@ public class Parser
         var expressao = Expressao();
         ConsumirToken(TokenTipo.Repetir);
 
-        var instrucoes = Instrucoes();
+        var corpo = Bloco();
 
-        return new Enquanto(_local, expressao, instrucoes);
+        ConsumirToken(TokenTipo.Fim);
+
+        return new Enquanto(_local, expressao, corpo);
     }
     
     private ParaCada? ParaCada()
@@ -390,7 +384,7 @@ public class Parser
             case TokenTipo.CaractereLiteral:
             case TokenTipo.TextoLiteral:
             case TokenTipo.Nulo:
-                return new ExpressaoLiteral(_local, ConsumirToken().Valor);
+                return new ExpressaoLiteral(_local, ConsumirToken());
             case TokenTipo.Identificador:
                 if (Proximo(1).Tipo == TokenTipo.AbrirParen)
                 {

@@ -1,3 +1,9 @@
-var x = entrada()
+var x = 3
 
-exibir(x)
+se x == 1 entao
+    exibir("a")
+senao se x == 2 entao
+    exibir("b")
+senao
+    exibir("c")
+fim

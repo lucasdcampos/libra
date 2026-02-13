@@ -20,7 +20,7 @@ public interface IVisitor<T>
     T VisitarContinuar(Continuar instrucao);
     T VisitarClasse(DefinicaoTipo instrucao);
     T VisitarParaCada(ParaCada instrucao);
-    T VisitarSenaoSe(SenaoSe instrucao);
+    T VisitarBloco(Bloco instrucao);
 
     T VisitarExpressaoLiteral(ExpressaoLiteral expressao);
     T VisitarExpressaoVariavel(ExpressaoVariavel expressao);

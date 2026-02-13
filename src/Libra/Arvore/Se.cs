@@ -2,17 +2,17 @@ namespace Libra.Arvore;
 
 public class Se : Instrucao
 {
-    public Se(LocalFonte local, Expressao condicao, Instrucao[] corpo, SenaoSe[] listaSenaoSe = null)
+    public Expressao Condicao { get; private set; }
+    public Instrucao Entao { get; private set; }
+    public Instrucao? Senao { get; private set; }
+
+    public Se(LocalFonte local, Expressao condicao, Instrucao entao, Instrucao? senao = null)
     {
-        Condicao = condicao ?? throw new ArgumentNullException(nameof(condicao));
-        Corpo = corpo ?? throw new ArgumentNullException(nameof(corpo));
-        ListaSenaoSe = listaSenaoSe;
+        Condicao = condicao;
+        Entao = entao;
+        Senao = senao;
         Local = local;
     }
-
-    public Expressao Condicao { get; private set; }
-    public IReadOnlyList<Instrucao> Corpo { get; private set; }
-    public IReadOnlyList<SenaoSe> ListaSenaoSe { get; private set; }
 
     public override T Aceitar<T>(IVisitor<T> visitor)
     {

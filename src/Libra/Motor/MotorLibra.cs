@@ -9,7 +9,6 @@ public class MotorLibra
     private Tokenizador _tokenizador;
     private Parser _parser;
     private Interpretador? _interpretador;
-    private Ambiente? _ambiente;
 
     /// <summary>
     /// Inicializa uma nova instância do MotorLibra com opções padrão.
@@ -18,8 +17,6 @@ public class MotorLibra
     public MotorLibra()
     {
         _opcoes = new OpcoesMotorLibra();
-
-        _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
     }
 
     /// <summary>
@@ -30,43 +27,6 @@ public class MotorLibra
     public MotorLibra(OpcoesMotorLibra opcoes)
     {
         _opcoes = opcoes;
-
-        _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
-    }
-
-    /// <summary>
-    /// Define uma variável global no ambiente do motor, tornando-a acessível em todos os scripts.
-    /// </summary>
-    /// <param name="identificador">Nome da variável global.</param>
-    /// <param name="valor">Valor a ser atribuído à variável global.</param>
-    public void DefinirGlobal(string identificador, object valor)
-    {
-        Ambiente.DefinirGlobal(identificador, valor);
-    }
-
-    /// <summary>
-    /// Obtém o valor de uma variável global definida no ambiente do motor.
-    /// </summary>
-    /// <param name="identificador">Nome da variável global.</param>
-    /// <returns>Valor da variável global, ou null se não existir.</returns>
-    public object? ObterGlobal(string identificador)
-    {
-        return Ambiente.ObterGlobal(identificador);
-    }
-
-    /// <summary>
-    /// Registra uma função nativa C# para ser chamada a partir dos scripts executados pelo motor.
-    /// Permite estender as funcionalidades do ambiente de script com código C#.
-    /// </summary>
-    /// <param name="nomeNoScript">Nome pelo qual a função será chamada no script.</param>
-    /// <param name="funcaoCSharp">Delegado da função C# a ser executada.</param>
-    public void RegistrarFuncaoNativa(string nomeNoScript, Func<object?[], object?> funcaoCSharp)
-    {
-        if (_ambiente == null)
-        {
-            throw new InvalidOperationException("Ambiente não foi inicializado.");
-        }
-        Ambiente.RegistrarFuncaoNativa(nomeNoScript, funcaoCSharp!);
     }
 
     /// <summary>
@@ -120,13 +80,14 @@ public class MotorLibra
 
             File.WriteAllText(logFile, mensagemLog);
 
-            Ambiente.Msg("\nHouve um problema, mas não foi culpa sua :(");
-            Ambiente.Msg($"Uma descrição do erro foi salva em: {logFile}");
-            Ambiente.Msg("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
-            Ambiente.Msg($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
-            Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
+            Console.WriteLine("\nHouve um problema, mas não foi culpa sua :(");
+            Console.WriteLine($"Uma descrição do erro foi salva em: {logFile}");
+            Console.WriteLine("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
+            Console.WriteLine($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
+            Console.WriteLine("\nImpossível continuar, encerrando a execução do programa.\n");
         }
 
-        return new LibraResultado(_interpretador.Saida.ObterValor(), Ambiente.TextoSaida);
+        // TODO: ?
+        return new LibraResultado(_interpretador.Saida.ObterValor(), "");
     }
 }

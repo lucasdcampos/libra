@@ -8,15 +8,15 @@ public class LibraMatematica : IModulo
 {
     private Random random = new Random();
 
-    public void RegistrarFuncoes(Programa programa = null)
+    public void RegistrarFuncoes(Ambiente ambiente)
     {
-        Ambiente.DefinirGlobal("__csraiz__", new FuncaoNativa(__csraiz__));
-        Ambiente.DefinirGlobal("__csraizq__", new FuncaoNativa(__csraizq__));
-        Ambiente.DefinirGlobal("__cssen__", new FuncaoNativa(__cssen__));
-        Ambiente.DefinirGlobal("__cscos__", new FuncaoNativa(__cscos__));
-        Ambiente.DefinirGlobal("__cstan__", new FuncaoNativa(__cstan__));
-        Ambiente.DefinirGlobal("__csrand__", new FuncaoNativa(__csrand__));
-        Ambiente.DefinirGlobal("__cslog__", new FuncaoNativa(__cslog__));
+        ambiente.DefinirGlobal("__csraiz__", new FuncaoNativa(__csraiz__));
+        ambiente.DefinirGlobal("__csraizq__", new FuncaoNativa(__csraizq__));
+        ambiente.DefinirGlobal("__cssen__", new FuncaoNativa(__cssen__));
+        ambiente.DefinirGlobal("__cscos__", new FuncaoNativa(__cscos__));
+        ambiente.DefinirGlobal("__cstan__", new FuncaoNativa(__cstan__));
+        ambiente.DefinirGlobal("__csrand__", new FuncaoNativa(__csrand__));
+        ambiente.DefinirGlobal("__cslog__", new FuncaoNativa(__cslog__));
     }
 
     public static object __csraizq__(object[] args)

@@ -7,9 +7,9 @@ namespace Libra.Modulos;
 
 public class LibraJson : IModulo
 {
-    public void RegistrarFuncoes(Programa programa = null)
+    public void RegistrarFuncoes(Ambiente ambiente)
     {
-        Ambiente.DefinirGlobal("json_ler", new FuncaoNativa(json_ler));
+        ambiente.DefinirGlobal("json_ler", new FuncaoNativa(json_ler));
     }
 
     public static object json_ler(object[] args)

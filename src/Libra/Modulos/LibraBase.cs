@@ -16,39 +16,41 @@ public class LibraBase : IModulo
 {
     public  bool DEBUG = false;
     private Programa _programa;
-
-    public void RegistrarFuncoes(Programa programa = null)
+    private Ambiente _ambiente;
+    
+    public void RegistrarFuncoes(Ambiente ambiente)
     {
-        Ambiente.DefinirGlobal("Nulo", new LibraNulo());
+        _ambiente = ambiente;
+        _ambiente.DefinirGlobal("Nulo", new LibraNulo());
 
-        Ambiente.DefinirGlobal("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
+        _ambiente.DefinirGlobal("__ativarmodulo__", new FuncaoNativa(__ativarmodulo__));
 
-        Ambiente.DefinirGlobal("sair", new FuncaoNativa(sair));
-        Ambiente.DefinirGlobal("exibir", new FuncaoNativa(exibir));
-        Ambiente.DefinirGlobal("tipo", new FuncaoNativa(tipo));
-        Ambiente.DefinirGlobal("garantir", new FuncaoNativa(garantir));
-        Ambiente.DefinirGlobal("tamanho", new FuncaoNativa(tamanho));
-        Ambiente.DefinirGlobal("concat", new FuncaoNativa(concat));
-        Ambiente.DefinirGlobal("pausar", new FuncaoNativa(pausar));
-        Ambiente.DefinirGlobal("real", new FuncaoNativa(real));
-        Ambiente.DefinirGlobal("int", new FuncaoNativa(_int));
-        Ambiente.DefinirGlobal("texto", new FuncaoNativa(texto));
-        Ambiente.DefinirGlobal("tentarReal", new FuncaoNativa(tentarReal));
-        Ambiente.DefinirGlobal("tentarInt", new FuncaoNativa(tentarInt));
-        Ambiente.DefinirGlobal("bytes", new FuncaoNativa(bytes));
-        Ambiente.DefinirGlobal("erro", new FuncaoNativa(erro));
-        Ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
+        _ambiente.DefinirGlobal("sair", new FuncaoNativa(sair));
+        _ambiente.DefinirGlobal("exibir", new FuncaoNativa(exibir));
+        _ambiente.DefinirGlobal("tipo", new FuncaoNativa(tipo));
+        _ambiente.DefinirGlobal("garantir", new FuncaoNativa(garantir));
+        _ambiente.DefinirGlobal("tamanho", new FuncaoNativa(tamanho));
+        _ambiente.DefinirGlobal("concat", new FuncaoNativa(concat));
+        _ambiente.DefinirGlobal("pausar", new FuncaoNativa(pausar));
+        _ambiente.DefinirGlobal("real", new FuncaoNativa(real));
+        _ambiente.DefinirGlobal("int", new FuncaoNativa(_int));
+        _ambiente.DefinirGlobal("texto", new FuncaoNativa(texto));
+        _ambiente.DefinirGlobal("tentarReal", new FuncaoNativa(tentarReal));
+        _ambiente.DefinirGlobal("tentarInt", new FuncaoNativa(tentarInt));
+        _ambiente.DefinirGlobal("bytes", new FuncaoNativa(bytes));
+        _ambiente.DefinirGlobal("erro", new FuncaoNativa(erro));
+        _ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
 
         // Impedir uso de funções potencialmente perigosas
-        if (Ambiente.AmbienteSeguro /* TODO: Arrumar! || Interpretador.Flags.ModoSeguro*/)
+        if (_ambiente.AmbienteSeguro /* TODO: Arrumar! || Interpretador.Flags.ModoSeguro*/)
             return;
 
-        Ambiente.DefinirGlobal("registrarCSharp", new FuncaoNativa(registrarCSharp));
-        Ambiente.DefinirGlobal("registrardll", new FuncaoNativa(registrardll));
-        Ambiente.DefinirGlobal("libra", new FuncaoNativa(libra));
+        _ambiente.DefinirGlobal("registrarCSharp", new FuncaoNativa(registrarCSharp));
+        _ambiente.DefinirGlobal("registrardll", new FuncaoNativa(registrardll));
+        _ambiente.DefinirGlobal("libra", new FuncaoNativa(libra));
 
-        Ambiente.DefinirGlobal("NL", new LibraTexto("\n"));
-        Ambiente.DefinirGlobal("FDA", new LibraTexto("\0"));
+        _ambiente.DefinirGlobal("NL", new LibraTexto("\n"));
+        _ambiente.DefinirGlobal("FDA", new LibraTexto("\0"));
     }
 
     public object __ativarmodulo__(object[] args)
@@ -61,13 +63,13 @@ public class LibraBase : IModulo
         switch (str)
         {
             case "matematica":
-                new LibraMatematica().RegistrarFuncoes(_programa);
+                new LibraMatematica().RegistrarFuncoes(_ambiente);
                 break;
             case "sistema":
-                new LibraSistema().RegistrarFuncoes(_programa);
+                new LibraSistema().RegistrarFuncoes(_ambiente);
                 break;
             case "json":
-                new LibraJson().RegistrarFuncoes(_programa);
+                new LibraJson().RegistrarFuncoes(_ambiente);
                 break;
         }
 
@@ -114,7 +116,7 @@ public class LibraBase : IModulo
             codigo = resultado;
         }
 
-        Ambiente.Encerrar(codigo);
+        _ambiente.Encerrar(codigo);
 
         return null;
     }
@@ -139,7 +141,7 @@ public class LibraBase : IModulo
             {
                 string nomeFuncao = $"{tipo.Name}_{metodo.Name}";
                 Func<object[], object> funcao = args => metodo.Invoke(null, args);
-                Ambiente.DefinirGlobal(nomeFuncao, new FuncaoNativa(funcao));
+                _ambiente.DefinirGlobal(nomeFuncao, new FuncaoNativa(funcao));
             }
         }
 
@@ -171,7 +173,7 @@ public class LibraBase : IModulo
         var output = string.Join(" ", args.Select(a => a?.ToString() ?? "null"));
 
         // Envia para o ambiente/console
-        Ambiente.Msg(output);
+        _ambiente.Msg(output);
 
         return null;
     }
@@ -276,7 +278,7 @@ public class LibraBase : IModulo
     public object entrada(object[] args)
     {
         if(args.Length > 0)
-            Ambiente.Msg(args[0].ToString());
+            _ambiente.Msg(args[0].ToString());
         return Console.ReadLine();
     }
 
@@ -353,7 +355,7 @@ public class LibraBase : IModulo
         if (!result.Success)
         {
             foreach (var diagnostic in result.Diagnostics)
-                Ambiente.Msg("Falha ao compilar assembly: " + diagnostic.ToString());
+                _ambiente.Msg("Falha ao compilar assembly: " + diagnostic.ToString());
             return null;
         }
 

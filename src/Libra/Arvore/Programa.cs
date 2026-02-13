@@ -1,32 +1,13 @@
-using Libra.Runtime; // TODO: remover
+namespace Libra.Arvore;
 
-namespace Libra.Arvore
+public class Programa : Nodo
 {
-    public class Programa : Nodo
+    public Instrucao[] Instrucoes;
+
+    public Programa(Instrucao[] instrucoes)
     {
-        public Programa(Instrucao[] instrucoes)
-        {
-            Instrucoes = instrucoes;
-            PilhaEscopos = new PilhaDeEscopos();
-        }
-
-        public int CodigoSaida { get; private set; }
-        public PilhaDeEscopos PilhaEscopos { get; private set; }
-        public Instrucao[] Instrucoes;
-
-        public Variavel ObterVariavel(string identificador)
-        {
-            return PilhaEscopos.ObterVariavel(identificador);
-        }
-
-        public void Sair(int codigo)
-        {
-            CodigoSaida = codigo;
-        }
-
-        public override T Aceitar<T>(IVisitor<T> visitor)
-        {
-            throw new NotImplementedException();
-        }
+        Instrucoes = instrucoes;
     }
+
+    public override T Aceitar<T>(IVisitor<T> visitor) => visitor.VisitarPrograma(this);
 }
