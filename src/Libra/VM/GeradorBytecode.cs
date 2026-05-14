@@ -178,6 +178,7 @@ public class GeradorBytecode : IVisitor<object>
     public object VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao) => null;
     public object VisitarExpressaoChamadaFuncao(ExpressaoChamadaFuncao expressao) => null;
     public object VisitarExpressaoChamadaMetodo(ExpressaoChamadaMetodo expressao) => null;
+    public object VisitarImportar(InstrucaoImportar instrucao) => null;
 
     public object VisitarBloco(Bloco instrucao)
     {
