@@ -58,28 +58,68 @@ exibir("Parabéns, o número era " + num)
 
 ## Compilando a Libra
 
-Para compilar o projeto, siga as instruções abaixo:
+Para compilar o projeto e gerar os binários de produção para Windows, Linux e macOS, siga as instruções abaixo:
 
-1. **Garanta que você tenha o .NET SDK instalado:** Antes de compilar o projeto, certifique-se de que você tenha o .NET Core SDK instalado em sua máquina. Você pode baixar o SDK no seguinte link: [https://dotnet.microsoft.com/en-us/download](https://dotnet.microsoft.com/en-us/download).
+1. **Pré-requisitos:** Certifique-se de ter o [.NET 9 SDK](https://dotnet.microsoft.com/download) instalado.
+2. **Executar o Script de Build:**
+   - No Windows: `./scripts/publicar_tudo.ps1`
+   - No Linux/macOS: `./scripts/publicar_tudo.sh`
 
-2. **Compilando o Projeto:**:
+Os binários prontos para uso estarão disponíveis na pasta `bin/release-dist/`.
 
+---
+
+## Usando com Docker
+
+Se você prefere não instalar o .NET localmente, pode usar a Libra através do Docker.
+
+### 1. Construir a imagem
+```bash
+docker build -t libra .
 ```
-git clone https://github.com/lucasdcampos/libra.git
-cd libra
-./scripts/build.ps1 (ou build.sh em Linux)
+
+### 2. Abrir o REPL (Modo Interativo)
+```bash
+docker run -it --rm libra
 ```
+
+### 3. Rodar um script local
+Para rodar um arquivo `.libra` que está no seu computador:
+```bash
+# No Linux ou PowerShell
+docker run --rm -v ${PWD}:/app libra /app/seu_script.libra
+```
+
+---
 
 ## Executando um Programa Libra
 
-Você pode usar o executável `libra.exe` ou `libra` gerado durante a compilação do projeto para executar um programa Libra.
-Para isso, use o seguinte comando:
+Você pode usar o executável `libra` gerado para rodar seus programas. 
 
-> **Nota:** Coloque o caminho para o executável nas variáveis de ambiente do seu sistema para facilitar a execução de programas Libra.
+> **Dica:** Adicione a pasta do executável ao seu `PATH` ou use a flag `-I` para incluir diretórios de bibliotecas customizados: `libra -I ./minhas_libs script.libra`.
 
 ## Melhorando a Experiência de Desenvolvimento
 Para facilitar a vida do desenvolvedor, há uma extensão no Visual Studio Code que adiciona Suporte à Libra, adicionando Syntax Highlighting e outras melhorias. 
 Baixe-a em https://marketplace.visualstudio.com/items?itemName=LucasMCampos.libra.
+
+### Rodando com Docker (Sem Instalação)
+
+Se você tem o Docker instalado, pode rodar a Libra sem precisar configurar o .NET:
+
+1. **Construa a imagem:**
+   ```bash
+   docker build -t libra .
+   ```
+
+2. **Rode o REPL (Interativo):**
+   ```bash
+   docker run -it libra
+   ```
+
+3. **Rode um script local:**
+   ```bash
+   docker run -v .:/dados libra seu_script.libra
+   ```
 
 ## Mais exemplos
 Olá Mundo?

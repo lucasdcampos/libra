@@ -1,26 +1,40 @@
-# Etapa 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+# --- Estágio de Compilação ---
+FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+WORKDIR /src
 
-# Definir o diretório de trabalho
-WORKDIR /app
+# Restaura as dependências (otimiza cache do Docker)
+COPY ["src/Libra/Libra.csproj", "src/Libra/"]
+COPY ["src/Libra.CLI/Libra.CLI.csproj", "src/Libra.CLI/"]
+RUN dotnet restore "src/Libra.CLI/Libra.CLI.csproj"
 
-# Copiar todos os arquivos para o contêiner
+# Compila a aplicação como um executável único e nativo para Linux
 COPY . .
+RUN dotnet publish "src/Libra.CLI/Libra.CLI.csproj" \
+    -c Release \
+    -r linux-musl-x64 \
+    -o /app/publish \
+    --self-contained true \
+    -p:PublishSingleFile=true \
+    -p:DebugType=none
 
-# Tornar o script shell executável
-RUN chmod +x scripts/publicar.sh
+# --- Estágio de Execução ---
+FROM mcr.microsoft.com/dotnet/runtime-deps:9.0-alpine AS runtime
+WORKDIR /libra
 
-# Executar o script de publicação
-RUN ./scripts/publicar.sh
+# Configurações de Globalização (necessário para .NET no Alpine)
+RUN apk add --no-cache icu-libs
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
-# Etapa 2: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+# Copia o executável e a biblioteca padrão
+COPY --from=build /app/publish .
 
-# Definir o diretório de trabalho
-WORKDIR /app
+# Cria um diretório para o usuário mapear seus scripts
+WORKDIR /dados
+VOLUME /dados
 
-# Copiar todos os arquivos do contêiner de build para o contêiner de execução
-COPY --from=build /app .
+# Define o binário da Libra como ponto de entrada
+# Isso permite usar a imagem como um comando: 'docker run libra meu_script.libra'
+ENTRYPOINT ["/libra/libra"]
 
-# Definir o comando para executar o programa, permitindo argumentos
-ENTRYPOINT ["./bin/linux-x64/libra"]
+# Por padrão, inicia o REPL se nenhum argumento for passado
+CMD []

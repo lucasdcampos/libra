@@ -1,6 +1,7 @@
 *.md
 exemplos/
 testes/
+pacotes/
 todo.txt
 .git/
 .gitignore
