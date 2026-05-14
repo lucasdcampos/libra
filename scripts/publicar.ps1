@@ -1,9 +1,35 @@
-# Excluir a pasta bin/
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue bin/
+param (
+    [Parameter(Mandatory=$false)]
+    [ValidateSet("win-x64", "linux-x64", "osx-x64", "tudo")]
+    [string]$Plataforma = "tudo"
+)
 
-& ./scripts/publicar_win-x64.ps1
-& ./scripts/publicar_linux-x64.ps1
-& ./scripts/publicar_linux-x64_selfc.ps1
+# Script para gerar binários de produção
+$platforms = @("win-x64", "linux-x64", "osx-x64")
 
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue bin/Libra/
-Remove-Item -Recurse -Force -ErrorAction SilentlyContinue bin/Libra-CLI/
+if ($Plataforma -ne "tudo") {
+    $platforms = @($Plataforma)
+    Write-Host "Iniciando publicação para a plataforma: $Plataforma..." -ForegroundColor Cyan
+} else {
+    Write-Host "Iniciando publicação multiplataforma..." -ForegroundColor Cyan
+}
+
+$outBase = "bin/release-dist"
+
+foreach ($rid in $platforms) {
+    Write-Host "Publicando para $rid..." -ForegroundColor Yellow
+    dotnet publish src/Libra.CLI/Libra.CLI.csproj `
+        -c Release `
+        -r $rid `
+        -o "$outBase/$rid" `
+        --self-contained true `
+        -p:PublishSingleFile=true `
+        -p:IncludeNativeLibrariesForSelfExtract=true `
+        -p:DebugType=none `
+        -p:DebugSymbols=false
+
+    # Remove arquivos desnecessários que o dotnet às vezes deixa
+    Remove-Item "$outBase/$rid/*.pdb" -ErrorAction SilentlyContinue
+}
+
+Write-Host "Publicação concluída! Artefatos disponíveis em: $outBase" -ForegroundColor Green
