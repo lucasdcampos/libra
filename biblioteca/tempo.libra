@@ -1,1 +1,5 @@
-erro("tempo.libra não foi implementado")
+__ativarmodulo__("tempo")
+
+funcao agora(): Objeto
+    retornar tempo_ms()
+fim

@@ -1,30 +1,185 @@
+// O Interpretador da Libra será descontinuado em favor do novo Compilador
+// Será mantido apenas para compatibilidade com versões antigas, mas não receberá mais atualizações ou correções de bugs
+
 using Libra.Arvore;
-using Libra.Runtime;
 using Microsoft.CSharp.RuntimeBinder;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.IO;
+using System.Text.Json;
 
-namespace Libra;
+namespace Libra.Runtime;
 
-public sealed class Interpretador : IVisitor
+public sealed class Interpretador : IVisitor<LibraObjeto>
 {
     public LocalFonte LocalAtual => _local;
     public InterpretadorFlags Flags { get; }
     public LibraObjeto Saida => _ultimoRetorno ?? LibraObjeto.Inicializar("Nulo");
     private LocalFonte _local = new LocalFonte();
     private LibraObjeto _ultimoRetorno;
-    
-    public Interpretador(InterpretadorFlags flags = null)
+    private Ambiente _ambiente;
+    private Dictionary<string, Modulo> _modulosImportados;
+
+    public Interpretador(InterpretadorFlags flags = null, Dictionary<string, Modulo> modulosImportados = null)
     {
         Flags = flags == null ? InterpretadorFlags.Padrao() : flags;
+        _ambiente = new Ambiente(new ConsoleLogger(), Flags.ModoSeguro);
+        _modulosImportados = modulosImportados ?? new Dictionary<string, Modulo>();
     }
 
-    public object VisitarPrograma(Programa programa)
+    public Ambiente Ambiente => _ambiente;
+
+    public void LimparSaida()
+    {
+        _ultimoRetorno = null;
+    }
+
+    public LibraObjeto VisitarPrograma(Programa programa)
     {
         VisitarInstrucoes(programa.Instrucoes);
 
         return _ultimoRetorno;
+    }
+
+    public LibraObjeto VisitarImportar(InstrucaoImportar instrucao)
+    {
+        string caminho = instrucao.Caminho;
+        string? arquivoCompleto = EncontrarCaminhoBiblioteca(caminho, instrucao.Local);
+
+        if (arquivoCompleto == null)
+            throw new ErroImportacao(caminho, instrucao.Local);
+
+        if (_modulosImportados.TryGetValue(arquivoCompleto, out var moduloExistente))
+        {
+            if (instrucao.Identificador != null)
+                _ambiente.Pilha.DefinirVariavel(instrucao.Identificador, moduloExistente, "Modulo", true);
+            return moduloExistente;
+        }
+
+        string codigo = File.ReadAllText(arquivoCompleto).ReplaceLineEndings("\n");
+        var tokenizador = new Tokenizador(codigo, Path.GetFileName(arquivoCompleto), Path.GetDirectoryName(arquivoCompleto) ?? "");
+        var tokens = tokenizador.Tokenizar();
+        var parser = new Parser(tokens.ToArray(), Flags.ForcarTiposEstaticos);
+        var programa = parser.Parse();
+
+        var novoInterpretador = new Interpretador(Flags, _modulosImportados);
+        
+        // Evita recursão infinita adicionando um módulo vazio temporário
+        var moduloTemporario = new Modulo(instrucao.Identificador ?? Path.GetFileNameWithoutExtension(caminho), new Dictionary<string, Variavel>());
+        _modulosImportados[arquivoCompleto] = moduloTemporario;
+
+        novoInterpretador.VisitarPrograma(programa);
+
+        // Coleta todas as variáveis do escopo global do novo interpretador
+        var escopoGlobal = novoInterpretador._ambiente.Pilha.ObterEscopoGlobal();
+        var propriedades = new Dictionary<string, Variavel>();
+        foreach (var par in escopoGlobal.Variaveis)
+        {
+            propriedades[par.Key] = par.Value;
+        }
+
+        var modulo = new Modulo(instrucao.Identificador ?? Path.GetFileNameWithoutExtension(caminho), propriedades);
+        _modulosImportados[arquivoCompleto] = modulo;
+
+        if (instrucao.Identificador != null)
+            _ambiente.Pilha.DefinirVariavel(instrucao.Identificador, modulo, "Modulo", true);
+
+        return modulo;
+    }
+
+    private string? TentarCaminhos(string baseDir, string nomeLogico)
+    {
+        // 1. Tenta o arquivo direto (se o usuário passou com .libra ou se o parser passou)
+        string fullPath = Path.Combine(baseDir, nomeLogico);
+        if (File.Exists(fullPath)) return Path.GetFullPath(fullPath);
+
+        // 2. Tenta adicionar .libra se não tiver
+        if (!nomeLogico.EndsWith(".libra"))
+        {
+            string comExt = fullPath + ".libra";
+            if (File.Exists(comExt)) return Path.GetFullPath(comExt);
+        }
+
+        // 3. Tenta como diretório (Entry Points)
+        string nomeDir = nomeLogico.EndsWith(".libra") 
+            ? nomeLogico.Substring(0, nomeLogico.Length - 6) 
+            : nomeLogico;
+        
+        string dirPath = Path.Combine(baseDir, nomeDir);
+        if (Directory.Exists(dirPath))
+        {
+            string[] entryPoints = { "inicio.libra", "index.libra" };
+            foreach (var ep in entryPoints)
+            {
+                string epPath = Path.Combine(dirPath, ep);
+                if (File.Exists(epPath)) return Path.GetFullPath(epPath);
+            }
+        }
+
+        return null;
+    }
+
+    private string? EncontrarCaminhoBiblioteca(string caminho, LocalFonte local)
+    {
+        // 1. Tentar caminho relativo ao arquivo atual
+        string? res = TentarCaminhos(local.CaminhoCompleto, caminho);
+        if (res != null) return res;
+
+        // 2. Tentar na subpasta 'biblioteca' relativa ao arquivo atual
+        res = TentarCaminhos(Path.Combine(local.CaminhoCompleto, "biblioteca"), caminho);
+        if (res != null) return res;
+
+        // 3. Tentar no diretório de trabalho atual (projeto raiz)
+        res = TentarCaminhos(Directory.GetCurrentDirectory(), caminho);
+        if (res != null) return res;
+
+        // 4. Lógica de Pacotes (importar pacote.modulo)
+        string[] partes = caminho.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+        if (partes.Length > 0)
+        {
+            string nomePacote = partes[0];
+            string restoCaminho = string.Join("/", partes.Skip(1));
+            
+            // Se for apenas 'importar pacote', o restoCaminho é vazio, 
+            // e o TentarCaminhos vai lidar com isso buscando por 'inicio.libra' etc na pasta do pacote.
+            if (string.IsNullOrEmpty(restoCaminho)) restoCaminho = ""; 
+
+            string pastaPacote = Path.Combine(Directory.GetCurrentDirectory(), "pacotes", nomePacote);
+            if (Directory.Exists(pastaPacote))
+            {
+                // Tenta resolver a raiz do pacote via projeto.libra.json
+                string raizPacote = "";
+                string configPath = Path.Combine(pastaPacote, "projeto.libra.json");
+                if (File.Exists(configPath))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(File.ReadAllText(configPath));
+                        if (doc.RootElement.TryGetProperty("raiz", out var raizProp))
+                            raizPacote = raizProp.GetString() ?? "";
+                    } catch {}
+                }
+
+                // Lista de pastas para buscar dentro do pacote
+                var pastasBuscaPacote = new List<string> { pastaPacote };
+                if (!string.IsNullOrEmpty(raizPacote)) pastasBuscaPacote.Add(Path.Combine(pastaPacote, raizPacote));
+                pastasBuscaPacote.Add(Path.Combine(pastaPacote, "codigo"));
+                pastasBuscaPacote.Add(Path.Combine(pastaPacote, "src"));
+
+                foreach (var pasta in pastasBuscaPacote)
+                {
+                    res = TentarCaminhos(pasta, restoCaminho == "" ? "." : restoCaminho);
+                    if (res != null) return res;
+                }
+            }
+        }
+
+        // 5. Biblioteca Padrão (diretório do executável)
+        res = TentarCaminhos(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "biblioteca"), caminho);
+        if (res != null) return res;
+
+        return null;
     }
 
     public void VisitarInstrucoes(Instrucao[] instrucoes)
@@ -35,7 +190,7 @@ public sealed class Interpretador : IVisitor
         }
     }
 
-    public object VisitarInstrucaoExpressao(InstrucaoExpressao instrucao)
+    public LibraObjeto VisitarInstrucaoExpressao(InstrucaoExpressao instrucao)
     {
         if (instrucao.Expressao == null)
             return null;
@@ -45,49 +200,50 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarTentar(Tentar instrucao)
+    public LibraObjeto VisitarTentar(Tentar instrucao)
     {
         try
         {
-            Ambiente.Pilha.EmpilharEscopo();
+            _ambiente.Pilha.EmpilharEscopo();
             VisitarInstrucoes(instrucao.InstrucoesTentar);
-            Ambiente.Pilha.DesempilharEscopo();
+            _ambiente.Pilha.DesempilharEscopo();
         }
         catch (Erro err)
         {
-            Ambiente.Pilha.DesempilharEscopo(); // Desempilhando escopo do "Tentar"
+            _ambiente.Pilha.DesempilharEscopo(); // Desempilhando escopo do "Tentar"
 
-            Ambiente.Pilha.EmpilharEscopo();
-            Ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem), TiposPadrao.Texto, true);
+            _ambiente.Pilha.EmpilharEscopo();
+            _ambiente.Pilha.DefinirVariavel(instrucao.VariavelErro, new LibraTexto(err.Mensagem), TiposPadrao.Texto, true);
             VisitarInstrucoes(instrucao.InstrucoesCapturar);
-            Ambiente.Pilha.DesempilharEscopo();
+            _ambiente.Pilha.DesempilharEscopo();
         }
 
         return null;
 
     }
 
-    public object VisitarAtribProp(AtribuicaoPropriedade instrucao)
+    public LibraObjeto VisitarAtribProp(AtribuicaoPropriedade instrucao)
     {
-        var obj = LibraObjeto.ParaLibraObjeto(VisitarExpressao(instrucao.Alvo));
+        var alvo = VisitarExpressao(instrucao.Alvo.Alvo);
+        var obj = LibraObjeto.ParaLibraObjeto(alvo);
 
         obj.AtribuirPropriedade(instrucao.Alvo.Propriedade, VisitarExpressao(instrucao.Expressao));
 
         return null;
     }
 
-    public object VisitarAtribIndice(AtribuicaoIndice instrucao)
+    public LibraObjeto VisitarAtribIndice(AtribuicaoIndice instrucao)
     {
         string identificador = instrucao.Identificador;
         int indice = VisitarExpressao<LibraInt>(instrucao.ExpressaoIndice).Valor;
         LibraObjeto expressao = VisitarExpressao(instrucao.Expressao);
 
-        Ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
+        _ambiente.Pilha.ModificarVetor(identificador, indice, expressao);
 
         return null;
     }
 
-    public object VisitarRetorno(Retornar instrucao)
+    public LibraObjeto VisitarRetorno(Retornar instrucao)
     {
         object resultadoExpressao = VisitarExpressao(((Retornar)instrucao).Expressao);
         _ultimoRetorno = LibraObjeto.ParaLibraObjeto(resultadoExpressao);
@@ -97,61 +253,64 @@ public sealed class Interpretador : IVisitor
         return null;
     }
 
-    public object VisitarSe(Se se)
+    public LibraObjeto VisitarSe(Se se)
     {
         if (VisitarExpressao<LibraInt>(se.Condicao).Valor != 0)
         {
-            Ambiente.Pilha.EmpilharEscopo();
-            VisitarInstrucoes(se.Corpo.ToArray());
-            Ambiente.Pilha.DesempilharEscopo();
-            return null;
+            return se.Entao.Aceitar(this);
         }
-
-        if (se.ListaSenaoSe == null || se.ListaSenaoSe.Count == 0)
-            return null;
-
-        foreach (var inst in se.ListaSenaoSe)
+        else if (se.Senao != null)
         {
-            if (VisitarExpressao<LibraInt>(inst.Condicao).Valor != 0)
-            {
-                Ambiente.Pilha.EmpilharEscopo();
-                VisitarInstrucoes(inst.Corpo.ToArray());
-                Ambiente.Pilha.DesempilharEscopo();
-
-                return null;
-            }
+            return se.Senao.Aceitar(this);
         }
 
         return null;
     }
 
-    public object VisitarEnquanto(Enquanto enquanto)
+    public LibraObjeto VisitarBloco(Bloco bloco)
     {
-        // TODO: Otimizar casos em que não é necessário calcular a expressão toda vez,
-        // como em "enquanto 1", por exemplo.
+        _ambiente.Pilha.EmpilharEscopo();
+        try
+        {
+            foreach (var instrucao in bloco.Instrucoes)
+            {
+                instrucao.Aceitar(this);
+            }
+        }
+        finally
+        {
+            _ambiente.Pilha.DesempilharEscopo();
+        }
+
+        return null;
+    }
+
+    public LibraObjeto VisitarEnquanto(Enquanto enquanto)
+    {
         while (VisitarExpressao<LibraInt>(enquanto.Expressao).Valor != 0)
         {
-            Ambiente.Pilha.EmpilharEscopo();
-            foreach (var i in enquanto.Instrucoes)
+            _ambiente.Pilha.EmpilharEscopo();
+            try
             {
-                try
+                foreach (var i in ((Bloco)enquanto.Corpo).Instrucoes)
                 {
                     i.Aceitar(this);
                 }
-                catch (ExcecaoRomper e)
-                {
-                    Ambiente.Pilha.DesempilharEscopo();
-                    return null;
-                }
-                // TODO: Adicionar 'continuar'
             }
-            Ambiente.Pilha.DesempilharEscopo();
+            catch (ExcecaoRomper)
+            {
+                return null;
+            }
+            finally
+            {
+                _ambiente.Pilha.DesempilharEscopo();
+            }
         }
 
         return null;
     }
 
-    public object VisitarParaCada(ParaCada instrucao)
+    public LibraObjeto VisitarParaCada(ParaCada instrucao)
     {
         var expr = instrucao.Vetor;
 
@@ -159,35 +318,35 @@ public sealed class Interpretador : IVisitor
 
         foreach (var item in vetor.Valor)
         {
-            Ambiente.Pilha.EmpilharEscopo();
+            _ambiente.Pilha.EmpilharEscopo();
             try
             {
-                Ambiente.DefinirGlobal(instrucao.Identificador.Valor.ToString(), item);
+                _ambiente.DefinirGlobal(instrucao.Identificador.Valor.ToString(), item);
                 VisitarInstrucoes(instrucao.Instrucoes);
             }
-            catch (ExcecaoRomper e)
+            catch (ExcecaoRomper)
             {
-                Ambiente.Pilha.DesempilharEscopo();
                 return null;
             }
-            // TODO: Adicionar 'continuar'
+            finally
+            {
+                _ambiente.Pilha.DesempilharEscopo();
+            }
         }
-
-        Ambiente.Pilha.DesempilharEscopo();
 
         return null;
     }
 
-    public object VisitarFuncao(DefinicaoFuncao funcao)
+    public LibraObjeto VisitarFuncao(DefinicaoFuncao funcao)
     {
         string identificador = funcao.Identificador;
 
         if (string.IsNullOrWhiteSpace(identificador))
-            throw new Erro("Identificador inválido!", _local);
+            throw new ErroIdentificadorInvalido(identificador, _local);
 
-        var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno);
+        var novaFuncao = new Funcao(identificador, funcao.Instrucoes, funcao.Parametros, funcao.TipoRetorno, _ambiente);
 
-        Ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, TiposPadrao.Func, true);
+        _ambiente.Pilha.DefinirVariavel(identificador, novaFuncao, TiposPadrao.Func, true);
 
         return null;
     }
@@ -210,25 +369,44 @@ public sealed class Interpretador : IVisitor
     public LibraObjeto VisitarConstrutorClasse(string nome, Expressao[] expressoes, string quemChamou = "")
     {
         // TODO: Pode dar erro!
-        Classe tipo = (Classe)Ambiente.Pilha.ObterVariavel(nome).Valor;
+        Classe tipo = (Classe)_ambiente.Pilha.ObterVariavel(nome).Valor;
 
+        // Cria um novo ambiente para o objeto, para que o 'auto' seja isolado
+        var ambienteObjeto = new Ambiente(_ambiente.Logger, _ambiente.AmbienteSeguro);
+        
         // TODO: Arrumar, nunca vi um código tão porcaria em toda a minha vida
         List<Variavel> vars = new();
         foreach(var i in tipo.Variaveis)
         {
-            vars.Add(new Variavel(i.Identificador, VisitarExpressao(i.Expressao), i.TipoVar, i.Constante));
-        }
-        foreach(var i in tipo.Funcoes)
-        {
-            vars.Add(new Variavel(
-                i.Identificador,
-                new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno),
-                TiposPadrao.Func,
-                true
-            ));
+            LibraObjeto valorProp;
+            if (i.Expressao != null)
+            {
+                valorProp = VisitarExpressao(i.Expressao);
+            }
+            else
+            {
+                valorProp = LibraObjeto.Inicializar(i.TipoVar);
+            }
+            vars.Add(new Variavel(i.Identificador, valorProp, i.TipoVar, i.Constante));
         }
 
         var obj = new LibraObjeto(nome, vars.ToArray(), expressoes);
+        
+        // Injetar a referência 'auto' (this) no ambiente do objeto
+        ambienteObjeto.Pilha.DefinirVariavel("auto", obj, nome, true);
+
+        // Adiciona as funções ao objeto, vinculando-as ao ambiente do objeto para que tenham acesso ao 'auto'
+        foreach(var i in tipo.Funcoes)
+        {
+            var metodo = new Funcao(i.Identificador, i.Instrucoes, i.Parametros, i.TipoRetorno, ambienteObjeto);
+            obj.Propriedades[i.Identificador] = new Variavel(i.Identificador, metodo, TiposPadrao.Func, true);
+        }
+
+        // Executa o construtor (função com o mesmo nome da classe) se existir
+        if (obj.Propriedades.ContainsKey(nome) && obj.Propriedades[nome].Valor is Funcao construtor)
+        {
+            ExecutarFuncao(construtor, expressoes);
+        }
         
         return obj;
     }
@@ -245,20 +423,39 @@ public sealed class Interpretador : IVisitor
         if (argumentos.Length != qtdParametros)
             throw new ErroEsperadoNArgumentos(funcao.Identificador, qtdParametros, argumentos.Length, _local);
 
-        Ambiente.Pilha.EmpilharEscopo(funcao.Identificador, _local); // empurra o novo Escopo da função
+        // 1. Avalia os argumentos no ambiente ATUAL (do chamador)
+        var valoresArgumentos = new LibraObjeto[argumentos.Length];
+        for (int i = 0; i < argumentos.Length; i++)
+        {
+            valoresArgumentos[i] = VisitarExpressao(argumentos[i]);
+        }
+
+        // 2. Troca para o ambiente onde a função foi definida
+        var ambienteOriginal = _ambiente;
+        if (funcao.AmbienteDefinicao != null)
+            _ambiente = funcao.AmbienteDefinicao;
+
+        _ambiente.Pilha.EmpilharEscopo(funcao.Identificador, _local);
 
         try 
         {
-            // Adicionando os argumentos ao Escopo
-            for (int i = 0; i < argumentos.Length; i++)
+            // Se a função vier de um objeto, injetamos o 'auto' no escopo local
+            if (_ambiente.Pilha.VariavelExiste("auto"))
+            {
+                var auto = _ambiente.Pilha.ObterVariavel("auto");
+                _ambiente.Pilha.DefinirVariavel("auto", auto.Valor, auto.Tipo, true);
+            }
+
+            // 3. Define os parâmetros com os valores já calculados
+            for (int i = 0; i < valoresArgumentos.Length; i++)
             {
                 string ident = funcao.Parametros[i].Identificador;
-                var obj = VisitarExpressao(argumentos[i]);
+                var obj = valoresArgumentos[i];
                 
                 if(funcao.Parametros[i].Tipo != TiposPadrao.Objeto && funcao.Parametros[i].Tipo != obj.Nome)
                     obj = obj.Converter(funcao.Parametros[i].Tipo);
 
-                Ambiente.Pilha.DefinirVariavel(ident, obj, funcao.Parametros[i].Tipo);
+                _ambiente.Pilha.DefinirVariavel(ident, obj, funcao.Parametros[i].Tipo);
             }
 
             VisitarInstrucoes(funcao.Instrucoes);
@@ -275,7 +472,8 @@ public sealed class Interpretador : IVisitor
         }
         finally
         {
-            Ambiente.Pilha.DesempilharEscopo(); // Removendo o Escopo da Pilha
+            _ambiente.Pilha.DesempilharEscopo(); // Removendo o Escopo da Pilha
+            _ambiente = ambienteOriginal;
         }
 
         // Caso a função não tenha um retorno explicito
@@ -286,7 +484,7 @@ public sealed class Interpretador : IVisitor
     {
         var argumentos = chamada.Argumentos;
 
-        var v = Ambiente.Pilha.ObterVariavel(chamada.Identificador);
+        var v = _ambiente.Pilha.ObterVariavel(chamada.Identificador);
 
         if(v.Valor is Classe)
             return VisitarConstrutorClasse(chamada.Identificador, chamada.Argumentos.ToArray());
@@ -295,35 +493,43 @@ public sealed class Interpretador : IVisitor
     }
 
     // TODO: É isso?
-    public object VisitarClasse(DefinicaoTipo i)
+    public LibraObjeto VisitarClasse(DefinicaoTipo i)
     {
-        Ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), i.Identificador);
+        _ambiente.Pilha.DefinirVariavel(i.Identificador, new Classe(i.Identificador, i.Variaveis, i.Funcoes), TiposPadrao.Objeto);
 
         return null;
     }
 
-    public object VisitarAtribVar(AtribuicaoVar i)
+    public LibraObjeto VisitarAtribVar(AtribuicaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
-            throw new Erro("Identificador inválido!", _local);
+            throw new ErroIdentificadorInvalido(i.Identificador, _local);
 
         LibraObjeto resultado = VisitarExpressao(i.Expressao);
 
-        Ambiente.Pilha.AtualizarVariavel(i.Identificador, resultado);
+        _ambiente.Pilha.AtualizarVariavel(i.Identificador, resultado);
 
         resultado.Construtor(i.Identificador);
         
         return resultado;
     }
 
-    public object VisitarDeclVar(DeclaracaoVar i)
+    public LibraObjeto VisitarDeclVar(DeclaracaoVar i)
     {
         if(string.IsNullOrWhiteSpace(i.Identificador))
-            throw new Erro("Identificador inválido!", _local);
+            throw new ErroIdentificadorInvalido(i.Identificador, _local);
 
-        LibraObjeto resultado = VisitarExpressao(i.Expressao);
+        LibraObjeto resultado;
+        if (i.Expressao != null)
+        {
+            resultado = VisitarExpressao(i.Expressao);
+        }
+        else
+        {
+            resultado = LibraObjeto.Inicializar(i.TipoVar);
+        }
 
-        Ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.TipoVar, i.Constante);
+        _ambiente.Pilha.DefinirVariavel(i.Identificador, resultado, i.TipoVar, i.Constante);
 
         resultado.Construtor(i.Identificador);
 
@@ -370,7 +576,7 @@ public sealed class Interpretador : IVisitor
 
     public LibraObjeto VisitarExpressaoLiteral(ExpressaoLiteral expressao)
     {
-        return expressao.Valor;
+        return LibraObjeto.ParaLibraObjeto(expressao.Valor);
     }
     
     public LibraObjeto VisitarExpressaoBinaria(ExpressaoBinaria expressao)
@@ -394,13 +600,13 @@ public sealed class Interpretador : IVisitor
             TokenTipo.OperadorMenorIgualQue => a.MenorIgualQue(b),
             TokenTipo.OperadorE => a.E(b),
             TokenTipo.OperadorOu => a.Ou(b),
-            _ => throw new Erro($"Operador desconhecido: {expressao.Operador.Tipo}", expressao.Operador.Local)
+            _ => throw new ErroOperadorInvalido(expressao.Operador.Tipo.ToString(), expressao.Operador.Local)
         };
     }
 
     public LibraObjeto VisitarExpressaoVariavel(ExpressaoVariavel expressao)
     {
-        var v = Ambiente.Pilha.ObterVariavel(expressao.Identificador.Valor.ToString());
+        var v = _ambiente.Pilha.ObterVariavel(expressao.Identificador.Valor.ToString());
         return v.Valor;
     }
 
@@ -432,7 +638,7 @@ public sealed class Interpretador : IVisitor
                 return LibraObjeto.ParaLibraObjeto(VisitarExpressao(expressao.Operando).Mult(new LibraInt(-1)));
         }
 
-        throw new Erro("Operador unário não implementado", expressao.Operador.Local);
+        throw new ErroOperadorInvalido(expressao.Operador.Tipo.ToString(), expressao.Operador.Local);
     }
 
     public LibraObjeto VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao)
@@ -440,7 +646,7 @@ public sealed class Interpretador : IVisitor
         string ident = expressao.Identificador;
         int indice = VisitarExpressao<LibraInt>(expressao.Expressao).Valor;
 
-        var variavel = Ambiente.Pilha.ObterVariavel(ident);
+        var variavel = _ambiente.Pilha.ObterVariavel(ident);
 
         if(variavel.Valor is LibraVetor vetor)
         {
@@ -472,23 +678,26 @@ public sealed class Interpretador : IVisitor
 
     public LibraObjeto VisitarExpressaoChamadaMetodo(ExpressaoChamadaMetodo expressao)
     {
-        var obj = LibraObjeto.ParaLibraObjeto(expressao.Alvo.Aceitar(this));
+        var alvo = VisitarExpressao(expressao.Alvo);
+        var chamada = expressao.Chamada;
 
-        return obj.ChamarMetodo(expressao.Chamada);
+        if (!alvo.Propriedades.ContainsKey(chamada.Identificador))
+            throw new ErroFuncaoNaoDefinida($"{alvo.Nome}.{chamada.Identificador}");
 
+        var valorProp = alvo.Propriedades[chamada.Identificador].Valor;
+        
+        if (valorProp is not Funcao funcao)
+            throw new ErroFuncaoNaoDefinida($"{alvo.Nome}.{chamada.Identificador}");
+
+        return ExecutarFuncao(funcao, chamada.Argumentos.ToArray());
     }
 
-    public object VisitarRomper(Romper instrucao)
+    public LibraObjeto VisitarRomper(Romper instrucao)
     {
         throw new ExcecaoRomper();
     }
 
-    public object VisitarContinuar(Continuar instrucao)
-    {
-        throw new NotImplementedException();
-    }
-
-    public object VisitarSenaoSe(SenaoSe instrucao)
+    public LibraObjeto VisitarContinuar(Continuar instrucao)
     {
         throw new NotImplementedException();
     }

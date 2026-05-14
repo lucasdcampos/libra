@@ -1,0 +1,23 @@
+// Benchmark de Recursividade (Fibonacci)
+importar "tempo.libra"
+
+funcao fib(n: Int): Int
+    se n <= 1 entao retornar n fim
+    retornar fib(n-1) + fib(n-2)
+fim
+
+funcao rodar(n: Int)
+    exibir("  - Calculando fib(" + texto(n) + ")...")
+    var inicio = tempo.agora()
+    var r = fib(n)
+    var momentoFim = tempo.agora()
+    var duracao = momentoFim - inicio
+    exibir("    Resultado: " + texto(r) + " em " + texto(duracao) + "ms")
+fim
+
+funcao executar()
+    exibir("Benchmark: Recursividade")
+    rodar(20)
+    rodar(25)
+    // Cuidado com valores acima de 30 no interpretador atual!
+fim

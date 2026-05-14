@@ -8,8 +8,7 @@ public class MotorLibra
     private readonly OpcoesMotorLibra _opcoes;
     private Tokenizador _tokenizador;
     private Parser _parser;
-    private Interpretador? _interpretador;
-    private Ambiente? _ambiente;
+    private Interpretador _interpretador;
 
     /// <summary>
     /// Inicializa uma nova instância do MotorLibra com opções padrão.
@@ -18,8 +17,7 @@ public class MotorLibra
     public MotorLibra()
     {
         _opcoes = new OpcoesMotorLibra();
-
-        _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
+        InicializarInterpretador();
     }
 
     /// <summary>
@@ -30,43 +28,13 @@ public class MotorLibra
     public MotorLibra(OpcoesMotorLibra opcoes)
     {
         _opcoes = opcoes;
-
-        _ambiente = Ambiente.ConfigurarAmbiente(new ConsoleLogger(), true);
+        InicializarInterpretador();
     }
 
-    /// <summary>
-    /// Define uma variável global no ambiente do motor, tornando-a acessível em todos os scripts.
-    /// </summary>
-    /// <param name="identificador">Nome da variável global.</param>
-    /// <param name="valor">Valor a ser atribuído à variável global.</param>
-    public void DefinirGlobal(string identificador, object valor)
+    private void InicializarInterpretador()
     {
-        Ambiente.DefinirGlobal(identificador, valor);
-    }
-
-    /// <summary>
-    /// Obtém o valor de uma variável global definida no ambiente do motor.
-    /// </summary>
-    /// <param name="identificador">Nome da variável global.</param>
-    /// <returns>Valor da variável global, ou null se não existir.</returns>
-    public object? ObterGlobal(string identificador)
-    {
-        return Ambiente.ObterGlobal(identificador);
-    }
-
-    /// <summary>
-    /// Registra uma função nativa C# para ser chamada a partir dos scripts executados pelo motor.
-    /// Permite estender as funcionalidades do ambiente de script com código C#.
-    /// </summary>
-    /// <param name="nomeNoScript">Nome pelo qual a função será chamada no script.</param>
-    /// <param name="funcaoCSharp">Delegado da função C# a ser executada.</param>
-    public void RegistrarFuncaoNativa(string nomeNoScript, Func<object?[], object?> funcaoCSharp)
-    {
-        if (_ambiente == null)
-        {
-            throw new InvalidOperationException("Ambiente não foi inicializado.");
-        }
-        Ambiente.RegistrarFuncaoNativa(nomeNoScript, funcaoCSharp!);
+        var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
+        _interpretador = new Interpretador(flags);
     }
 
     /// <summary>
@@ -79,13 +47,12 @@ public class MotorLibra
     {
         try
         {
-            _tokenizador = new Tokenizador(codigo, arquivo, caminho);
+            _interpretador.LimparSaida();
+            _tokenizador = new Tokenizador(codigo, arquivo, caminho, _opcoes.CaminhosBiblioteca);
             var tokens = _tokenizador.Tokenizar();
-            _parser = new Parser(tokens.ToArray());
+            _parser = new Parser(tokens.ToArray(), _opcoes.ModoEstrito);
             var programa = _parser.Parse();
             
-            var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
-            _interpretador = new Interpretador(flags);
             _interpretador.VisitarPrograma(programa);
             
         }
@@ -93,9 +60,9 @@ public class MotorLibra
         {
             e.ExibirFormatado();
 
-            if (_opcoes.NivelDebug > 0)
+            if (_opcoes.NivelDebug > NivelDebugDetalhe.Nenhum)
             {
-                Console.WriteLine($"Pilha de Chamadas: {e.StackTrace}");
+                Console.WriteLine($"[DEBUG] StackTrace: {e.StackTrace}");
             }
         }
         catch (ExcecaoSaida)
@@ -104,29 +71,54 @@ public class MotorLibra
         }
         catch (Exception ex)
         {
-            string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-            string logFile = Path.Combine(logsDir, $"erro-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+            LogarErroInterno(ex);
+        }
 
+        object? valorSaida = null;
+        try {
+            valorSaida = _interpretador?.Saida?.ObterValor();
+        } catch {}
+
+        return new LibraResultado(valorSaida, "");
+    }
+
+    private void LogarErroInterno(Exception ex)
+    {
+        string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+        string logFile = Path.Combine(logsDir, $"erro-interno-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+
+        try
+        {
             if (!Directory.Exists(logsDir))
             {
                 Directory.CreateDirectory(logsDir);
             }
 
-            string mensagemLog = "Ocorreu um erro interno na Libra, veja a descrição para mais detalhes:\n";
-            mensagemLog += "Versão: Libra 1.0.0-Beta\n";
-            mensagemLog += $"Ultima local do Script Libra executada: {_interpretador.LocalAtual}\n";
-            mensagemLog += $"Problema:\n{ex.ToString()}\n";
-            mensagemLog += "Por favor reportar em https://github.com/lucasdcampos/libra/issues/ (se possível incluir script que causou o problema)\n";
+            string mensagemLog = "=== ERRO INTERNO DA LIBRA ===\n";
+            mensagemLog += $"Data/Hora: {DateTime.Now}\n";
+            mensagemLog += $"Versão Engine: {LibraUtil.VersaoAtual()}\n";
+            mensagemLog += $"Último Local Conhecido: {_interpretador?.LocalAtual}\n\n";
+            mensagemLog += "EXCEÇÃO:\n";
+            mensagemLog += ex.ToString();
+            mensagemLog += "\n\nPor favor, reporte este erro em: https://github.com/lucasdcampos/libra/issues/";
+            mensagemLog += "\nSe possível, anexe o script que causou este problema.";
 
             File.WriteAllText(logFile, mensagemLog);
-
-            Ambiente.Msg("\nHouve um problema, mas não foi culpa sua :(");
-            Ambiente.Msg($"Uma descrição do erro foi salva em: {logFile}");
-            Ambiente.Msg("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
-            Ambiente.Msg($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
-            Ambiente.Msg("\nImpossível continuar, encerrando a execução do programa.\n");
+        }
+        catch (Exception logEx)
+        {
+            Console.WriteLine($"[CRÍTICO] Falha ao salvar log de erro: {logEx.Message}");
         }
 
-        return new LibraResultado(_interpretador.Saida.ObterValor(), Ambiente.TextoSaida);
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine("\n[ERRO DE SISTEMA]");
+        Console.ResetColor();
+        Console.WriteLine("Ocorreu um problema interno no motor da Libra.");
+        Console.WriteLine("Isso não é um erro no seu código, mas sim um bug na linguagem.");
+        Console.WriteLine($"\nUm log detalhado foi salvo em: {logFile}");
+        Console.WriteLine("Por favor, ajude-nos a melhorar reportando este problema no GitHub.");
+        Console.WriteLine("Link: https://github.com/lucasdcampos/libra/issues/");
+        Console.WriteLine($"\nVersão: {LibraUtil.VersaoAtual()}");
+        Console.WriteLine("Encerrando a execução.\n");
     }
 }

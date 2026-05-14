@@ -3,7 +3,7 @@ using System.Text;
 internal static class IniciarNovoProjeto
 {
     static string _nomePadraoProjeto = "ProjetoLibra/";
-    const string _nomeConfig = "libra.json";
+    const string _nomeConfig = "projeto.libra.json";
     internal static void Executar(string nome)
     {
         _nomePadraoProjeto = nome;
@@ -36,7 +36,6 @@ internal static class IniciarNovoProjeto
         string nomeProjeto = "Novo Projeto";
         string versao = "0.1.0";
         string descricao = "Descrição do Projeto";
-        List<string> autores = new List<string>();
         string licenca = "SEM LICENÇA";
         string codigoPrincipal = "inicio.libra";
 
@@ -45,18 +44,18 @@ internal static class IniciarNovoProjeto
             var sb = new StringBuilder();
             sb.AppendLine("{");
 
-            sb.AppendFormat("  \"NomeProjeto\": \"{0}\",\n", nomeProjeto);
-            sb.AppendFormat("  \"Versao\": \"{0}\",\n", versao);
-            sb.AppendFormat("  \"Descricao\": \"{0}\",\n", descricao);
+            sb.AppendFormat("  \"nome\": \"{0}\",\n", nomeProjeto);
+            sb.AppendFormat("  \"versao\": \"{0}\",\n", versao);
+            sb.AppendFormat("  \"descricao\": \"{0}\",\n", descricao);
 
-            sb.Append("  \"Autores\": [],\n");
+            sb.Append("  \"autores\": [],\n");
 
-            sb.AppendFormat("  \"Licenca\": \"{0}\",\n", licenca);
-             sb.AppendFormat("  \"Raiz\": \"{0}\",\n", "codigo/");
-            sb.AppendFormat("  \"CodigoPrincipal\": \"{0}\",\n", codigoPrincipal);
+            sb.AppendFormat("  \"licenca\": \"{0}\",\n", licenca);
+             sb.AppendFormat("  \"raiz\": \"{0}\",\n", "codigo/");
+            sb.AppendFormat("  \"codigoPrincipal\": \"{0}\",\n", codigoPrincipal);
 
-            sb.AppendLine("  \"OpcoesMotor\": {");
-            sb.AppendLine("    \"ModoEstrito\": true");
+            sb.AppendLine("  \"opcoesMotor\": {");
+            sb.AppendLine("    \"modoEstrito\": true");
             sb.AppendLine("  }");
 
             sb.AppendLine("}");
@@ -66,7 +65,7 @@ internal static class IniciarNovoProjeto
             File.WriteAllText(nomeArquivoConfig, conteudoJson);
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"Arquivo '{_nomePadraoProjeto}/{nomeArquivoConfig}' criado com sucesso!");
+            Console.WriteLine($"Arquivo '{_nomePadraoProjeto}/{_nomeConfig}' criado com sucesso!");
             Console.ResetColor();
             Console.WriteLine($"Use 'cd {_nomePadraoProjeto}' e depois 'libra rodar' para executar seu código!");
 

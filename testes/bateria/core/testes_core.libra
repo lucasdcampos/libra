@@ -1,0 +1,65 @@
+// Testes de funcionalidades básicas da linguagem
+
+funcao testarVariaveis()
+    exibir("  - Variáveis e Constantes")
+    var a = 10
+    const b = 20
+    a = a + b
+    se a != 30 entao erro("Erro em variáveis/constantes") fim
+    
+    var s = "texto"
+    s = s + " concatenado"
+    se s != "texto concatenado" entao erro("Erro em concatenação de texto") fim
+fim
+
+funcao testarCondicionais()
+    exibir("  - Condicionais (se/senao)")
+    var x = 5
+    se x > 0 entao
+        // ok
+    senao
+        erro("Erro em condicional 'se'")
+    fim
+    
+    x = -1
+    se x > 0 entao
+        erro("Erro em condicional 'se'")
+    senao se x < 0 entao
+        // ok
+    senao
+        erro("Erro em condicional 'senao se'")
+    fim
+fim
+
+funcao testarLoops()
+    exibir("  - Loops (enquanto/para cada)")
+    var i = 0
+    enquanto i < 5 repetir
+        i = i + 1
+    fim
+    se i != 5 entao erro("Erro em loop 'enquanto'") fim
+    
+    var soma = 0
+    var v = {1, 2, 3, 4, 5}
+    para cada item em v
+        soma = soma + item
+    fim
+    se soma != 15 entao erro("Erro em loop 'para cada'") fim
+fim
+
+funcao testarExpressoes()
+    exibir("  - Expressões Matemáticas e Lógicas")
+    var r = (10 + 5) * 2 / 3
+    se r != 10 entao erro("Erro em precedência matemática") fim
+    
+    var b = (1 > 0) e (0 == 0) ou (1 < 0)
+    se b != 1 entao erro("Erro em expressões lógicas") fim
+fim
+
+funcao executar()
+    exibir("Testando Core da Linguagem:")
+    testarVariaveis()
+    testarCondicionais()
+    testarLoops()
+    testarExpressoes()
+fim

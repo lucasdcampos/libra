@@ -34,6 +34,11 @@ internal static class Program
                 Comandos.RodarProjeto(argumentosParaProcessar);
                 break;
 
+            case "i":
+            case "instalar":
+                Comandos.Instalar(argumentosParaProcessar);
+                break;
+
             default:
                 if (argumentosParaProcessar.Any())
                 {
@@ -64,10 +69,11 @@ internal static class Program
         for (int i = argumentos.Count - 1; i >= 0; i--)
         {
             string arg = argumentos[i];
-            if (arg.StartsWith("--"))
+            if (arg.StartsWith("-"))
             {
                 string flag = arg.TrimStart('-');
                 bool flagProcessada = true;
+                
                 if (Comandos.EhComandoInterno(flag.ToLowerInvariant()))
                 {
                     Comandos.ExecutarComando(flag.ToLowerInvariant());
@@ -75,20 +81,37 @@ internal static class Program
                 }
 
                 switch (flag.ToLowerInvariant())
-                    {
-                        case "modoestrito":
-                            opcoesMotor.ModoEstrito = true;
-                            break;
-                        case "ignoraravisos":
-                            opcoesMotor.TratarAvisosComoErros = false;
-                            break;
-                        case "modoseguro":
-                            opcoesMotor.ModoSeguro = true;
-                            break;
-                        default:
+                {
+                    case "modoestrito":
+                        opcoesMotor.ModoEstrito = true;
+                        break;
+                    case "ignoraravisos":
+                        opcoesMotor.TratarAvisosComoErros = false;
+                        break;
+                    case "modoseguro":
+                        opcoesMotor.ModoSeguro = true;
+                        break;
+                    case "i":
+                    case "incluir":
+                        if (i + 1 < argumentos.Count)
+                        {
+                            opcoesMotor.CaminhosBiblioteca.Add(argumentos[i + 1]);
+                            argumentos.RemoveAt(i + 1); // Remove o caminho
+                        }
+                        else
+                        {
+                            Console.WriteLine("Erro: A flag -I ou --incluir espera um caminho.");
+                            return true;
+                        }
+                        break;
+                    default:
+                        if (arg.StartsWith("--"))
                             flagProcessada = false; // Não é uma flag global reconhecida
-                            break;
-                    }
+                        else
+                            flagProcessada = false; 
+                        break;
+                }
+                
                 if (flagProcessada)
                 {
                     argumentos.RemoveAt(i); // Remove a flag se foi processada

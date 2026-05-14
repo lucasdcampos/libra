@@ -1,6 +1,6 @@
 using Libra.Arvore;
 
-namespace Libra;
+namespace Libra.Runtime;
 
 public class LibraObjeto
 {
@@ -30,10 +30,7 @@ public class LibraObjeto
 
     internal void Construtor(string ident)
     {
-        if(Propriedades.ContainsKey(Nome) && Propriedades[Nome].Valor is Funcao)
-        {
-            ChamarMetodo(new ExpressaoChamadaFuncao(new LocalFonte() /* TODO: Arrumar! */, Nome, _argsConstrutor), ident);
-        }
+        // Removido: A execução do construtor agora é tratada pelo Interpretador
     }
 
     protected void DeclararPropriedade(Variavel prop)
@@ -69,13 +66,13 @@ public class LibraObjeto
     public void AtribuirPropriedade(string ident, LibraObjeto novoValor)
     {
         if(!Propriedades.ContainsKey(ident))
-            throw new ErroVariavelNaoDeclarada(ident);
+            throw new ErroVariavelNaoDeclarada($"{Nome}.{ident}");
         Propriedades[ident].AtualizarValor(novoValor);
     }
 
     public virtual LibraObjeto ChamarMetodo(ExpressaoChamadaFuncao chamada, string quemChamou = "")
     {
-        if(!Propriedades.ContainsKey(chamada.Identificador) && Propriedades[chamada.Identificador].Valor is not Funcao)
+        if(!Propriedades.ContainsKey(chamada.Identificador) || Propriedades[chamada.Identificador].Valor is not Funcao)
             throw new ErroFuncaoNaoDefinida(chamada.Identificador);
         var args = chamada.Argumentos.ToList<Expressao>();
         if(!string.IsNullOrEmpty(quemChamou))

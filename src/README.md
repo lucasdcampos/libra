@@ -8,3 +8,5 @@ Projeto principal (DLL), responsável pelo *front-end e backend* da Libra, isto 
 ## Libra.CLI/
 Programa de Console (Executável) usado para chamar o Interpretador da Libra para executar um script.
 
+## Libra.Testes/
+Projeto de Testes Unitários (DLL) usado para testar o Tokenizador, Parser e Interpretador da Libra.

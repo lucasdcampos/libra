@@ -1,6 +1,6 @@
 using Libra.Arvore;
 
-namespace Libra;
+namespace Libra.Runtime;
 
 public class Classe : LibraObjeto, IChamavel
 {

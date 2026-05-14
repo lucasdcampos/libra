@@ -1,8 +1,9 @@
-namespace Libra;
+namespace Libra.Runtime;
 
 public class Escopo
 {
     internal Dictionary<string, Variavel> _variaveis = new Dictionary<string, Variavel>();
+    public Dictionary<string, Variavel> Variaveis => _variaveis;
     public string Nome { get; private set; }
     public LocalFonte Local { get; private set; }
 

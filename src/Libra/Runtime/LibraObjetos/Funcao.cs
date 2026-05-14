@@ -1,31 +1,21 @@
 using Libra.Arvore;
 
-namespace Libra
+namespace Libra.Runtime
 {
-    public class Parametro
-    {
-        public string Identificador;
-        public string Tipo;
-
-        public Parametro(string ident, string tipo = "Objeto")
-        {
-            Identificador = ident;
-            Tipo = tipo;
-        }
-    }
-
     public class Funcao : LibraObjeto, IChamavel
     {
         public Instrucao[] Instrucoes;
         public Parametro[] Parametros;
         public string TipoRetorno;
         public string Identificador { get; }
-        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto") : base("Func", new Variavel[0])
+        public Ambiente? AmbienteDefinicao;
+        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto", Ambiente? ambiente = null) : base("Func", new Variavel[0])
         {
             Instrucoes = instrucoes;
             Parametros = parametros;
             TipoRetorno = tipoRetorno;
             Identificador = ident;
+            AmbienteDefinicao = ambiente;
         }
 
         public override LibraInt Igual(LibraObjeto outro)

@@ -2,11 +2,11 @@ using Libra.Motor;
 
 public class ConfiguracaoProjetoLibra
 {
-    public string? NomeProjeto { get; set; }
-    public string? Versao { get; set; }
-    public List<string>? Autores { get; set; }
-    public string? CodigoPrincipal { get; set; }
-    public OpcoesMotorLibra? OpcoesPadraoMotor { get; set; }
-    public string Descricao { get; internal set; } = "";
-    public string Licenca { get; internal set; } = "";
+    public string? nome { get; set; }
+    public string? versao { get; set; }
+    public List<string>? autores { get; set; }
+    public string? codigoPrincipal { get; set; }
+    public OpcoesMotorLibra? opcoesPadraoMotor { get; set; }
+    public string descricao { get; internal set; } = "";
+    public string licenca { get; internal set; } = "";
 }

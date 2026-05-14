@@ -1,0 +1,37 @@
+// Benchmark de Criação de Objetos e Acesso a Propriedades
+importar "tempo.libra"
+
+classe Ponto
+    var x: Int
+    var y: Int
+    funcao Ponto(x: Int, y: Int)
+        auto.x = x
+        auto.y = y
+    fim
+    funcao somar(): Int
+        retornar auto.x + auto.y
+    fim
+fim
+
+funcao rodar(qtd: Int)
+    exibir("  - Criando " + texto(qtd) + " objetos...")
+    var inicio = tempo.agora()
+    
+    var i = 0
+    var somaTotal = 0
+    enquanto i < qtd repetir
+        var p = Ponto(i, i + 1)
+        somaTotal = somaTotal + p.somar()
+        i = i + 1
+    fim
+    
+    var momentoFim = tempo.agora()
+    var duracao = momentoFim - inicio
+    exibir("    Concluído em: " + texto(duracao) + "ms (Soma Total: " + texto(somaTotal) + ")")
+fim
+
+funcao executar()
+    exibir("Benchmark: Objetos e Métodos")
+    rodar(10000)
+    rodar(50000)
+fim

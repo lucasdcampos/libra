@@ -1,0 +1,18 @@
+// Runner de Performance
+exibir("========================================")
+exibir("   INICIANDO BENCHMARKS DE PERFORMANCE  ")
+exibir("========================================")
+
+importar "bench_loops.libra" como loops
+importar "bench_recursao.libra" como recursao
+importar "bench_objetos.libra" como objetos
+
+loops.executar()
+exibir("")
+recursao.executar()
+exibir("")
+objetos.executar()
+
+exibir("========================================")
+exibir("   BENCHMARKS CONCLUÍDOS               ")
+exibir("========================================")

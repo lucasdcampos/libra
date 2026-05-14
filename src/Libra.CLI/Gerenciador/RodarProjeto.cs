@@ -5,10 +5,10 @@ internal static class RodarProjetoLibra
 {
     internal static void Executar()
     {
-        string jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "libra.json");
+        string jsonPath = Path.Combine(Directory.GetCurrentDirectory(), "projeto.libra.json");
         if (!File.Exists(jsonPath))
         {
-            Console.WriteLine("Arquivo libra.json não encontrado na raiz do projeto.");
+            Console.WriteLine("Arquivo projeto.libra.json não encontrado na raiz do projeto.");
             return;
         }
 
@@ -16,26 +16,26 @@ internal static class RodarProjetoLibra
         using var doc = JsonDocument.Parse(jsonContent);
         var root = doc.RootElement;
 
-        string raiz = root.TryGetProperty("Raiz", out var raizProp) ? raizProp.GetString() ?? "" : "";
-        string codigoPrincipal = root.TryGetProperty("CodigoPrincipal", out var codProp) ? codProp.GetString() ?? "" : "";
+        string raiz = root.TryGetProperty("raiz", out var raizProp) ? raizProp.GetString() ?? "" : "";
+        string codigoPrincipal = root.TryGetProperty("codigoPrincipal", out var codProp) ? codProp.GetString() ?? "" : "";
 
         if (string.IsNullOrWhiteSpace(raiz) || string.IsNullOrWhiteSpace(codigoPrincipal))
         {
-            Console.WriteLine("Campos 'Raiz' ou 'CodigoPrincipal' não encontrados ou inválidos no libra.json.");
+            Console.WriteLine("Campos 'raiz' ou 'codigoPrincipal' não encontrados ou inválidos no projeto.libra.json.");
             return;
         }
 
-        string caminho = Path.Combine(raiz, codigoPrincipal);
+        string caminhoCompleto = Path.GetFullPath(Path.Combine(raiz, codigoPrincipal));
 
-        if (!File.Exists(caminho))
+        if (!File.Exists(caminhoCompleto))
         {
-            Console.WriteLine($"Arquivo principal '{caminho}' não encontrado.");
+            Console.WriteLine($"Arquivo principal '{caminhoCompleto}' não encontrado.");
             return;
         }
 
-        string codigo = File.ReadAllText(caminho);
+        string codigo = File.ReadAllText(caminhoCompleto);
 
         var motor = new Libra.Motor.MotorLibra();
-        motor.Executar(codigo, codigoPrincipal, caminho);
+        motor.Executar(codigo, codigoPrincipal, Path.GetDirectoryName(caminhoCompleto) ?? "");
     }
 }
