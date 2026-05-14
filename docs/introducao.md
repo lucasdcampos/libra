@@ -4,7 +4,7 @@ Libra é uma linguagem de programação criada para facilitar o aprendizado de p
 convencionais.
 
 Ela é uma linguagem **interpretada**, isto é, precisa de um **interpretador** para funcionar. O Interpretador é um programa especial capaz de ler e executar códigos escritos em Libra.
-A implementação oficial do interpretador é atualmente escrita em C# e mantida em https://github.com/lucasdcampos/libra.
+A implementação oficial do interpretador é atualmente escrita em C# e mantida em https://github.com/linguagem-libra/libra.
 
 ## O que a Libra é capaz de criar?
 Essencialmente, qualquer programa pode ser escrito em Libra, porém ela foi criada com a intenção de ensinar programação a iniciantes e criar pequenas automações, sendo esta a área

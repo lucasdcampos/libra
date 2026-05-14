@@ -1,6 +1,6 @@
 /// Biblioteca padrão da Libra
 /// Arquivo: vetores.libra
-/// Libra é distribuída pela Licença MIT, veja https:///github.com/lucasdcampos/libra
+/// Libra é distribuída pela Licença MIT, veja https:///github.com/linguagem-libra/libra
 
 /// Função que gera uma progressão aritmética (PA) em forma de vetor.
 /// Parâmetros:

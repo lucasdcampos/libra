@@ -37,6 +37,21 @@ public class MotorLibra
         _interpretador = new Interpretador(flags);
     }
 
+    public void DefinirGlobal(string identificador, object valor)
+    {
+        _interpretador.Ambiente.DefinirGlobal(identificador, valor);
+    }
+
+    public object ObterGlobal(string identificador)
+    {
+        return _interpretador.Ambiente.ObterGlobal(identificador);
+    }
+
+    public void RegistrarFuncaoNativa(string nomeNoScript, Func<object[], object> funcaoCSharp)
+    {
+        _interpretador.Ambiente.RegistrarFuncaoNativa(nomeNoScript, funcaoCSharp);
+    }
+
     /// <summary>
     /// Executa um código em formato de string no ambiente do motor, utilizando o modo de execução configurado.
     /// Atualmente, apenas o modo de interpretação está implementado.
@@ -100,7 +115,7 @@ public class MotorLibra
             mensagemLog += $"Último Local Conhecido: {_interpretador?.LocalAtual}\n\n";
             mensagemLog += "EXCEÇÃO:\n";
             mensagemLog += ex.ToString();
-            mensagemLog += "\n\nPor favor, reporte este erro em: https://github.com/lucasdcampos/libra/issues/";
+            mensagemLog += "\n\nPor favor, reporte este erro em: https://github.com/linguagem-libra/libra/issues/";
             mensagemLog += "\nSe possível, anexe o script que causou este problema.";
 
             File.WriteAllText(logFile, mensagemLog);
@@ -117,7 +132,7 @@ public class MotorLibra
         Console.WriteLine("Isso não é um erro no seu código, mas sim um bug na linguagem.");
         Console.WriteLine($"\nUm log detalhado foi salvo em: {logFile}");
         Console.WriteLine("Por favor, ajude-nos a melhorar reportando este problema no GitHub.");
-        Console.WriteLine("Link: https://github.com/lucasdcampos/libra/issues/");
+        Console.WriteLine("Link: https://github.com/linguagem-libra/libra/issues/");
         Console.WriteLine($"\nVersão: {LibraUtil.VersaoAtual()}");
         Console.WriteLine("Encerrando a execução.\n");
     }

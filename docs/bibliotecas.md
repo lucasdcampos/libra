@@ -5,35 +5,49 @@ Uma biblioteca é um conjunto de código pré-escrito que pode ser reutilizado e
 As bibliotecas facilitam o desenvolvimento, fornecendo funções, constantes e outros recursos que podem ser importados para o código, economizando tempo e esforço.
 
 ## Como importar uma biblioteca?
-Na Libra, bibliotecas podem ser importadas utilizando a palavra-chave `importar` seguida pelo nome do arquivo contendo o código-fonte.
+Na Libra, bibliotecas podem ser importadas utilizando a palavra-chave `importar` seguida pelo nome do arquivo contendo o código-fonte (em aspas) ou o nome do módulo (sem aspas, se estiver no caminho de busca).
+
+### Aliases (Apelidos)
+Você pode usar a palavra-chave `como` para dar um nome mais curto ou conveniente para um módulo importado.
+
+**Exemplo:**
+```js
+importar "matematica.libra" como mat
+
+exibir(mat.PI)
+exibir(mat.raizq(64))
+```
 
 ## O que acontece ao importar uma biblioteca?
 Quando você importa um arquivo:
+1. O conteúdo do arquivo é processado e executado.
+2. Se você usou um apelido (`como`), os elementos ficam disponíveis dentro desse apelido (ex: `mat.funcao()`).
+3. Se você **não** usou um apelido, os elementos são injetados diretamente no seu escopo atual.
 
-O conteúdo do arquivo é "copiado" para dentro do programa no ponto onde o comando importar foi escrito.
-Todas as funções, variáveis e outros elementos definidos no arquivo importado ficam disponíveis para uso.
-
-**Exemplo:**
-Vamos supor que você tenha um arquivo `arquivo2.libra`, com o seguinte código:
+**Exemplo sem apelido:**
 ```js
-funcao exemplo()
-  exibir("Função do Arquivo 2")
+// arquivo: util.libra
+funcao teste()
+  exibir("Oi")
 fim
-```
-No seu arquivo principal, você pode fazer o seguinte:
-```js
-importar "arquivo2.libra"
 
-exibir("Estou no arquivo 1")
-exemplo() // Chamando uma função definida em "arquivo2.libra"
+// arquivo principal
+importar "util.libra"
+teste() // Chamada direta
 ```
-
-## Boas práticas ao usar bibliotecas
-**Organização:** Separe funcionalidades em arquivos diferentes para melhorar a legibilidade e manutenção. <br>
-**Evite conflitos:** Certifique-se de que os nomes de funções e variáveis não entrem em conflito entre o código principal e as bibliotecas. <br>
-**Importe apenas o necessário:** Evite carregar bibliotecas que não serão usadas no programa. <br>
 
 ## Biblioteca Padrão da Libra
-Na maioria das instalações, a Libra vem com uma biblioteca padrão com diversas funções que você pode usar, como funções matemáticas, funções para interagir com o sistema operacional, etc.
+A Libra vem com uma biblioteca padrão que não precisa ser instalada separadamente. Alguns módulos comuns incluem:
 
-Para mais informações, veja https://github.com/lucasdcampos/libra/blob/master/biblioteca/README.md
+- **`matematica`**: Funções matemáticas avançadas.
+- **`vetores`**: Utilidades para manipular listas.
+- **`tempo`**: Medição de tempo e datas.
+- **`sistema`**: Interação com arquivos e o sistema operacional.
+- **`json`**: Processamento de dados em formato JSON.
+
+Para mais detalhes sobre as funções de cada uma, consulte o [README da pasta biblioteca](https://github.com/linguagem-libra/libra/blob/master/biblioteca/README.md).
+
+## Boas práticas
+- **Organização**: Separe funcionalidades em arquivos diferentes.
+- **Evite conflitos**: Prefira sempre usar `como` para evitar que nomes de funções da biblioteca sobrescrevam as suas.
+- **Caminhos**: Scripts Libra procuram por arquivos no diretório atual, na pasta `biblioteca/` local e na pasta de instalação da linguagem.

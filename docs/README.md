@@ -10,6 +10,7 @@ Aqui você encontra toda a documentação da linguagem Libra. Para ver as pergun
 [Variáveis](variaveis.md)<br>
 [Controles de Fluxo](controles_de_fluxo.md)<br>
 [Funções](funcoes.md)<br>
+[Classes e Objetos](classes.md)<br>
 [Bibliotecas](bibliotecas.md)<br>
 
 ## Documentação para Contribuidores

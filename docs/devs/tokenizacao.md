@@ -1,79 +1,69 @@
 # Tokenização
-É o processo de transformar um arquivo com código-fonte de um programa Libra em partes menores chamadas de Tokens.
+É o processo de transformar o código-fonte de um programa Libra em partes menores chamadas de **Tokens**.
 
 ## Token
+Um Token representa o menor componente lógico da linguagem. Cada token carrega informações sobre seu tipo, sua localização no código-fonte e, opcionalmente, um valor literal.
+
 Definição de Token na Libra: (`Token.cs`)
 ```cs
 public class Token
 {
-    public Token(TokenTipo tipo, int linha, object valor = null)
+    public Token(TokenTipo tipo, LocalFonte local, object valor = null)
     {
         Tipo = tipo;
         Valor = valor;
-        Linha = linha;
+        Local = local;
     }
 
     public TokenTipo Tipo { get; private set; }
-    public object Valor { get; private set; }
-    public int Linha { get; private set; }
+    public object Valor { get; internal set; }
+    public LocalFonte Local { get; private set; }
 }
 ```
-Todo Token possui um Tipo, a Linha correspondente no código-fonte e opcionalmente um Valor.
 
-### Tipos de Token:
-`NumeroLiteral, CaractereLiteral, TextoLiteral, Vetor, Identificador, Nulo, TokenInvalido, OperadorSoma, OperadorSub, OperadorMult, OperadorDiv, OperadorPot, OperadorComparacao, OperadorDefinir, OperadorMaiorQue, OperadorMenorQue, OperadorMaiorIgualQue, OperadorMenorIgualQue, OperadorE, OperadorOu, OperadorOuExclusivo, OperadorDiferente, OperadorNeg, OperadorResto, AbrirParen, FecharParen, AbrirCol, FecharCol, AbrirChave, FecharChave, PontoEVirgula, Virgula, NovaLinha, FimDoArquivo, Var, Const, Funcao, Se, Senao, SenaoSe, Entao, Enquanto, repetir, Romper, Retornar, Fim`
+### LocalFonte
+Diferente das versões iniciais que guardavam apenas a linha, agora utilizamos a estrutura `LocalFonte`, que armazena:
+- **Arquivo**: Nome do arquivo de origem.
+- **Linha**: Número da linha onde o token foi encontrado.
+- **CaminhoCompleto**: Caminho absoluto para facilitar a resolução de imports.
 
-Alguns tokens necessitam de valor, enquanto outros não, por exemplo: Um Token de tipo `NumeroLiteral` deve possuir um valor, pois precisamos saber qual número em questão está associado a esse Token, enquanto um Token de tipo
-`AbrirChave` (`{`) não.
+### Tipos de Token
+A Libra possui uma vasta gama de tokens, incluindo literais, identificadores, operadores e palavras reservadas. Alguns exemplos:
+- **Literais**: `NumeroLiteral` (suporta decimais, binários `0b` e hexadecimais `0x`), `TextoLiteral`, `CaractereLiteral`.
+- **Palavras Reservadas**: `var`, `const`, `funcao`, `classe`, `se`, `enquanto`, `para cada`, `tentar`, `capturar`, `importar`, etc.
+- **Operadores**: Aritméticos (`+`, `-`, `*`, `/`, `%`, `^`), Lógicos (`e`, `ou`, `nao`), Comparação (`==`, `!=`, `>`, `<`, `>=`, `<=`).
 
-## Tokenizando um Arquivo (`Tokenizador.cs`)
+## O Tokenizador (`Tokenizador.cs`)
+O Tokenizador é responsável por percorrer o código caractere por caractere e agrupar esses caracteres em Tokens válidos.
+
 ```cs
-public List<Token> Tokenizar(string source) 
+public List<Token> Tokenizar()
+{
+    while (Atual() != '\0')
     {
-        PreTokenizar();
-
-        var texto = "";
-        try
-        {
-            while (Atual() != '\0')
-            {
-                if(char.IsDigit(Atual()))
-                {
-                    TokenizarNumero();
-                }
-
-                else if(char.IsLetter(Atual()) || Atual() == '_')
-                {
-                    TokenizarPalavra();
-                }
-                else 
-                {
-                    TokenizarSimbolo();
-                }
-            }
-        
-            AdicionarTokenALista(TokenTipo.FimDoArquivo);
-
-            return _tokens;
-        }
-        catch (Exception e)
-        {
-            Ambiente.ExibirErro(e);
-        }
-
-        return null;
+        if (char.IsDigit(Atual()))
+            TokenizarNumero();
+        else if (char.IsLetter(Atual()) || Atual() == '_')
+            TokenizarPalavra();
+        else
+            TokenizarSimbolo();
     }
-```
-O método `Tokenizar()` recebe uma string como argumento, que corresponde ao código-fonte que se deseja tokenizar, como por exemplo `exibir("Olá, Mundo!")`. Enquanto o Tokenizador não tiver percorrido todo o arquivo
-(encontrado um caractere de fim de arquivo), ele irá Tokenizar os caracteres específicos.
 
-Antes disso, há a etapa de `pré-tokenização`, responsável por importar arquivos externos ao código fonte (Quando o usuário usa `importar "arquivo.libra"`). Isso simplesmente copia tudo que está dentro do arquivo
-para o código final, não importando se a sintaxe é válida ou não.
+    AdicionarTokenALista(TokenTipo.FimDoArquivo);
+    return _tokens;
+}
+```
 
 ### Como a Tokenização funciona?
-Cada familia de Token será tokenizada de uma forma (números, palavras ou símbolos), mas todas seguem o mesmo princípio:
 
-Ir percorrendo o código-fonte caractere por caractere, fazendo checagens e tentando formar Tokens. No final do método `Tokenizar()`, uma `List<Token>` foi gerada e é retornada a quem o chamou.
+1.  **Números**: Se o caractere for um dígito, o método `TokenizarNumero` entra em ação. Ele consegue identificar se o número é um inteiro, um número real (com ponto), um binário (iniciado por `0b`) ou um hexadecimal (iniciado por `0x`). Underscores (`_`) são ignorados para facilitar a leitura de números grandes (ex: `1_000_000`).
+2.  **Palavras e Identificadores**: Se começar com uma letra ou underscore, o Tokenizador lê a palavra completa. Em seguida, verifica se essa palavra é uma **Palavra Reservada** (como `se` ou `funcao`). Se não for, ela é tratada como um **Identificador** (nome de variável ou função).
+3.  **Símbolos e Comentários**: Outros caracteres são processados como símbolos (parênteses, chaves, operadores). O Tokenizador também lida com:
+    - **Comentários de Linha**: Iniciados por `//`.
+    - **Comentários de Bloco**: Delimitados por `/* ... */`.
+    - **Strings**: Delimitadas por aspas duplas `"`.
 
-Essa lista então é passada ao Parser, veja [Parsing](parsing.md) para mais informações.
+### Tratamento de Espaços e Quebras de Linha
+Espaços em branco e quebras de linha são utilizados apenas para separar tokens e não geram tokens próprios (com exceção do controle interno de incremento do número da linha em `LocalFonte`).
 
+Essa lista de tokens gerada é então passada ao **Parser**, que organizará os tokens em uma Árvore de Sintaxe Abstrata (AST). Veja [Parsing](parsing.md) para mais informações.

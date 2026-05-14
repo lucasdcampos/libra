@@ -1,46 +1,57 @@
 [Documentação](README.md) -> [Instalação](#)
 
 # Instalação
-Para instalar Libra em seu computador, vá para https://linguagem-libra.github.io/ e escolha a versão correspondente ao seu sistema operacional.
+A Libra pode ser utilizada de duas formas: instalando localmente no seu sistema ou utilizando um container Docker (recomendado para testes rápidos).
 
-Você baixará um arquivo compactado, basta descompactar esse arquivo no local de preferência. O executável estará dentro da pasta
-extraída, **libra.exe** no caso de Windows e **libra** em Linux.
+## 1. Usando Docker (Recomendado)
+Se você tem o Docker instalado, pode rodar a Libra sem configurar o .NET nativamente:
 
-**Importante:**<br>
-Antes de executar o programa, verifique se você possui o Runtime do dotnet instalado. Em Windows, instale-o com:
-```ps1
-winget install Microsoft.DotNet.SDK.9
-```
-Caso não queira usar WinGet, baixe diretamente do site oficial da Microsoft https://dotnet.microsoft.com/pt-br/download/dotnet/8.0
+1. **Construa a imagem:**
+   ```bash
+   docker build -t libra .
+   ```
 
-Para testar se tudo está funcionando, abra o executável, você deverá ver uma tela de console aberta parecida com isso:
-```
-Bem-vindo à Libra 0.1.0.0
-Digite "ajuda", "licenca" ou uma instruçao.
+2. **Abra o REPL (Modo Interativo):**
+   ```bash
+   docker run -it --rm libra
+   ```
+
+3. **Rode um script local:**
+   ```bash
+   docker run --rm -v ${PWD}:/dados libra seu_script.libra
+   ```
+
+## 2. Instalação Local
+Para instalar a Libra nativamente:
+
+1. Vá para o repositório oficial no GitHub e baixe a versão correspondente ao seu sistema operacional.
+2. Descompacte o arquivo. O executável será **libra.exe** (Windows) ou **libra** (Linux/macOS).
+
+### Pré-requisitos
+Antes de executar, você precisa do **.NET 9 Runtime** instalado.
+- **Windows**: `winget install Microsoft.DotNet.SDK.9`
+- **Geral**: Baixe em [dotnet.microsoft.com](https://dotnet.microsoft.com/download/dotnet/9.0)
+
+### Testando a Instalação
+Abra o terminal e execute `./libra`. Você deverá ver:
+```text
+Bem-vindo à Libra 0.1.1
+Digite "ajuda", "licenca" ou uma instrução.
 >>>
 ```
-Caso isso não acontecer, tente executar o programa pelo terminal, use `./libra` e veja se algum erro aparece na tela. O mais comum é problemas ao tentar
-encontrar as bibliotecas, que devem ser carregadas junto com o Interpretador.
 
-Se você conseguir abrir o programa sem problemas, pode avançar ao próximo passo.
+## Adicionando Libra ao PATH
+Para facilitar o uso, adicione o diretório do executável às variáveis de ambiente do seu sistema.
 
-## Adicionando Libra ao PATH do Sistema (Variáveis de Ambiente)
-Libra foi projetada para ser chamada principalmente de um terminal, e para o processo ficar mais conveniente, precisamos adicionar o caminho do executável nas variáveis
-de ambiente do sistema.
-
-Em Windows, abra o PowerShell e digite:
+**Windows (PowerShell):**
 ```ps1
-[Environment]::SetEnvironmentVariable("Path", $([Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Machine) + ";C:\Caminho\Do\Diretorio"), [System.EnvironmentVariableTarget]::Machine)
+[Environment]::SetEnvironmentVariable("Path", $([Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::Machine) + ";C:\Caminho\Para\Libra"), [System.EnvironmentVariableTarget]::Machine)
 ```
 
-Em Linux, use: (substitua *.bashrc* pelo seu Shell de preferência)
-```sh
-echo 'export PATH=$PATH:/caminho/do/diretorio' >> ~/.bashrc
+**Linux/macOS:**
+```bash
+echo 'export PATH=$PATH:/caminho/para/libra' >> ~/.bashrc
 source ~/.bashrc
 ```
-
-## Testando se tudo ocorreu bem
-Abra um novo terminal, e digite apenas `libra`, isso deve abrir a mesma tela de Console que aparece quando se abre o executável diretamente. Agora sempre que
-quiser chamar a Libra, basta digitar `libra` no terminal, muito mais prático.
 
 Próximo Capítulo: [Interpretador](interpretador.md)

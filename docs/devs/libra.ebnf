@@ -3,38 +3,59 @@ programa                ::= instrucao*
 instrucao               ::= inst_decl_var
                           | inst_decl_func
                           | inst_decl_classe
-                          | inst_atrib_var
+                          | inst_atrib
                           | inst_atrib_indice
                           | inst_se
                           | inst_enquanto
+                          | inst_para_cada
                           | inst_romper
                           | inst_continuar
                           | inst_retornar
+                          | inst_tentar
+                          | inst_importar
                           | expr
 
 bloco                   ::= instrucao* "fim"
 
-inst_decl_var           ::= ("var" | "const") ident (":" tipo)? "=" expr
+inst_decl_var           ::= ("var" | "const") ident (":" tipo)? ("=" expr)?
 
 inst_decl_classe        ::= "classe" ident (inst_decl_var | inst_decl_func)* "fim"
 
-inst_decl_func          ::= "funcao" ident "(" (ident ("," ident)*)? ")" ("-->" tipo)? bloco
+inst_decl_func          ::= "funcao" ident "(" (param ("," param)*)? ")" (":" tipo)? instrucao* "fim"
+
+param                   ::= ident (":" tipo)?
 
 tipo                    ::= "Objeto" | "Int" | "Real" | "Texto" | "Vetor" | ident
 
-inst_atrib_var          ::= ident "=" expr
+inst_atrib              ::= (ident | expr_propriedade) "=" expr
 
 inst_atrib_indice       ::= ident "[" expr "]" "=" expr
 
-inst_se                 ::= "se" expr "entao" instrucao* (senao_se*)? "fim"
+inst_se                 ::= "se" expr "entao" instrucao* (senao_se*)? (senao)? "fim"
 
 senao_se                ::= "senao" "se" expr "entao" instrucao*
 
-inst_enquanto           ::= "enquanto" expr "repetir" bloco
+senao                   ::= "senao" instrucao*
 
-expr                    ::= expr_lit | expr_var | expr_indice | expr_chamada | expr_unaria | expr_bin | construir_vetor
+inst_enquanto           ::= "enquanto" expr "repetir" instrucao* "fim"
 
-expr_lit                ::= int | real | texto
+inst_para_cada          ::= "para" "cada" ident "em" expr instrucao* "fim"
+
+inst_tentar             ::= "tentar" instrucao* "capturar" ("(" ident ")")? instrucao* "fim"
+
+inst_importar           ::= "importar" (texto | ident_com_pontos) ("como" ident)?
+
+ident_com_pontos        ::= ident ("." ident)*
+
+expr                    ::= expr_precedencia
+
+expr_precedencia        ::= expr_bin | expr_unaria | primaria
+
+expr_unaria             ::= ("-" | "!") expr
+
+primaria                ::= expr_lit | expr_var | expr_indice | expr_chamada | expr_propriedade | expr_chamada_metodo | construir_vetor | expr_paren
+
+expr_lit                ::= int | real | texto | "Nulo"
 
 expr_var                ::= ident
 
@@ -42,9 +63,9 @@ expr_indice             ::= ident "[" expr "]"
 
 expr_chamada            ::= ident "(" (expr ("," expr)*)? ")"
 
-expr_unaria             ::= (- | !) expr
+expr_propriedade        ::= primaria "." ident
 
-expr_bin                ::= expr op_bin expr
+expr_chamada_metodo     ::= primaria "." ident "(" (expr ("," expr)*)? ")"
 
 expr_paren              ::= "(" expr ")"
 
@@ -54,7 +75,7 @@ op_bin                  ::= "+" | "-" | "*" | "/" | "^" | "%" | "e" | "ou" | ">"
 
 ident                   ::= letra (letra | digito | "_")*
 
-int                     ::= digito+
+int                     ::= digito+ | "0b" [01]+ | "0x" [0-9a-fA-F]+
 
 real                    ::= digito+ "." digito+
 

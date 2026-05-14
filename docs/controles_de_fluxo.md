@@ -18,11 +18,11 @@ senao
 fim
 ```
 **Descrição**
-- expressao: Uma condição que avalia para verdadeiro ou falso (Qualquer valor diferente de zero é considerado verdadeiro).
-- entao: Marca o início do bloco de instruções a ser executado caso a condição seja verdadeira.
-- senao se: Avalia outra condição se as anteriores forem falsas.
-- senao: Executa um bloco de código caso nenhuma das condições anteriores seja verdadeira.
-- fim: Indica o final do controle condicional.
+- **expressao**: Uma condição que avalia para verdadeiro ou falso (Qualquer valor diferente de zero é considerado verdadeiro).
+- **entao**: Marca o início do bloco de instruções a ser executado caso a condição seja verdadeira.
+- **senao se**: Avalia outra condição se as anteriores forem falsas.
+- **senao**: Executa um bloco de código caso nenhuma das condições anteriores seja verdadeira.
+- **fim**: Indica o final do controle condicional.
 
 ## Laço (`enquanto`)
 O comando `enquanto` permite repetir um bloco de código enquanto uma condição for verdadeira.
@@ -36,8 +36,39 @@ fim
 // Resultado: Mostra 0, 1, 2, 3, 4 na tela.
 ```
 **Descrição:**
-- expressao: Uma condição que é avaliada antes de cada iteração. Se for falso, o laço é encerrado.
-- repetir: Marca o início do bloco de instruções a ser repetido.
-- fim: Indica o final do laço.
+- **expressao**: Uma condição que é avaliada antes de cada iteração. Se for falso, o laço é encerrado.
+- **repetir**: Marca o início do bloco de instruções a ser repetido.
+- **fim**: Indica o final do laço.
+
+## Iteração em Vetores (`para cada`)
+O comando `para cada` facilita percorrer todos os elementos de um vetor (lista).
+
+**Exemplo:**
+```js
+var frutas = {"Maçã", "Banana", "Uva"}
+para cada f em frutas
+    exibir("Eu gosto de: " + f)
+fim
+```
+**Descrição:**
+- **identificador**: O nome da variável temporária que receberá o valor de cada item em cada volta do laço.
+- **em**: Indica qual vetor será percorrido.
+- **fim**: Indica o final do laço.
+
+## Tratamento de Erros (`tentar / capturar`)
+O bloco `tentar` permite capturar erros que ocorrem durante a execução do programa e tratá-los de forma elegante, evitando que o programa "quebre" inesperadamente.
+
+**Exemplo:**
+```js
+tentar
+    var resultado = 10 / 0
+capturar(erro)
+    exibir("Ocorreu um erro: " + erro)
+fim
+```
+**Descrição:**
+- **tentar**: Inicia o bloco de código que pode vir a falhar.
+- **capturar(identificador)**: Se um erro ocorrer no bloco `tentar`, a execução pula para cá. O `identificador` recebe a mensagem do erro.
+- **fim**: Indica o final do bloco de tratamento.
 
 Próximo Capítulo: [Funções](funcoes.md)

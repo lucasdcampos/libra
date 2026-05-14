@@ -39,7 +39,7 @@ public static class Comandos
     internal static void MostrarLicenca()
     {
         Console.WriteLine("MIT License - Copyright 2024 - 2025 Lucas M. Campos");
-        Console.WriteLine("Acesse https://github.com/lucasdcampos/libra para mais detalhes");
+        Console.WriteLine("Acesse https://github.com/linguagem-libra/libra para mais detalhes");
     }
 
     internal static void IniciarProjeto(List<string> args)
