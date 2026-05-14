@@ -1,0 +1,28 @@
+// Testes da Biblioteca Padrão
+
+importar "matematica.libra" como mat
+importar "vetores.libra" como vet
+
+funcao testarMatematica()
+    exibir("  - Biblioteca: Matematica")
+    se mat.raizq(81) != 9 entao erro("Erro em mat.raizq") fim
+    se mat.abs(-10) != 10 entao erro("Erro em mat.abs") fim
+    se mat.hipotenusa(3, 4) != 5 entao erro("Erro em mat.hipotenusa") fim
+    se 2 ^ 3 != 8 entao erro("Erro em operador '^'") fim
+fim
+
+funcao testarVetores()
+    exibir("  - Biblioteca: Vetores")
+    var v = {3, 1, 2}
+    var rev = vet.reverter(v)
+    se rev[0] != 2 ou rev[2] != 3 entao erro("Erro em vet.reverter") fim
+    
+    var incluído = vet.incluir(v, 4)
+    se tamanho(incluído) != 4 entao erro("Erro em vet.incluir") fim
+fim
+
+funcao executar()
+    exibir("Testando Biblioteca Padrão:")
+    testarMatematica()
+    testarVetores()
+fim

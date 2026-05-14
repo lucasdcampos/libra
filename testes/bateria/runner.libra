@@ -1,0 +1,35 @@
+// Runner principal da bateria de testes
+
+exibir("========================================")
+exibir("   INICIANDO BATERIA DE TESTES LIBRA   ")
+exibir("========================================")
+
+importar "core/testes_core.libra" como core
+importar "objetos/testes_objetos.libra" como objetos
+importar "biblioteca/testes_biblioteca.libra" como bib
+importar "tempo.libra"
+
+var inicio = tempo.agora()
+
+tentar
+    core.executar()
+    exibir("")
+    objetos.executar()
+    exibir("")
+    bib.executar()
+    exibir("")
+capturar(err)
+    exibir("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    exibir("   FALHA DETECTADA NA BATERIA DE TESTES ")
+    exibir("   Erro: " + err)
+    exibir("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    sair(1)
+fim
+
+var momentoFim = tempo.agora()
+var duracao = momentoFim - inicio
+
+exibir("========================================")
+exibir("   TESTES CONCLUÍDOS COM SUCESSO!      ")
+exibir("   Tempo total: " + texto(duracao) + "ms")
+exibir("========================================")

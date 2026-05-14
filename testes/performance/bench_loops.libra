@@ -1,0 +1,24 @@
+// Benchmark de Loops e Aritmética Simples
+importar "tempo.libra"
+
+funcao rodar(iteracoes: Int)
+    exibir("  - Rodando benchmark de loops (" + texto(iteracoes) + " iterações)...")
+    var inicio = tempo.agora()
+    
+    var i = 0
+    var soma = 0
+    enquanto i < iteracoes repetir
+        soma = soma + i
+        i = i + 1
+    fim
+    
+    var momentoFim = tempo.agora()
+    var duracao = momentoFim - inicio
+    exibir("    Concluído em: " + texto(duracao) + "ms (Soma: " + texto(soma) + ")")
+fim
+
+funcao executar()
+    exibir("Benchmark: Loops e Aritmética")
+    rodar(100000)
+    rodar(1000000)
+fim

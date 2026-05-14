@@ -1,0 +1,44 @@
+// Testes de POO e Funções
+
+classe Pessoa
+    var nome: Texto
+    var idade: Int
+    
+    funcao Pessoa(n: Texto, i: Int)
+        auto.nome = n
+        auto.idade = i
+    fim
+    
+    funcao saudar(): Texto
+        retornar "Olá, meu nome é " + auto.nome
+    fim
+fim
+
+funcao testarClasses()
+    exibir("  - Classes e Instanciação")
+    var p = Pessoa("Lucas", 25)
+    se p.nome != "Lucas" entao erro("Erro em propriedade de classe") fim
+    se p.saudar() != "Olá, meu nome é Lucas" entao erro("Erro em método de classe") fim
+    
+    p.idade = 26
+    se p.idade != 26 entao erro("Erro em modificação de propriedade") fim
+fim
+
+funcao fib(n: Int): Int
+    se n <= 1 entao retornar n fim
+    retornar fib(n-1) + fib(n-2)
+fim
+
+funcao testarFuncoes()
+    exibir("  - Funções e Recursividade")
+    se fib(10) != 55 entao erro("Erro em função recursiva") fim
+    
+    var f = fib
+    se f(5) != 5 entao erro("Erro em função como variável") fim
+fim
+
+funcao executar()
+    exibir("Testando Objetos e Funções:")
+    testarClasses()
+    testarFuncoes()
+fim

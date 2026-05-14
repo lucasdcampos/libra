@@ -1,9 +1,0 @@
-var x = 3
-
-se x == 1 entao
-    exibir("a")
-senao se x == 2 entao
-    exibir("b")
-senao
-    exibir("c")
-fim
