@@ -1,6 +1,6 @@
 // Biblioteca padrão da Libra
 // Arquivo: matematica.libra
-// Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
+// Libra é distribuída pela Licença MIT, veja https://github.com/linguagem-libra/libra
 
 __ativarmodulo__("matematica") // chamado internamente
 

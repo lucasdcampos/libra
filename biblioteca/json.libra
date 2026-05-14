@@ -1,6 +1,6 @@
 // Biblioteca padrão da Libra
 // Arquivo: json.libra
-// Libra é distribuída pela Licença MIT, veja https://github.com/lucasdcampos/libra
+// Libra é distribuída pela Licença MIT, veja https://github.com/linguagem-libra/libra
 
 // Ativa o módulo internamente
 __ativarmodulo__("json")
