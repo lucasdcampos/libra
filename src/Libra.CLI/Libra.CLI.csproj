@@ -16,4 +16,12 @@
     <ProjectReference Include="..\Libra\Libra.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\biblioteca\**\*.*">
+      <Link>biblioteca\%(RecursiveDir)%(FileName)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

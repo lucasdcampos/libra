@@ -12,6 +12,7 @@ public class Tokenizador
     private string _fonte;
     private List<Token> _tokens = new();
     private HashSet<string> _arquivosImportados = new();
+    private List<string> _caminhosExtras = new();
     private LocalFonte _local;
     private Dictionary<string, TokenTipo> _palavrasReservadas = new Dictionary<string, TokenTipo>
     {
@@ -33,6 +34,8 @@ public class Tokenizador
         { "capturar", TokenTipo.Capturar },
         { "entao", TokenTipo.Entao },
         { "fim", TokenTipo.Fim },
+        { "importar", TokenTipo.Importar },
+        { "como", TokenTipo.Como },
         { "nulo", TokenTipo.Nulo },
         { "ou", TokenTipo.OperadorOu },
         { "e", TokenTipo.OperadorE },
@@ -40,11 +43,12 @@ public class Tokenizador
         { "nao", TokenTipo.OperadorNeg }
     };
 
-    public Tokenizador(string fonte, string nomeArquivo = "", string caminho = "")
+    public Tokenizador(string fonte, string nomeArquivo = "", string caminho = "", List<string> caminhosExtras = null)
     {
         _fonte = fonte.ReplaceLineEndings("\n");
         _local = new LocalFonte(caminho, nomeArquivo, 1);
         _posicao = 0;
+        _caminhosExtras = caminhosExtras ?? new List<string>();
     }
 
     public List<Token> Tokenizar()
@@ -202,36 +206,6 @@ public class Tokenizador
         var buffer = new StringBuilder();
 
         buffer.Append(TokenizarIdentificador());
-        
-        if(buffer.ToString() == "importar")
-        {
-            ConsumirEspacos();
-
-            if(Atual() != '"')
-            {
-                var arquivo = TokenizarIdentificador();
-                if(string.IsNullOrEmpty(arquivo))
-                    throw new Erro("Esperado `\"`", _local);
-                ImportarArquivo(arquivo + ".libra");
-                return;
-            }
-            
-            ConsumirChar(); // Consumindo `"`
-            var caminhoArquivo = new StringBuilder();
-
-            while(Atual() != '"')
-            {
-                if(Atual() == '\n' || ConsumirEspacos() != 0)
-                    throw new Erro("Esperado `\"`", _local);
-
-                caminhoArquivo.Append(ConsumirChar());
-            }
-            ConsumirChar(); // Consumindo `"`
-
-            ImportarArquivo(caminhoArquivo.ToString());
-
-            return;
-        }
         
         if (_palavrasReservadas.ContainsKey(buffer.ToString()))
         {
@@ -499,32 +473,69 @@ public class Tokenizador
         if (_arquivosImportados.Contains(caminho))
             return;
 
-        string arquivoCompleto = Path.Combine(_local.CaminhoCompleto, caminho);
+        string arquivoCompleto = EncontrarCaminhoBiblioteca(caminho);
 
-        if (!File.Exists(arquivoCompleto))
+        if (arquivoCompleto == null)
         {
-            string appDataPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Libra", caminho);
-
-            if (File.Exists(appDataPath))
-            {
-                arquivoCompleto = appDataPath;
-            }
-            else
-            {
-                throw new ErroAcessoNulo($" Arquivo '{caminho}' não encontrado.");
-            }
+            throw new ErroAcessoNulo($" Arquivo '{caminho}' não encontrado.");
         }
 
         _arquivosImportados.Add(caminho);
 
         string codigoArquivo = File.ReadAllText(arquivoCompleto).ReplaceLineEndings("\n");
 
-        var novosTokens = new Tokenizador(codigoArquivo, caminho, arquivoCompleto).Tokenizar();
+        var novosTokens = new Tokenizador(codigoArquivo, caminho, arquivoCompleto, _caminhosExtras).Tokenizar();
 
         for (int i = 0; i < novosTokens.Count - 1; i++)
         {
             _tokens.Add(novosTokens[i]);
         }
+    }
+
+    private string EncontrarCaminhoBiblioteca(string caminho)
+    {
+        var caminhosBusca = new List<string>
+        {
+            _local.CaminhoCompleto,                                          // 1. Mesmo diretório
+            Path.Combine(_local.CaminhoCompleto, "biblioteca"),              // 2. Subpasta 'biblioteca'
+        };
+
+        // 3. Pasta 'pacotes' local e suas subpastas (Gerenciador de Pacotes)
+        string pastaPacotes = Path.Combine(Directory.GetCurrentDirectory(), "pacotes");
+        if (Directory.Exists(pastaPacotes))
+        {
+            caminhosBusca.Add(pastaPacotes);
+            // Adiciona subpastas imediatas (ex: pacotes/lib-http/)
+            foreach (var subDir in Directory.GetDirectories(pastaPacotes))
+            {
+                caminhosBusca.Add(subDir);
+            }
+        }
+
+        // 4. Pasta 'biblioteca' no diretório pai
+        DirectoryInfo parent = Directory.GetParent(_local.CaminhoCompleto);
+        if (parent != null)
+        {
+            caminhosBusca.Add(Path.Combine(parent.FullName, "biblioteca"));
+        }
+
+        // 4. Caminhos extras definidos via opções/CLI
+        caminhosBusca.AddRange(_caminhosExtras);
+
+        // 5. Diretório do executável
+        caminhosBusca.Add(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "biblioteca"));
+
+        // 6. AppData (global)
+        caminhosBusca.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Libra"));
+
+        foreach (var dir in caminhosBusca)
+        {
+            if (string.IsNullOrEmpty(dir)) continue;
+            string fullPath = Path.Combine(dir, caminho);
+            if (File.Exists(fullPath)) return fullPath;
+        }
+
+        return null;
     }
 
     public void PrintarListaTokens()

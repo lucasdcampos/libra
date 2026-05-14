@@ -76,5 +76,10 @@ namespace Libra.Motor
 
         public bool ModoSeguro { get; set; } = false;
         public bool PermitirEntrada { get; set; } = true;
+
+        /// <summary>
+        /// Lista de caminhos adicionais onde o interpretador deve procurar por bibliotecas importadas.
+        /// </summary>
+        public List<string> CaminhosBiblioteca { get; set; } = new List<string>();
     }
 }

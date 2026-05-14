@@ -8,12 +8,14 @@ namespace Libra.Runtime
         public Parametro[] Parametros;
         public string TipoRetorno;
         public string Identificador { get; }
-        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto") : base("Func", new Variavel[0])
+        public Ambiente? AmbienteDefinicao;
+        public Funcao(string ident, Instrucao[] instrucoes, Parametro[] parametros, string tipoRetorno = "Objeto", Ambiente? ambiente = null) : base("Func", new Variavel[0])
         {
             Instrucoes = instrucoes;
             Parametros = parametros;
             TipoRetorno = tipoRetorno;
             Identificador = ident;
+            AmbienteDefinicao = ambiente;
         }
 
         public override LibraInt Igual(LibraObjeto outro)

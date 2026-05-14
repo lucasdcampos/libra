@@ -4,9 +4,12 @@ using Libra.Motor;
 public class Repl
 {
     private readonly OpcoesMotorLibra _opcoesMotorBase;
+    private readonly MotorLibra _motor;
+
     public Repl(OpcoesMotorLibra opcoesMotor)
     {
         _opcoesMotorBase = opcoesMotor;
+        _motor = new MotorLibra(_opcoesMotorBase);
     }
 
     public void ExecutarLoop()
@@ -45,19 +48,21 @@ public class Repl
             // Se não for um comando interno, tenta executar como código Libra
             try
             {
-                var motor = new MotorLibra(_opcoesMotorBase);
-                var resultado = motor.Executar($"exibir({linha})"); // TODO: Melhorar isso 
+                // Tenta executar a linha e captura o resultado
+                var resultado = _motor.Executar(linhaProcessada);
                 
-                if (resultado != null)
+                // Se o resultado tiver um valor (não for uma instrução pura como 'var')
+                // e não for Nulo, exibe para o usuário
+                if (resultado != null && resultado.Valor != null)
                 {
-                    //Console.WriteLine(resultado.Valor ?? "Nulo"); // TODO: Melhorar saída
+                    Console.WriteLine(resultado.Valor);
                 }
             }
             catch (Exception e)
             {
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                Console.Error.WriteLine("Ocorreu um erro inesperado:");
-                Console.Error.WriteLine(e.ToString());
+                Console.Error.WriteLine("Ocorreu um erro ao processar a instrução:");
+                Console.Error.WriteLine(e.Message);
                 Console.ResetColor();
             }
         }

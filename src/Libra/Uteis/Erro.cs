@@ -4,9 +4,10 @@ namespace Libra;
 
 public enum ErroCategoria
 {
-    Erro, // Erro Genérico
-    ErroSintaxe,
-    ErroExecucao
+    Erro,
+    Sintaxe,
+    Execucao,
+    Sistema
 }
 
 public class Erro : Exception
@@ -16,6 +17,7 @@ public class Erro : Exception
     public LocalFonte Local { get; protected set; }
     public ErroCategoria Categoria { get; protected set; }
     protected string dica;
+
     public Erro(string mensagem, LocalFonte local = new LocalFonte(), int codigo = 1, string dica = "")
     {
         Codigo = codigo;
@@ -39,56 +41,45 @@ public class Erro : Exception
     public void ExibirFormatado()
     {
         Console.ForegroundColor = ConsoleColor.Red;
-        
-        Console.WriteLine(Categoria.ToString()+"", ": ");
+        Console.Write($"{Categoria} [L{Codigo}]: ");
         Console.ResetColor();
         Console.WriteLine(Mensagem);
-        Console.WriteLine(string.IsNullOrEmpty(Local.Arquivo) ? "" : $"  Arquivo \"{Local.Arquivo}\", linha {Local.Linha}");
 
-        // TODO: Reabilitar call stack
-        
-        //string callStack =  Ambiente.Pilha.ObterCallStack();
-        //Console.WriteLine(string.IsNullOrEmpty(callStack) ? "\n": $"  Pilha de Chamadas:\n{callStack}");
-
-        if(!String.IsNullOrEmpty(dica))
+        if (!string.IsNullOrEmpty(Local.Arquivo))
         {
-            Console.ForegroundColor = ConsoleColor.DarkCyan;
-            Console.WriteLine("Dica:", " ");
-            Console.ResetColor();
-            Console.WriteLine(dica.Replace("\n", "\n      ")+"\n");
+            Console.WriteLine($"  No arquivo: {Local.Arquivo}");
+            Console.WriteLine($"  Na linha: {Local.Linha}");
         }
-        
+
+        if (!string.IsNullOrEmpty(dica))
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("Dica: ");
+            Console.ResetColor();
+            Console.WriteLine(dica);
+        }
+        Console.WriteLine();
     }
     
     private void AtribuirCategoria()
     {
         if (Codigo >= 1000 && Codigo < 2000)
-            Categoria = ErroCategoria.ErroSintaxe;
+            Categoria = ErroCategoria.Sintaxe;
         else if (Codigo >= 2000 && Codigo < 3000)
-            Categoria = ErroCategoria.ErroExecucao;
+            Categoria = ErroCategoria.Execucao;
+        else if (Codigo >= 3000)
+            Categoria = ErroCategoria.Sistema;
         else
-            Categoria = ErroCategoria.Erro; // Genérico
+            Categoria = ErroCategoria.Erro;
     }
 
     public override string ToString()
     {
-        if (Local.Linha == 0)
-            //Local = Interpretador.LocalAtual TODO: Arrumar!;
-            Local = new LocalFonte();
-
-        string msg = "";
-        string categoria = $"{Categoria}: ";
-
-        msg += categoria;
-
-        if(Local.Linha == 0 || string.IsNullOrEmpty(Local.Arquivo))
-            msg += $"{Mensagem}";
-        else
-            msg +=$"{Mensagem}\n--> `{Local.Arquivo}`, Linha: {Local.Linha}";
-        
-        msg += String.Concat(Enumerable.Repeat(' ', categoria.Length));
-
-        return msg;
+        string localStr = (Local.Linha > 0 && !string.IsNullOrEmpty(Local.Arquivo)) 
+            ? $" em {Local.Arquivo}:{Local.Linha}" 
+            : "";
+        return $"{Categoria} [L{Codigo}]: {Mensagem}{localStr}";
     }
 }
 
@@ -191,4 +182,22 @@ public class ErroEsperadoNArgumentos : Erro
         : base(2012, $"{ident}() esperava: {esperado} argumento(s), mas recebeu {recebido}.", local, dica) 
         { 
         }
+}
+
+public class ErroIdentificadorInvalido : Erro
+{
+    public ErroIdentificadorInvalido(string identificador, LocalFonte local = new LocalFonte(), string dica = "Identificadores devem começar com letra ou '_' e conter apenas letras, números ou '_'.") 
+        : base(1003, $"Identificador inválido: `{identificador}`", local, dica) { }
+}
+
+public class ErroImportacao : Erro
+{
+    public ErroImportacao(string caminho, LocalFonte local = new LocalFonte(), string dica = "Verifique se o arquivo existe e se o caminho está correto.") 
+        : base(2013, $"Não foi possível importar o módulo '{caminho}'.", local, dica) { }
+}
+
+public class ErroOperadorInvalido : Erro
+{
+    public ErroOperadorInvalido(string operador, LocalFonte local = new LocalFonte(), string dica = "Verifique se o operador é válido para os tipos de dados utilizados.") 
+        : base(2014, $"Operador '{operador}' não é válido ou não foi implementado para estes tipos.", local, dica) { }
 }

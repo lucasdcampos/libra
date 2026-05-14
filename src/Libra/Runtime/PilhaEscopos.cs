@@ -21,6 +21,16 @@ public class PilhaDeEscopos
             throw new ErroTransbordoDePilha();
     }
 
+    public bool VariavelExiste(string identificador)
+    {
+        for (int i = 0; i < escopos.Count; i++)
+        {
+            if (escopos.ElementAt(i).VariavelExiste(identificador))
+                return true;
+        }
+        return false;
+    }
+
     // Remove o escopo atual da pilha, caso não seja o global
     public void DesempilharEscopo()
     {
@@ -47,6 +57,11 @@ public class PilhaDeEscopos
             sb.Append($"    {e.Nome} ({e.Local})\n");
         }
         return sb.ToString();
+    }
+
+    public Escopo ObterEscopoGlobal()
+    {
+        return escopos.Last();
     }
 
     // Busca uma variável, começando pelo escopo mais interno até o global

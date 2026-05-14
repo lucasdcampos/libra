@@ -8,7 +8,7 @@ public class MotorLibra
     private readonly OpcoesMotorLibra _opcoes;
     private Tokenizador _tokenizador;
     private Parser _parser;
-    private Interpretador? _interpretador;
+    private Interpretador _interpretador;
 
     /// <summary>
     /// Inicializa uma nova instância do MotorLibra com opções padrão.
@@ -17,6 +17,7 @@ public class MotorLibra
     public MotorLibra()
     {
         _opcoes = new OpcoesMotorLibra();
+        InicializarInterpretador();
     }
 
     /// <summary>
@@ -27,6 +28,13 @@ public class MotorLibra
     public MotorLibra(OpcoesMotorLibra opcoes)
     {
         _opcoes = opcoes;
+        InicializarInterpretador();
+    }
+
+    private void InicializarInterpretador()
+    {
+        var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
+        _interpretador = new Interpretador(flags);
     }
 
     /// <summary>
@@ -39,13 +47,12 @@ public class MotorLibra
     {
         try
         {
-            _tokenizador = new Tokenizador(codigo, arquivo, caminho);
+            _interpretador.LimparSaida();
+            _tokenizador = new Tokenizador(codigo, arquivo, caminho, _opcoes.CaminhosBiblioteca);
             var tokens = _tokenizador.Tokenizar();
-            _parser = new Parser(tokens.ToArray());
+            _parser = new Parser(tokens.ToArray(), _opcoes.ModoEstrito);
             var programa = _parser.Parse();
             
-            var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
-            _interpretador = new Interpretador(flags);
             _interpretador.VisitarPrograma(programa);
             
         }
@@ -53,9 +60,9 @@ public class MotorLibra
         {
             e.ExibirFormatado();
 
-            if (_opcoes.NivelDebug > 0)
+            if (_opcoes.NivelDebug > NivelDebugDetalhe.Nenhum)
             {
-                Console.WriteLine($"Pilha de Chamadas: {e.StackTrace}");
+                Console.WriteLine($"[DEBUG] StackTrace: {e.StackTrace}");
             }
         }
         catch (ExcecaoSaida)
@@ -64,30 +71,54 @@ public class MotorLibra
         }
         catch (Exception ex)
         {
-            string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-            string logFile = Path.Combine(logsDir, $"erro-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+            LogarErroInterno(ex);
+        }
 
+        object? valorSaida = null;
+        try {
+            valorSaida = _interpretador?.Saida?.ObterValor();
+        } catch {}
+
+        return new LibraResultado(valorSaida, "");
+    }
+
+    private void LogarErroInterno(Exception ex)
+    {
+        string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+        string logFile = Path.Combine(logsDir, $"erro-interno-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+
+        try
+        {
             if (!Directory.Exists(logsDir))
             {
                 Directory.CreateDirectory(logsDir);
             }
 
-            string mensagemLog = "Ocorreu um erro interno na Libra, veja a descrição para mais detalhes:\n";
-            mensagemLog += "Versão: Libra 1.0.0-Beta\n";
-            mensagemLog += $"Ultima local do Script Libra executada: {_interpretador.LocalAtual}\n";
-            mensagemLog += $"Problema:\n{ex.ToString()}\n";
-            mensagemLog += "Por favor reportar em https://github.com/lucasdcampos/libra/issues/ (se possível incluir script que causou o problema)\n";
+            string mensagemLog = "=== ERRO INTERNO DA LIBRA ===\n";
+            mensagemLog += $"Data/Hora: {DateTime.Now}\n";
+            mensagemLog += $"Versão Engine: {LibraUtil.VersaoAtual()}\n";
+            mensagemLog += $"Último Local Conhecido: {_interpretador?.LocalAtual}\n\n";
+            mensagemLog += "EXCEÇÃO:\n";
+            mensagemLog += ex.ToString();
+            mensagemLog += "\n\nPor favor, reporte este erro em: https://github.com/lucasdcampos/libra/issues/";
+            mensagemLog += "\nSe possível, anexe o script que causou este problema.";
 
             File.WriteAllText(logFile, mensagemLog);
-
-            Console.WriteLine("\nHouve um problema, mas não foi culpa sua :(");
-            Console.WriteLine($"Uma descrição do erro foi salva em: {logFile}");
-            Console.WriteLine("Por favor reportar em https://github.com/lucasdcampos/libra/issues/");
-            Console.WriteLine($"Versão: Libra {LibraUtil.VersaoAtual()}"); // TODO: Não deixar a versão hardcoded dessa forma
-            Console.WriteLine("\nImpossível continuar, encerrando a execução do programa.\n");
+        }
+        catch (Exception logEx)
+        {
+            Console.WriteLine($"[CRÍTICO] Falha ao salvar log de erro: {logEx.Message}");
         }
 
-        // TODO: ?
-        return new LibraResultado(_interpretador.Saida.ObterValor(), "");
+        Console.ForegroundColor = ConsoleColor.Magenta;
+        Console.WriteLine("\n[ERRO DE SISTEMA]");
+        Console.ResetColor();
+        Console.WriteLine("Ocorreu um problema interno no motor da Libra.");
+        Console.WriteLine("Isso não é um erro no seu código, mas sim um bug na linguagem.");
+        Console.WriteLine($"\nUm log detalhado foi salvo em: {logFile}");
+        Console.WriteLine("Por favor, ajude-nos a melhorar reportando este problema no GitHub.");
+        Console.WriteLine("Link: https://github.com/lucasdcampos/libra/issues/");
+        Console.WriteLine($"\nVersão: {LibraUtil.VersaoAtual()}");
+        Console.WriteLine("Encerrando a execução.\n");
     }
 }

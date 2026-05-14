@@ -62,4 +62,6 @@ public enum TokenTipo
     Tentar,                     // tentar
     Capturar,                   // capturar
     Fim,                        // fim
+    Importar,                   // importar
+    Como,                       // como
 }

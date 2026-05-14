@@ -29,18 +29,28 @@ namespace Libra
                 throw new ErroModificacaoConstante(Identificador);
 
             bool tiposDiferentes = novoValor.Nome != Valor.Nome;
-            bool tipoModificavel = Tipo == TiposPadrao.Objeto;
+            bool tipoModificavel = Tipo == TiposPadrao.Objeto || Valor.Nome == "Nulo";
 
             // Tentando alterar o tipo da variável
             if (tiposDiferentes && !tipoModificavel)
             {
-                // Tentando converter para o tipo base
-                // Ex: Se o tipo base é Real, mas recebemos um Int,
-                // então convertemos o Int para Real (O contrário não ocorre)
-                novoValor= novoValor.Converter(Valor.Nome);
+                // Se o tipo da variável é o nome da classe do novo objeto, permitimos
+                if (Tipo == novoValor.Nome)
+                {
+                    Valor = novoValor;
+                    return;
+                }
+
+                // Tentando converter para o tipo esperado pela variável
+                novoValor = novoValor.Converter(Tipo);
             }
 
             Valor = novoValor;
+            if (tipoModificavel && Valor.Nome != "Nulo" && Tipo == "Nulo")
+            {
+                // Se a variável era Nulo e agora tem um valor, ela assume o tipo do valor
+                // para manter a consistência se não for um tipo genérico 'Objeto'
+            }
         }
 
         public override string ToString()

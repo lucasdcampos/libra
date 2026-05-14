@@ -30,10 +30,7 @@ public class LibraObjeto
 
     internal void Construtor(string ident)
     {
-        if(Propriedades.ContainsKey(Nome) && Propriedades[Nome].Valor is Funcao)
-        {
-            ChamarMetodo(new ExpressaoChamadaFuncao(new LocalFonte() /* TODO: Arrumar! */, Nome, _argsConstrutor), ident);
-        }
+        // Removido: A execução do construtor agora é tratada pelo Interpretador
     }
 
     protected void DeclararPropriedade(Variavel prop)
@@ -69,7 +66,7 @@ public class LibraObjeto
     public void AtribuirPropriedade(string ident, LibraObjeto novoValor)
     {
         if(!Propriedades.ContainsKey(ident))
-            throw new ErroVariavelNaoDeclarada(ident);
+            throw new ErroVariavelNaoDeclarada($"{Nome}.{ident}");
         Propriedades[ident].AtualizarValor(novoValor);
     }
 

@@ -32,4 +32,5 @@ public interface IVisitor<T>
     T VisitarExpressaoAcessoVetor(ExpressaoAcessoVetor expressao);
     T VisitarExpressaoChamadaFuncao(ExpressaoChamadaFuncao expressao);
     T VisitarExpressaoChamadaMetodo(ExpressaoChamadaMetodo expressao);
+    T VisitarImportar(InstrucaoImportar instrucao);
 }

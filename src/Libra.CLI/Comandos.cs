@@ -53,6 +53,11 @@ public static class Comandos
         RodarProjetoLibra.Executar();
     }
 
+    internal static void Instalar(List<string> args)
+    {
+        GerenciadorPacotesLibra.Instalar(args);
+    }
+
     internal static void MostrarCreditos()
     {
         Console.WriteLine("  Creditos à Lucas Maciel de Campos, Criador da Libra.");

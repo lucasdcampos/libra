@@ -12,6 +12,6 @@ public class InstrucaoExpressao : Instrucao
 
     public override T Aceitar<T>(IVisitor<T> visitor)
     {
-        return Expressao.Aceitar(visitor);
+        return visitor.VisitarInstrucaoExpressao(this);
     }
 }

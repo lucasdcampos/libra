@@ -71,6 +71,9 @@ public class LibraBase : IModulo
             case "json":
                 new LibraJson().RegistrarFuncoes(_ambiente);
                 break;
+            case "tempo":
+                new LibraTempo().RegistrarFuncoes(_ambiente);
+                break;
         }
 
         return null;
