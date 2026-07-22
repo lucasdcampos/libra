@@ -34,7 +34,10 @@ public class MotorLibra
     private void InicializarInterpretador()
     {
         var flags = new InterpretadorFlags(_opcoes.ModoSeguro, _opcoes.ModoEstrito, true);
-        _interpretador = new Interpretador(flags);
+        _interpretador = new Interpretador(flags, logger: _opcoes.Logger);
+
+        if (_opcoes.LerLinha != null)
+            _interpretador.Ambiente.LerLinha = _opcoes.LerLinha;
     }
 
     public void DefinirGlobal(string identificador, object valor)
@@ -60,20 +63,26 @@ public class MotorLibra
     /// <returns>Resultado da execução, se houver; caso contrário, null.</returns>
     public LibraResultado Executar(string codigo, string arquivo="", string caminho="")
     {
+        string textoErro = "";
+
         try
         {
             _interpretador.LimparSaida();
+            _interpretador.Ambiente.LimparTextoSaida();
             _tokenizador = new Tokenizador(codigo, arquivo, caminho, _opcoes.CaminhosBiblioteca);
             var tokens = _tokenizador.Tokenizar();
             _parser = new Parser(tokens.ToArray(), _opcoes.ModoEstrito);
             var programa = _parser.Parse();
-            
+
             _interpretador.VisitarPrograma(programa);
-            
+
         }
         catch (Erro e)
         {
-            e.ExibirFormatado();
+            if (_opcoes.ExibirErrosNoConsole)
+                e.ExibirFormatado();
+
+            textoErro = e.ToString();
 
             if (_opcoes.NivelDebug > NivelDebugDetalhe.Nenhum)
             {
@@ -86,7 +95,7 @@ public class MotorLibra
         }
         catch (Exception ex)
         {
-            LogarErroInterno(ex);
+            textoErro = LogarErroInterno(ex);
         }
 
         object? valorSaida = null;
@@ -94,13 +103,29 @@ public class MotorLibra
             valorSaida = _interpretador?.Saida?.ObterValor();
         } catch {}
 
-        return new LibraResultado(valorSaida, "");
+        string saidaTerminal = _interpretador?.Ambiente?.TextoSaida ?? "";
+        if (textoErro != "")
+        {
+            if (saidaTerminal != "" && !saidaTerminal.EndsWith("\n"))
+                saidaTerminal += "\n";
+            saidaTerminal += textoErro + "\n";
+
+            // Embedders que capturam via logger (ex.: playground WASM) não escrevem no
+            // Console; roteia o erro pelo logger para que ele apareça na saída capturada.
+            if (!_opcoes.ExibirErrosNoConsole)
+                _opcoes.Logger?.Msg(textoErro, "\n");
+        }
+
+        return new LibraResultado(valorSaida, saidaTerminal);
     }
 
-    private void LogarErroInterno(Exception ex)
+    private string LogarErroInterno(Exception ex)
     {
+        string logFile = "";
+
+#if !LIBRA_WASM
         string logsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-        string logFile = Path.Combine(logsDir, $"erro-interno-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
+        logFile = Path.Combine(logsDir, $"erro-interno-{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt");
 
         try
         {
@@ -124,16 +149,25 @@ public class MotorLibra
         {
             Console.WriteLine($"[CRÍTICO] Falha ao salvar log de erro: {logEx.Message}");
         }
+#endif
 
-        Console.ForegroundColor = ConsoleColor.Magenta;
-        Console.WriteLine("\n[ERRO DE SISTEMA]");
-        Console.ResetColor();
-        Console.WriteLine("Ocorreu um problema interno no motor da Libra.");
-        Console.WriteLine("Isso não é um erro no seu código, mas sim um bug na linguagem.");
-        Console.WriteLine($"\nUm log detalhado foi salvo em: {logFile}");
-        Console.WriteLine("Por favor, ajude-nos a melhorar reportando este problema no GitHub.");
-        Console.WriteLine("Link: https://github.com/linguagem-libra/libra/issues/");
-        Console.WriteLine($"\nVersão: {LibraUtil.VersaoAtual()}");
-        Console.WriteLine("Encerrando a execução.\n");
+        if (_opcoes.ExibirErrosNoConsole)
+        {
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("\n[ERRO DE SISTEMA]");
+            Console.ResetColor();
+            Console.WriteLine("Ocorreu um problema interno no motor da Libra.");
+            Console.WriteLine("Isso não é um erro no seu código, mas sim um bug na linguagem.");
+            if (logFile != "")
+                Console.WriteLine($"\nUm log detalhado foi salvo em: {logFile}");
+            Console.WriteLine("Por favor, ajude-nos a melhorar reportando este problema no GitHub.");
+            Console.WriteLine("Link: https://github.com/linguagem-libra/libra/issues/");
+            Console.WriteLine($"\nVersão: {LibraUtil.VersaoAtual()}");
+            Console.WriteLine("Encerrando a execução.\n");
+        }
+
+        return "[ERRO DE SISTEMA] Ocorreu um problema interno no motor da Libra. "
+             + "Isso não é um erro no seu código, mas sim um bug na linguagem. "
+             + $"({ex.GetType().Name}: {ex.Message})";
     }
 }

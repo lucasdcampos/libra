@@ -14,7 +14,8 @@ funcao bubbleSort(vetor: Vetor)
         fim
         i = i + 1
     fim
-    exibir("Vetor ordenado: ", mostrarVetor(vetor))
+    exibir("Vetor ordenado: ", "")
+    mostrarVetor(vetor)
 fim
 
 var numeros = { 64, 34, 25, 12, 22, 11, 90 }

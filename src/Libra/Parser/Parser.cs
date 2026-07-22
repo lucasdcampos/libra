@@ -151,12 +151,16 @@ public class Parser
             identificador = partes.Last();
         }
 
+        // Sem apelido (`como`), os elementos do módulo também são injetados no
+        // escopo atual (permite chamar `mostrarVetor()` em vez de `vetores.mostrarVetor()`).
+        bool injetarNoEscopo = true;
         if (TentarConsumirToken(TokenTipo.Como))
         {
             identificador = ConsumirToken(TokenTipo.Identificador).Valor.ToString();
+            injetarNoEscopo = false;
         }
 
-        return new InstrucaoImportar(_local, caminho, identificador);
+        return new InstrucaoImportar(_local, caminho, identificador, injetarNoEscopo);
     }
 
     private Instrucao? Repetir()

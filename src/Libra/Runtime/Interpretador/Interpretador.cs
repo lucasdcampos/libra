@@ -21,10 +21,10 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
     private Ambiente _ambiente;
     private Dictionary<string, Modulo> _modulosImportados;
 
-    public Interpretador(InterpretadorFlags flags = null, Dictionary<string, Modulo> modulosImportados = null)
+    public Interpretador(InterpretadorFlags flags = null, Dictionary<string, Modulo> modulosImportados = null, ILogger logger = null)
     {
         Flags = flags == null ? InterpretadorFlags.Padrao() : flags;
-        _ambiente = new Ambiente(new ConsoleLogger(), Flags.ModoSeguro);
+        _ambiente = new Ambiente(logger ?? new ConsoleLogger(), Flags.ModoSeguro);
         _modulosImportados = modulosImportados ?? new Dictionary<string, Modulo>();
     }
 
@@ -47,27 +47,53 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         string caminho = instrucao.Caminho;
         string? arquivoCompleto = EncontrarCaminhoBiblioteca(caminho, instrucao.Local);
 
-        if (arquivoCompleto == null)
-            throw new ErroImportacao(caminho, instrucao.Local);
+        string codigo;
+        string chaveModulo;
+        string nomeArquivo;
+        string diretorioArquivo;
 
-        if (_modulosImportados.TryGetValue(arquivoCompleto, out var moduloExistente))
+        if (arquivoCompleto != null)
+        {
+            codigo = File.ReadAllText(arquivoCompleto).ReplaceLineEndings("\n");
+            chaveModulo = arquivoCompleto;
+            nomeArquivo = Path.GetFileName(arquivoCompleto);
+            diretorioArquivo = Path.GetDirectoryName(arquivoCompleto) ?? "";
+        }
+        // Fallback: biblioteca padrão embutida no assembly (ex.: playground WASM sem filesystem).
+        else if (BibliotecaEmbutida.TryLer(caminho, out var codigoEmbutido, out var arquivoEmbutido))
+        {
+            codigo = codigoEmbutido;
+            chaveModulo = "embutido:" + arquivoEmbutido;
+            nomeArquivo = arquivoEmbutido;
+            diretorioArquivo = "";
+        }
+        else
+        {
+            throw new ErroImportacao(caminho, instrucao.Local);
+        }
+
+        if (_modulosImportados.TryGetValue(chaveModulo, out var moduloExistente))
         {
             if (instrucao.Identificador != null)
                 _ambiente.Pilha.DefinirVariavel(instrucao.Identificador, moduloExistente, "Modulo", true);
+            if (instrucao.InjetarNoEscopo)
+                InjetarModuloNoEscopo(moduloExistente);
             return moduloExistente;
         }
 
-        string codigo = File.ReadAllText(arquivoCompleto).ReplaceLineEndings("\n");
-        var tokenizador = new Tokenizador(codigo, Path.GetFileName(arquivoCompleto), Path.GetDirectoryName(arquivoCompleto) ?? "");
+        var tokenizador = new Tokenizador(codigo, nomeArquivo, diretorioArquivo);
         var tokens = tokenizador.Tokenizar();
         var parser = new Parser(tokens.ToArray(), Flags.ForcarTiposEstaticos);
         var programa = parser.Parse();
 
-        var novoInterpretador = new Interpretador(Flags, _modulosImportados);
+        // Compartilha o logger do interpretador atual para que a saída das funções
+        // do módulo importado seja capturada no mesmo lugar (e não caia num
+        // ConsoleLogger, que quebra no browser WASM).
+        var novoInterpretador = new Interpretador(Flags, _modulosImportados, _ambiente.Logger);
         
         // Evita recursão infinita adicionando um módulo vazio temporário
         var moduloTemporario = new Modulo(instrucao.Identificador ?? Path.GetFileNameWithoutExtension(caminho), new Dictionary<string, Variavel>());
-        _modulosImportados[arquivoCompleto] = moduloTemporario;
+        _modulosImportados[chaveModulo] = moduloTemporario;
 
         novoInterpretador.VisitarPrograma(programa);
 
@@ -80,12 +106,32 @@ public sealed class Interpretador : IVisitor<LibraObjeto>
         }
 
         var modulo = new Modulo(instrucao.Identificador ?? Path.GetFileNameWithoutExtension(caminho), propriedades);
-        _modulosImportados[arquivoCompleto] = modulo;
+        _modulosImportados[chaveModulo] = modulo;
 
         if (instrucao.Identificador != null)
             _ambiente.Pilha.DefinirVariavel(instrucao.Identificador, modulo, "Modulo", true);
 
+        if (instrucao.InjetarNoEscopo)
+            InjetarModuloNoEscopo(modulo);
+
         return modulo;
+    }
+
+    /// <summary>
+    /// Injeta os elementos de um módulo (funções, constantes) no escopo global atual,
+    /// permitindo chamá-los diretamente após `importar X` (sem apelido). Nomes que já
+    /// existem no escopo — como as funções base — são preservados, evitando conflitos.
+    /// As funções mantêm seu ambiente de definição (fecho), então dependências internas
+    /// do módulo continuam resolvidas.
+    /// </summary>
+    private void InjetarModuloNoEscopo(Modulo modulo)
+    {
+        var escopoGlobal = _ambiente.Pilha.ObterEscopoGlobal();
+        foreach (var par in modulo.Propriedades)
+        {
+            if (!escopoGlobal.Variaveis.ContainsKey(par.Key))
+                escopoGlobal.Variaveis[par.Key] = par.Value;
+        }
     }
 
     private string? TentarCaminhos(string baseDir, string nomeLogico)

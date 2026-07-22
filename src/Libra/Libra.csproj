@@ -13,8 +13,23 @@
     <SatelliteResourceLanguages></SatelliteResourceLanguages>
   </PropertyGroup>
 
-  <ItemGroup>
+  <!-- Propriedade global (passada via -p:LibraWasm=true) que ativa o build web-safe:
+       define LIBRA_WASM e remove a dependência do Roslyn (incompatível com browser-wasm). -->
+  <PropertyGroup Condition="'$(LibraWasm)' == 'true'">
+    <DefineConstants>$(DefineConstants);LIBRA_WASM</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(LibraWasm)' != 'true'">
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
+  </ItemGroup>
+
+  <!-- Biblioteca padrão (.libra) embutida no assembly. Permite resolver
+       `importar vetores`, `importar matematica`, etc. mesmo sem filesystem
+       (ex.: playground WebAssembly). Ver Libra.BibliotecaEmbutida. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\biblioteca\*.libra">
+      <LogicalName>Biblioteca/%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

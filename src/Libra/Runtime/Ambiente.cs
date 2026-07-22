@@ -17,6 +17,12 @@ public class Ambiente
     private string _textoSaida = "";
     public string TextoSaida => _textoSaida;
 
+    /// <summary>
+    /// Provedor de entrada usado pela função nativa `entrada()`.
+    /// Por padrão lê do Console (CLI/REPL); embedders (ex.: playground WASM)
+    /// podem substituí-lo para ler de um buffer de stdin pré-definido.
+    /// </summary>
+    public Func<string?> LerLinha { get; set; } = Console.ReadLine;
 
     public Ambiente(ILogger logger, bool seguro)
     {
@@ -44,6 +50,11 @@ public class Ambiente
     public void RegistrarFuncaoNativa(string nomeFuncao, Func<object[], object> funcaoCSharp)
     {
         Pilha.DefinirVariavel(nomeFuncao, new FuncaoNativa(funcaoCSharp, nomeFuncao), TiposPadrao.Func);
+    }
+
+    public void LimparTextoSaida()
+    {
+        _textoSaida = "";
     }
 
     public void Msg(string msg, string final = "\n")

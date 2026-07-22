@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.WebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <WasmMainJSPath>main.js</WasmMainJSPath>
+    <AssemblyName>libra-wasm</AssemblyName>
+
+    <!-- Reduz o tamanho do bundle enviado ao browser -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <WasmEnableSIMD>true</WasmEnableSIMD>
+
+    <!-- Propaga a flag também para builds diretas deste projeto.
+         IMPORTANTE: ao publicar, passe -p:LibraWasm=true na linha de comando para que
+         a propriedade global também alcance o projeto Libra referenciado (remove o Roslyn). -->
+    <LibraWasm>true</LibraWasm>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Libra\Libra.csproj" />
+  </ItemGroup>
+
+</Project>

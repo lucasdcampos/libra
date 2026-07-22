@@ -7,8 +7,10 @@ using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
+#if !LIBRA_WASM
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+#endif
 
 namespace Libra.Modulos;
 
@@ -41,16 +43,19 @@ public class LibraBase : IModulo
         _ambiente.DefinirGlobal("erro", new FuncaoNativa(erro));
         _ambiente.DefinirGlobal("entrada", new FuncaoNativa(entrada));
 
+        // Constantes de texto inofensivas — disponíveis também em modo seguro.
+        _ambiente.DefinirGlobal("NL", new LibraTexto("\n"));
+        _ambiente.DefinirGlobal("FDA", new LibraTexto("\0"));
+
         // Impedir uso de funções potencialmente perigosas
         if (_ambiente.AmbienteSeguro /* TODO: Arrumar! || Interpretador.Flags.ModoSeguro*/)
             return;
 
+#if !LIBRA_WASM
         _ambiente.DefinirGlobal("registrarCSharp", new FuncaoNativa(registrarCSharp));
         _ambiente.DefinirGlobal("registrardll", new FuncaoNativa(registrardll));
+#endif
         _ambiente.DefinirGlobal("libra", new FuncaoNativa(libra));
-
-        _ambiente.DefinirGlobal("NL", new LibraTexto("\n"));
-        _ambiente.DefinirGlobal("FDA", new LibraTexto("\0"));
     }
 
     public object __ativarmodulo__(object[] args)
@@ -151,6 +156,7 @@ public class LibraBase : IModulo
         return null;
     }
 
+#if !LIBRA_WASM
     public object registrarCSharp(object[] args)
     {
         LibraUtil.ChecarArgumentos(MethodBase.GetCurrentMethod().Name, 3, args.Length);
@@ -166,11 +172,22 @@ public class LibraBase : IModulo
 
         return null;
     }
+#endif
 
     public object exibir(object[] args)
     {
         if (args == null || args.Length == 0)
             return null;
+
+        // exibir(valor)               -> valor + quebra de linha
+        // exibir(valor, terminador)   -> valor seguido do terminador, sem quebra automática
+        //                                (permite prompts na mesma linha: exibir("Nome:", " "))
+        // exibir(a, b, c, ...)        -> junta tudo com espaço + quebra de linha
+        if (args.Length == 2)
+        {
+            _ambiente.Msg(args[0]?.ToString() ?? "null", args[1]?.ToString() ?? "");
+            return null;
+        }
 
         // Converte todos os argumentos em strings e junta com espaço
         var output = string.Join(" ", args.Select(a => a?.ToString() ?? "null"));
@@ -282,7 +299,7 @@ public class LibraBase : IModulo
     {
         if(args.Length > 0)
             _ambiente.Msg(args[0].ToString());
-        return Console.ReadLine();
+        return _ambiente.LerLinha() ?? "";
     }
 
     public object tamanho(object[] args)
@@ -338,6 +355,7 @@ public class LibraBase : IModulo
         throw new Erro(args[0].ToString(), new LocalFonte() /* TODO: Arrumar! */);
     }
 
+#if !LIBRA_WASM
     private Assembly CompilarCodigo(string codigo)
     {
         var tree = CSharpSyntaxTree.ParseText(codigo);
@@ -365,4 +383,5 @@ public class LibraBase : IModulo
         ms.Seek(0, SeekOrigin.Begin);
         return Assembly.Load(ms.ToArray());
     }
+#endif
 }

@@ -1,3 +1,5 @@
+using Libra;
+
 namespace Libra.Motor
 {
     /// <summary>
@@ -76,6 +78,25 @@ namespace Libra.Motor
 
         public bool ModoSeguro { get; set; } = false;
         public bool PermitirEntrada { get; set; } = true;
+
+        /// <summary>
+        /// Logger customizado para a saída do script. Se null, usa <see cref="ConsoleLogger"/>.
+        /// Embedders (ex.: playground WASM) podem passar um <see cref="SilentLogger"/> e ler
+        /// a saída de <see cref="LibraResultado.SaidaTerminal"/>.
+        /// </summary>
+        public ILogger? Logger { get; set; } = null;
+
+        /// <summary>
+        /// Provedor de entrada para a função `entrada()`. Se null, lê do Console.
+        /// </summary>
+        public Func<string?>? LerLinha { get; set; } = null;
+
+        /// <summary>
+        /// Se true (padrão, CLI/REPL), erros são impressos no Console de forma formatada.
+        /// Embedders que capturam a saída devem definir como false — o texto do erro é
+        /// devolvido em <see cref="LibraResultado.SaidaTerminal"/>.
+        /// </summary>
+        public bool ExibirErrosNoConsole { get; set; } = true;
 
         /// <summary>
         /// Lista de caminhos adicionais onde o interpretador deve procurar por bibliotecas importadas.
